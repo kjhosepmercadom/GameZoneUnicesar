@@ -12,7 +12,7 @@ import java.util.Optional;
 
 /**
  * Business rules for the product catalog: registration, listing,
- * validation, and stock management.
+ * validation, stock management, and search operations.
  *
  * @author Dair
  */
@@ -33,6 +33,14 @@ public class ProductService {
 
     /**
      * Registers a new video game with domain validations.
+     *
+     * @param id       unique identifier of the product
+     * @param name     display name of the product
+     * @param price    unit price, must not be negative
+     * @param stock    available quantity, must not be negative
+     * @param platform target gaming platform
+     * @param genre    genre of the game
+     * @return the registered VideoGame instance
      */
     public VideoGame registerVideoGame(String id, String name, double price, int stock,
                                        String platform, String genre) {
@@ -52,6 +60,14 @@ public class ProductService {
 
     /**
      * Registers a new console with domain validations.
+     *
+     * @param id         unique identifier of the product
+     * @param name       display name of the product
+     * @param price      unit price, must not be negative
+     * @param stock      available quantity, must not be negative
+     * @param brand      hardware manufacturer brand
+     * @param generation console generation
+     * @return the registered Console instance
      */
     public Console registerConsole(String id, String name, double price, int stock,
                                    String brand, String generation) {
@@ -88,7 +104,9 @@ public class ProductService {
     }
 
     /**
-     * Returns a copy of the product catalog.
+     * Returns a copy of the current product catalog.
+     *
+     * @return defensive copy of product list
      */
     public List<Product> listAll() {
         return new ArrayList<>(products);
@@ -96,6 +114,9 @@ public class ProductService {
 
     /**
      * Finds a product by its id.
+     *
+     * @param id the product ID to search for
+     * @return Optional containing the product if found
      */
     public Optional<Product> findById(String id) {
         return products.stream()
@@ -105,6 +126,10 @@ public class ProductService {
 
     /**
      * Checks whether a product has enough stock.
+     *
+     * @param id       the product ID
+     * @param quantity required stock quantity
+     * @return true if enough stock is available
      */
     public boolean hasEnoughStock(String id, int quantity) {
         return findById(id)
@@ -114,6 +139,9 @@ public class ProductService {
 
     /**
      * Deducts stock after a confirmed sale.
+     *
+     * @param id       the product ID
+     * @param quantity quantity to deduct
      */
     public void reduceStock(String id, int quantity) {
         if (quantity <= 0) {
@@ -129,5 +157,61 @@ public class ProductService {
 
         product.setStock(product.getStock() - quantity);
         persistence.saveAll(products);
+    }
+
+    /**
+     * Filters products matching a given name keyword (case-insensitive).
+     *
+     * @param keyword the substring to search for in product names
+     * @return list of matching products
+     */
+    public List<Product> searchByName(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return listAll();
+        }
+        String lowerKeyword = keyword.toLowerCase();
+        return products.stream()
+                .filter(p -> p.getName().toLowerCase().contains(lowerKeyword))
+                .toList();
+    }
+
+    /**
+     * Filters products within a specific price range.
+     *
+     * @param minPrice minimum price threshold
+     * @param maxPrice maximum price threshold
+     * @return list of products within the range
+     */
+    public List<Product> filterByPriceRange(double minPrice, double maxPrice) {
+        if (minPrice < 0 || maxPrice < minPrice) {
+            throw new IllegalArgumentException("Invalid price range parameters");
+        }
+        return products.stream()
+                .filter(p -> p.getPrice() >= minPrice && p.getPrice() <= maxPrice)
+                .toList();
+    }
+
+    /**
+     * Retrieves all video games from the catalog.
+     *
+     * @return list of VideoGame instances
+     */
+    public List<VideoGame> listVideoGames() {
+        return products.stream()
+                .filter(p -> p instanceof VideoGame)
+                .map(p -> (VideoGame) p)
+                .toList();
+    }
+
+    /**
+     * Retrieves all consoles from the catalog.
+     *
+     * @return list of Console instances
+     */
+    public List<Console> listConsoles() {
+        return products.stream()
+                .filter(p -> p instanceof Console)
+                .map(p -> (Console) p)
+                .toList();
     }
 }
