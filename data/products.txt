@@ -1,0 +1,4 @@
+VIDEOGAME;VG001;The Legend of Zelda: Tears of the Kingdom;59.99;15;Nintendo Switch;Action-Adventure
+VIDEOGAME;VG002;God of War Ragnarok;69.99;10;PlayStation 5;Action
+CONSOLE;CON001;PlayStation 5 Digital Edition;449.99;5;Sony;9th Gen
+CONSOLE;CON002;Nintendo Switch OLED;349.99;8;Nintendo;8th Gen
