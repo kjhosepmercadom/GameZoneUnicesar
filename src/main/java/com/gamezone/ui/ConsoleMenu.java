@@ -2,11 +2,13 @@ package com.gamezone.ui;
 
 import com.gamezone.model.Customer;
 import com.gamezone.model.Product;
+import com.gamezone.model.Sale;
 import com.gamezone.model.Seller;
 import com.gamezone.service.PersonService;
 import com.gamezone.service.ProductService;
 import com.gamezone.service.SaleService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -46,6 +48,7 @@ public class ConsoleMenu {
             System.out.println("===== GAMEZONE UNICESAR =====");
             System.out.println("1. Gestion de productos");
             System.out.println("2. Gestion de personas");
+            System.out.println("3. Gestion de ventas");
             System.out.println("0. Salir");
             int option = readInt("Seleccione una opcion: ");
             switch (option) {
@@ -54,6 +57,9 @@ public class ConsoleMenu {
                     break;
                 case 2:
                     showPersonMenu();
+                    break;
+                case 3:
+                    showSaleMenu();
                     break;
                 case 0:
                     running = false;
@@ -192,6 +198,96 @@ public class ConsoleMenu {
         }
         for (Seller seller : sellers) {
             System.out.println(seller.getDescription());
+        }
+    }
+
+    private void showSaleMenu() {
+        System.out.println();
+        System.out.println("--- Gestion de ventas ---");
+        System.out.println("1. Registrar venta");
+        System.out.println("2. Historial completo de ventas");
+        System.out.println("3. Historial de compras de un cliente");
+        System.out.println("4. Ventas atendidas por un vendedor");
+        System.out.println("0. Volver");
+        int option = readInt("Seleccione una opcion: ");
+        try {
+            switch (option) {
+                case 1:
+                    registerSale();
+                    break;
+                case 2:
+                    printSales(saleService.listAllSales(), "No hay ventas registradas.");
+                    break;
+                case 3:
+                    printCustomers();
+                    String customerId = readText("Identificacion del cliente: ");
+                    if (personService.findCustomerById(customerId) == null) {
+                        System.out.println("No existe un cliente con identificacion " + customerId + ".");
+                    } else {
+                        printSales(saleService.findSalesByCustomer(customerId), "El cliente no tiene compras registradas.");
+                    }
+                    break;
+                case 4:
+                    printSellers();
+                    String sellerCode = readText("Codigo del vendedor: ");
+                    if (personService.findSellerByEmployeeCode(sellerCode) == null) {
+                        System.out.println("No existe un vendedor con codigo " + sellerCode + ".");
+                    } else {
+                        printSales(saleService.findSalesBySeller(sellerCode), "El vendedor no tiene ventas registradas.");
+                    }
+                    break;
+                case 0:
+                    break;
+                default:
+                    System.out.println("Opcion no valida.");
+            }
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    private void registerSale() {
+        System.out.println("-- Registrar venta --");
+        if (personService.listCustomers().isEmpty()) {
+            System.out.println("Primero debe registrar al menos un cliente.");
+            return;
+        }
+        printCustomers();
+        String customerId = readText("Identificacion del cliente: ");
+        printSellers();
+        String sellerCode = readText("Codigo del vendedor: ");
+        printProducts();
+        List<String> productIds = new ArrayList<>();
+        while (true) {
+            String productId = readLine("Codigo del producto (Enter para terminar): ");
+            if (productId.isEmpty()) {
+                break;
+            }
+            if (productService.findById(productId) == null) {
+                System.out.println("No existe un producto con codigo " + productId + ".");
+                continue;
+            }
+            int quantity = readInt("Cantidad: ");
+            if (quantity <= 0) {
+                System.out.println("La cantidad debe ser mayor que cero.");
+                continue;
+            }
+            for (int i = 0; i < quantity; i++) {
+                productIds.add(productId);
+            }
+        }
+        Sale sale = saleService.registerSale(customerId, sellerCode, productIds);
+        System.out.println("Venta registrada correctamente.");
+        System.out.println(sale.generateReceipt());
+    }
+
+    private void printSales(List<Sale> sales, String emptyMessage) {
+        if (sales.isEmpty()) {
+            System.out.println(emptyMessage);
+            return;
+        }
+        for (Sale sale : sales) {
+            System.out.println(sale.generateReceipt());
         }
     }
 
