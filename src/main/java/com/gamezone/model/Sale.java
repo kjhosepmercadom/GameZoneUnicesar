@@ -1,0 +1,88 @@
+package com.gamezone.model;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Transaction registered at the store. A sale is made on a date by a customer,
+ * attended by a seller, and contains one or more products. A product bought
+ * several times appears several times in the product list.
+ */
+public class Sale {
+
+    private String id;
+    private LocalDate date;
+    private Customer customer;
+    private Seller seller;
+    private List<Product> products;
+
+    /**
+     * Creates a sale with all its information.
+     *
+     * @param id       unique sale identifier
+     * @param date     date of the sale
+     * @param customer customer that made the purchase
+     * @param seller   seller that attended the sale
+     * @param products products bought; one entry per unit sold
+     * @throws IllegalArgumentException if the sale has no products or lacks customer or seller
+     */
+    public Sale(String id, LocalDate date, Customer customer, Seller seller, List<Product> products) {
+        if (customer == null || seller == null) {
+            throw new IllegalArgumentException("La venta debe tener un cliente y un vendedor.");
+        }
+        if (products == null || products.isEmpty()) {
+            throw new IllegalArgumentException("La venta debe contener al menos un producto.");
+        }
+        this.id = id;
+        this.date = date;
+        this.customer = customer;
+        this.seller = seller;
+        this.products = new ArrayList<>(products);
+    }
+
+    /**
+     * Returns the unique sale identifier.
+     *
+     * @return the sale identifier
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Returns the date of the sale.
+     *
+     * @return the sale date
+     */
+    public LocalDate getDate() {
+        return date;
+    }
+
+    /**
+     * Returns the customer that made the purchase.
+     *
+     * @return the customer
+     */
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    /**
+     * Returns the seller that attended the sale.
+     *
+     * @return the seller
+     */
+    public Seller getSeller() {
+        return seller;
+    }
+
+    /**
+     * Returns the products bought in the sale.
+     *
+     * @return a copy of the product list
+     */
+    public List<Product> getProducts() {
+        return new ArrayList<>(products);
+    }
+}
