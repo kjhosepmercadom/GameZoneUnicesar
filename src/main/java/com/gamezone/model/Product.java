@@ -107,4 +107,32 @@ public abstract class Product {
      * @return the full product description
      */
     public abstract String getDescription();
+
+    /**
+     * Checks whether the inventory can cover the requested quantity.
+     *
+     * @param quantity the quantity requested
+     * @return {@code true} if the available stock is enough
+     */
+    public boolean hasEnoughStock(int quantity) {
+        return quantity > 0 && stock >= quantity;
+    }
+
+    /**
+     * Deducts the given quantity from the inventory.
+     *
+     * @param quantity the quantity to deduct, must be positive
+     * @throws IllegalArgumentException if the quantity is not positive or
+     *                                  the available stock is insufficient
+     */
+    public void decreaseStock(int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("La cantidad a descontar debe ser mayor que cero.");
+        }
+        if (quantity > stock) {
+            throw new IllegalArgumentException("Stock insuficiente para el producto " + id
+                    + " (disponible: " + stock + ", solicitado: " + quantity + ").");
+        }
+        stock -= quantity;
+    }
 }
