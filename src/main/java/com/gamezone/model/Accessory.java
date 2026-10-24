@@ -90,4 +90,17 @@ public abstract class Accessory extends Product {
         }
         return false;
     }
+
+    /**
+     * Builds the common part of the accessory description, including the
+     * compatible consoles. Subclasses extend it with their specific attributes.
+     *
+     * @return the accessory description
+     */
+    @Override
+    public String getDescription() {
+        String compatibility = compatibleConsoleIds.isEmpty() ? "ninguna" : String.join(", ", compatibleConsoleIds);
+        return String.format("%s - %s | Precio: $%,.0f | Stock: %d | Compatible con: %s",
+                getId(), getTitle(), getPrice(), getStock(), compatibility);
+    }
 }
