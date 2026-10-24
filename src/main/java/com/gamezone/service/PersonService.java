@@ -63,4 +63,40 @@ public class PersonService {
     public List<Seller> listSellers() {
         return new ArrayList<>(sellers);
     }
+
+    /**
+     * Finds a customer by its identification number.
+     *
+     * @param identification the identification number
+     * @return the customer found, or {@code null} if it does not exist
+     */
+    public Customer findCustomerById(String identification) {
+        if (identification == null) {
+            return null;
+        }
+        for (Customer customer : customers) {
+            if (customer.getIdentification().equals(identification.trim())) {
+                return customer;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Finds a seller by its employee code, ignoring letter case.
+     *
+     * @param employeeCode the employee code
+     * @return the seller found, or {@code null} if it does not exist
+     */
+    public Seller findSellerByEmployeeCode(String employeeCode) {
+        if (employeeCode == null) {
+            return null;
+        }
+        for (Seller seller : sellers) {
+            if (seller.getEmployeeCode().equalsIgnoreCase(employeeCode.trim())) {
+                return seller;
+            }
+        }
+        return null;
+    }
 }
