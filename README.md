@@ -1,2 +1,108 @@
-# GameZoneUnicesar
-GameZone Unicesar Video Game Store Information System (Programming III - UPC)
+# GameZone Unicesar
+
+Information system for **GameZone Unicesar**, a video game store located in
+the university area of Valledupar. The application manages products (video
+games and consoles), people (customers and sellers) and sales, and keeps all
+the information in files between executions.
+
+Programming III - Universidad Popular del Cesar.
+
+## Features
+
+The console menu (in Spanish) offers ten operations:
+
+| Module   | Operation                                                         |
+|----------|-------------------------------------------------------------------|
+| Products | 1. Register a video game                                          |
+|          | 2. Register a console                                             |
+|          | 3. List the product inventory                                     |
+| People   | 4. Register a customer                                            |
+|          | 5. List customers                                                 |
+|          | 6. List sellers                                                   |
+| Sales    | 7. Register a sale (customer, seller and one or more products)    |
+|          | 8. Show the complete sales history                                |
+|          | 9. Show the purchase history of a customer                        |
+|          | 10. Show the sales attended by a seller                           |
+
+Business rules:
+
+- A sale must contain at least one product.
+- A product cannot be sold when its stock is insufficient.
+- Registering a sale deducts the sold quantities from the inventory.
+- The sale total is the sum of the prices of the products bought.
+- Data is loaded automatically at startup and saved after every operation.
+
+## Architecture
+
+The code lives in the `com.gamezone` package and is organized in four layers:
+
+```
+src/main/java/com/gamezone
+├── model         Domain classes: Person, Customer, Seller, Product, VideoGame, Console, Sale
+├── persistence   CSV repositories: ProductRepository, PersonRepository, SaleRepository
+├── service       Business rules: ProductService, PersonService, SaleService
+├── ui            Console menu: ConsoleMenu
+└── Main.java     Builds the layers and starts the application
+```
+
+Allowed dependencies: `ui -> service -> persistence -> model`. See the design
+documents for details:
+
+- [Analysis](docs/analysis.md)
+- [Hierarchy diagram](docs/hierarchy-diagram.md)
+- [Class diagram](docs/class-diagram.md)
+- [Layers diagram](docs/layers-diagram.md)
+
+## Requirements
+
+- JDK 17 or newer
+- Apache Maven 3.8 or newer (or an IDE with Maven support such as NetBeans or IntelliJ IDEA)
+
+## Build and run
+
+Run every command from the root folder of the repository, so the application
+finds the `data/` folder.
+
+```bash
+mvn clean package
+java -jar target/gamezone-unicesar-1.0.0.jar
+```
+
+Alternatively, compile and run in one step:
+
+```bash
+mvn compile exec:java
+```
+
+In NetBeans: *File > Open Project*, select the repository folder and press
+*Run Project* (F6).
+
+## Data files
+
+| File                  | Content                                   | Versioned |
+|-----------------------|-------------------------------------------|-----------|
+| `data/sellers.csv`    | Sellers of the store (3 preloaded)        | Yes       |
+| `data/products.csv`   | Product inventory (preloaded examples)    | Yes       |
+| `data/customers.csv`  | Customers registered from the menu        | No        |
+| `data/sales.csv`      | Sales registered from the menu            | No        |
+
+Files use `;` as separator. Products include a type discriminator
+(`VIDEOGAME` or `CONSOLE`) in the first column. Missing files are treated as
+empty and are created on the first save.
+
+## Git workflow
+
+The team follows a simplified Git Flow:
+
+- `main`: stable version, updated only through Pull Requests from `develop`.
+- `develop`: integration branch, updated only through approved Pull Requests.
+- `feature/*`: one branch per functionality, created from `develop` and
+  deleted after merging.
+
+Commit messages follow Conventional Commits (`feat:`, `fix:`, `docs:`,
+`refactor:`, `chore:`). Team roles and responsibilities are described in
+[TEAM.md](TEAM.md).
+
+## License
+
+[MIT](LICENSE)
