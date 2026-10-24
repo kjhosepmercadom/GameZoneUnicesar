@@ -45,4 +45,22 @@ public class PersonService {
         personRepository.saveCustomers(customers);
         return customer;
     }
+
+    /**
+     * Returns every registered customer.
+     *
+     * @return a copy of the customer list
+     */
+    public List<Customer> listCustomers() {
+        return new ArrayList<>(customers);
+    }
+
+    /**
+     * Returns every seller of the store.
+     *
+     * @return a copy of the seller list
+     */
+    public List<Seller> listSellers() {
+        return new ArrayList<>(sellers);
+    }
 }
