@@ -52,4 +52,42 @@ public abstract class Accessory extends Product {
      * @return the accessory type code (CONTROLLER, CABLE or MEMORY)
      */
     public abstract String getAccessoryType();
+
+    /**
+     * Registers a console as compatible with this accessory.
+     *
+     * @param consoleId identifier of the compatible console
+     */
+    public void addCompatibleConsole(String consoleId) {
+        if (consoleId != null && !isCompatibleWith(consoleId)) {
+            compatibleConsoleIds.add(consoleId.trim());
+        }
+    }
+
+    /**
+     * Removes a console from the compatibility list.
+     *
+     * @param consoleId identifier of the console to remove
+     */
+    public void removeCompatibleConsole(String consoleId) {
+        compatibleConsoleIds.removeIf(id -> id.equalsIgnoreCase(consoleId));
+    }
+
+    /**
+     * Checks whether this accessory works with the given console.
+     *
+     * @param consoleId identifier of the console
+     * @return {@code true} if the console is in the compatibility list
+     */
+    public boolean isCompatibleWith(String consoleId) {
+        if (consoleId == null) {
+            return false;
+        }
+        for (String id : compatibleConsoleIds) {
+            if (id.equalsIgnoreCase(consoleId.trim())) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
