@@ -1,6 +1,7 @@
 package com.gamezone.model;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -97,5 +98,33 @@ public class Sale {
             total += product.getPrice();
         }
         return total;
+    }
+
+    /**
+     * Builds a receipt in Spanish with the sale details: identifier, date,
+     * customer, seller, products bought and total.
+     *
+     * @return the formatted receipt
+     */
+    public String generateReceipt() {
+        StringBuilder receipt = new StringBuilder();
+        receipt.append("========================================\n");
+        receipt.append("        GAMEZONE UNICESAR - RECIBO\n");
+        receipt.append("========================================\n");
+        receipt.append("Venta: ").append(id).append('\n');
+        receipt.append("Fecha: ").append(date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))).append('\n');
+        receipt.append("Cliente: ").append(customer.getName())
+                .append(" (").append(customer.getIdentification()).append(")\n");
+        receipt.append("Vendedor: ").append(seller.getName())
+                .append(" (").append(seller.getEmployeeCode()).append(")\n");
+        receipt.append("----------------------------------------\n");
+        for (Product product : products) {
+            receipt.append(String.format("%-8s %-20s $%,12.0f%n", product.getId(), product.getTitle(), product.getPrice()));
+        }
+        receipt.append("----------------------------------------\n");
+        receipt.append(String.format("Productos: %d%n", products.size()));
+        receipt.append(String.format("TOTAL: $%,.0f%n", calculateTotal()));
+        receipt.append("========================================");
+        return receipt.toString();
     }
 }
