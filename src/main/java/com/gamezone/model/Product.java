@@ -98,4 +98,13 @@ public abstract class Product {
     public void setStock(int stock) {
         this.stock = stock;
     }
+
+    /**
+     * Builds a complete description that integrates the particular
+     * characteristics of each product type. Every subclass must provide
+     * its own implementation.
+     *
+     * @return the full product description
+     */
+    public abstract String getDescription();
 }
