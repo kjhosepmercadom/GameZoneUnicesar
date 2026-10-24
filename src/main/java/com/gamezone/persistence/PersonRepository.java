@@ -1,6 +1,7 @@
 package com.gamezone.persistence;
 
 import com.gamezone.model.Customer;
+import com.gamezone.model.Seller;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -60,6 +61,36 @@ public class PersonRepository {
             customers.add(new Customer(fields[1], fields[0], fields[2], fields[3]));
         }
         return customers;
+    }
+
+    /**
+     * Writes every seller to the sellers file, replacing its previous content.
+     *
+     * @param sellers the sellers to store
+     * @throws IllegalStateException if the file cannot be written
+     */
+    public void saveSellers(List<Seller> sellers) {
+        List<String> lines = new ArrayList<>();
+        for (Seller seller : sellers) {
+            lines.add(clean(seller.getIdentification()) + SEPARATOR + clean(seller.getName())
+                    + SEPARATOR + clean(seller.getPhone()) + SEPARATOR + clean(seller.getEmployeeCode())
+                    + SEPARATOR + clean(seller.getShift()));
+        }
+        writeLines(sellersFile, lines);
+    }
+
+    /**
+     * Reads every seller stored in the sellers file.
+     *
+     * @return the stored sellers, or an empty list if the file does not exist
+     * @throws IllegalStateException if the file cannot be read or has an invalid line
+     */
+    public List<Seller> loadSellers() {
+        List<Seller> sellers = new ArrayList<>();
+        for (String[] fields : readRecords(sellersFile, 5)) {
+            sellers.add(new Seller(fields[1], fields[0], fields[2], fields[3], fields[4]));
+        }
+        return sellers;
     }
 
     private void writeLines(Path file, List<String> lines) {
