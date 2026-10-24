@@ -48,12 +48,51 @@ public class PersonRepository {
         writeLines(customersFile, lines);
     }
 
+    /**
+     * Reads every customer stored in the customers file.
+     *
+     * @return the stored customers, or an empty list if the file does not exist
+     * @throws IllegalStateException if the file cannot be read or has an invalid line
+     */
+    public List<Customer> loadCustomers() {
+        List<Customer> customers = new ArrayList<>();
+        for (String[] fields : readRecords(customersFile, 4)) {
+            customers.add(new Customer(fields[1], fields[0], fields[2], fields[3]));
+        }
+        return customers;
+    }
+
     private void writeLines(Path file, List<String> lines) {
         try {
             Files.write(file, lines, StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new IllegalStateException("No se pudo guardar el archivo: " + file, e);
         }
+    }
+
+    private List<String[]> readRecords(Path file, int expectedFields) {
+        List<String[]> records = new ArrayList<>();
+        if (!Files.exists(file)) {
+            return records;
+        }
+        List<String> lines;
+        try {
+            lines = Files.readAllLines(file, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new IllegalStateException("No se pudo leer el archivo: " + file, e);
+        }
+        for (int i = 0; i < lines.size(); i++) {
+            String line = lines.get(i).trim();
+            if (line.isEmpty()) {
+                continue;
+            }
+            String[] fields = line.split(SEPARATOR, -1);
+            if (fields.length != expectedFields) {
+                throw new IllegalStateException("Linea " + (i + 1) + " invalida en " + file + ": " + line);
+            }
+            records.add(fields);
+        }
+        return records;
     }
 
     private String clean(String value) {
