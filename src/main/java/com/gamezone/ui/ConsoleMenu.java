@@ -1,5 +1,6 @@
 package com.gamezone.ui;
 
+import com.gamezone.model.Product;
 import com.gamezone.service.PersonService;
 import com.gamezone.service.ProductService;
 import com.gamezone.service.SaleService;
@@ -41,9 +42,13 @@ public class ConsoleMenu {
         while (running) {
             System.out.println();
             System.out.println("===== GAMEZONE UNICESAR =====");
+            System.out.println("1. Gestion de productos");
             System.out.println("0. Salir");
             int option = readInt("Seleccione una opcion: ");
             switch (option) {
+                case 1:
+                    showProductMenu();
+                    break;
                 case 0:
                     running = false;
                     System.out.println("Gracias por usar GameZone Unicesar. Hasta pronto.");
@@ -51,6 +56,73 @@ public class ConsoleMenu {
                 default:
                     System.out.println("Opcion no valida.");
             }
+        }
+    }
+
+    private void showProductMenu() {
+        System.out.println();
+        System.out.println("--- Gestion de productos ---");
+        System.out.println("1. Registrar videojuego");
+        System.out.println("2. Registrar consola");
+        System.out.println("3. Listar inventario de productos");
+        System.out.println("0. Volver");
+        int option = readInt("Seleccione una opcion: ");
+        try {
+            switch (option) {
+                case 1:
+                    registerVideoGame();
+                    break;
+                case 2:
+                    registerConsole();
+                    break;
+                case 3:
+                    printProducts();
+                    break;
+                case 0:
+                    break;
+                default:
+                    System.out.println("Opcion no valida.");
+            }
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    private void registerVideoGame() {
+        System.out.println("-- Registrar videojuego --");
+        String id = readText("Codigo: ");
+        String title = readText("Titulo: ");
+        double price = readDouble("Precio: ");
+        int stock = readInt("Cantidad en inventario: ");
+        String platform = readText("Plataforma: ");
+        String genre = readText("Genero: ");
+        String ageRating = readText("Clasificacion de edad: ");
+        productService.registerVideoGame(id, title, price, stock, platform, genre, ageRating);
+        System.out.println("Videojuego registrado correctamente.");
+    }
+
+    private void registerConsole() {
+        System.out.println("-- Registrar consola --");
+        String id = readText("Codigo: ");
+        String title = readText("Titulo: ");
+        double price = readDouble("Precio: ");
+        int stock = readInt("Cantidad en inventario: ");
+        String brand = readText("Marca: ");
+        String model = readText("Modelo: ");
+        int generation = readInt("Generacion: ");
+        productService.registerConsole(id, title, price, stock, brand, model, generation);
+        System.out.println("Consola registrada correctamente.");
+    }
+
+    private void printProducts() {
+        List<Product> products = productService.listAllProducts();
+        System.out.println("-- Inventario de productos --");
+        if (products.isEmpty()) {
+            System.out.println("No hay productos registrados.");
+            return;
+        }
+        for (Product product : products) {
+            System.out.println(product.getDescription());
         }
     }
 
@@ -79,6 +151,21 @@ public class ConsoleMenu {
                 return Integer.parseInt(value);
             } catch (NumberFormatException e) {
                 System.out.println("Debe ingresar un numero entero.");
+            }
+        }
+    }
+
+    private double readDouble(String prompt) {
+        while (true) {
+            String value = readLine(prompt).replace("$", "").replace(" ", "");
+            if (value.matches("\\d{1,3}(\\.\\d{3})+")) {
+                value = value.replace(".", "");
+            }
+            value = value.replace(",", ".");
+            try {
+                return Double.parseDouble(value);
+            } catch (NumberFormatException e) {
+                System.out.println("Debe ingresar un numero valido.");
             }
         }
     }
