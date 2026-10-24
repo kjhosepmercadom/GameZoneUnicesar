@@ -93,6 +93,47 @@ public class SaleService {
         return sale;
     }
 
+    /**
+     * Returns the complete history of registered sales.
+     *
+     * @return a copy of the sales list
+     */
+    public List<Sale> listAllSales() {
+        return new ArrayList<>(sales);
+    }
+
+    /**
+     * Returns the purchase history of a specific customer.
+     *
+     * @param customerId identification of the customer
+     * @return the sales made by the customer, possibly empty
+     */
+    public List<Sale> findSalesByCustomer(String customerId) {
+        List<Sale> result = new ArrayList<>();
+        for (Sale sale : sales) {
+            if (sale.getCustomer().getIdentification().equals(customerId.trim())) {
+                result.add(sale);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns the sales attended by a specific seller.
+     *
+     * @param sellerCode employee code of the seller
+     * @return the sales attended by the seller, possibly empty
+     */
+    public List<Sale> findSalesBySeller(String sellerCode) {
+        List<Sale> result = new ArrayList<>();
+        for (Sale sale : sales) {
+            if (sale.getSeller().getEmployeeCode().equalsIgnoreCase(sellerCode.trim())) {
+                result.add(sale);
+            }
+        }
+        return result;
+    }
+
     private String nextSaleId() {
         int max = 0;
         for (Sale sale : sales) {
