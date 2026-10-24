@@ -1,0 +1,159 @@
+package com.gamezone.service;
+
+import com.gamezone.model.Console;
+import com.gamezone.model.Product;
+import com.gamezone.model.VideoGame;
+import com.gamezone.persistence.ProductRepository;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Applies the business rules of the product module: registration of video
+ * games and consoles, inventory queries and stock updates. Every change is
+ * persisted immediately through the {@link ProductRepository}.
+ */
+public class ProductService {
+
+    private final ProductRepository productRepository;
+    private final List<Product> products;
+
+    /**
+     * Creates the service and loads the stored products.
+     *
+     * @param productRepository repository used to persist the products
+     */
+    public ProductService(ProductRepository productRepository) {
+        this.productRepository = productRepository;
+        this.products = productRepository.loadAll();
+    }
+
+    /**
+     * Registers a new video game in the inventory.
+     *
+     * @param id        unique product identifier
+     * @param title     commercial title
+     * @param price     unit price in Colombian pesos
+     * @param stock     initial stock
+     * @param platform  platform the game was developed for
+     * @param genre     genre of the game
+     * @param ageRating recommended age rating
+     * @return the registered video game
+     * @throws IllegalArgumentException if any data is invalid or the identifier already exists
+     */
+    public VideoGame registerVideoGame(String id, String title, double price, int stock,
+                                       String platform, String genre, String ageRating) {
+        validateCommonData(id, title, price, stock);
+        requireText(platform, "plataforma");
+        requireText(genre, "genero");
+        requireText(ageRating, "clasificacion de edad");
+        VideoGame videoGame = new VideoGame(id.trim(), title.trim(), price, stock,
+                platform.trim(), genre.trim(), ageRating.trim());
+        products.add(videoGame);
+        productRepository.saveAll(products);
+        return videoGame;
+    }
+
+    /**
+     * Registers a new console in the inventory.
+     *
+     * @param id         unique product identifier
+     * @param title      commercial title
+     * @param price      unit price in Colombian pesos
+     * @param stock      initial stock
+     * @param brand      manufacturer brand
+     * @param model      console model
+     * @param generation console generation number
+     * @return the registered console
+     * @throws IllegalArgumentException if any data is invalid or the identifier already exists
+     */
+    public Console registerConsole(String id, String title, double price, int stock,
+                                   String brand, String model, int generation) {
+        validateCommonData(id, title, price, stock);
+        requireText(brand, "marca");
+        requireText(model, "modelo");
+        if (generation <= 0) {
+            throw new IllegalArgumentException("La generacion debe ser mayor que cero.");
+        }
+        Console console = new Console(id.trim(), title.trim(), price, stock,
+                brand.trim(), model.trim(), generation);
+        products.add(console);
+        productRepository.saveAll(products);
+        return console;
+    }
+
+    /**
+     * Returns every product registered in the inventory.
+     *
+     * @return a copy of the product list
+     */
+    public List<Product> listAllProducts() {
+        return new ArrayList<>(products);
+    }
+
+    /**
+     * Finds a product by its identifier, ignoring letter case.
+     *
+     * @param id the product identifier
+     * @return the product found, or {@code null} if it does not exist
+     */
+    public Product findById(String id) {
+        if (id == null) {
+            return null;
+        }
+        for (Product product : products) {
+            if (product.getId().equalsIgnoreCase(id.trim())) {
+                return product;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Checks whether a product has enough stock for the requested quantity.
+     *
+     * @param productId the product identifier
+     * @param quantity  the quantity requested
+     * @return {@code true} if the product exists and its stock covers the quantity
+     */
+    public boolean hasEnoughStock(String productId, int quantity) {
+        Product product = findById(productId);
+        return product != null && product.hasEnoughStock(quantity);
+    }
+
+    /**
+     * Deducts a sold quantity from the stock of a product and persists the change.
+     *
+     * @param productId the product identifier
+     * @param quantity  the quantity sold
+     * @throws IllegalArgumentException if the product does not exist or the stock is insufficient
+     */
+    public void updateStock(String productId, int quantity) {
+        Product product = findById(productId);
+        if (product == null) {
+            throw new IllegalArgumentException("No existe un producto con codigo " + productId + ".");
+        }
+        product.decreaseStock(quantity);
+        productRepository.saveAll(products);
+    }
+
+    private void validateCommonData(String id, String title, double price, int stock) {
+        requireText(id, "codigo");
+        requireText(title, "titulo");
+        if (findById(id) != null) {
+            throw new IllegalArgumentException("Ya existe un producto con codigo " + id.trim() + ".");
+        }
+        if (price <= 0) {
+            throw new IllegalArgumentException("El precio debe ser mayor que cero.");
+        }
+        if (stock < 0) {
+            throw new IllegalArgumentException("La cantidad en inventario no puede ser negativa.");
+        }
+    }
+
+    private void requireText(String value, String fieldName) {
+        if (value == null || value.trim().isEmpty()) {
+            throw new IllegalArgumentException("El campo " + fieldName + " es obligatorio.");
+        }
+    }
+}
