@@ -43,6 +43,10 @@ public class ProductService {
      */
     public VideoGame registerVideoGame(String id, String title, double price, int stock,
                                        String platform, String genre, String ageRating) {
+        validateCommonData(id, title, price, stock);
+        requireText(platform, "plataforma");
+        requireText(genre, "genero");
+        requireText(ageRating, "clasificacion de edad");
         VideoGame videoGame = new VideoGame(id.trim(), title.trim(), price, stock,
                 platform.trim(), genre.trim(), ageRating.trim());
         products.add(videoGame);
@@ -65,6 +69,12 @@ public class ProductService {
      */
     public Console registerConsole(String id, String title, double price, int stock,
                                    String brand, String model, int generation) {
+        validateCommonData(id, title, price, stock);
+        requireText(brand, "marca");
+        requireText(model, "modelo");
+        if (generation <= 0) {
+            throw new IllegalArgumentException("La generacion debe ser mayor que cero.");
+        }
         Console console = new Console(id.trim(), title.trim(), price, stock,
                 brand.trim(), model.trim(), generation);
         products.add(console);
@@ -125,5 +135,25 @@ public class ProductService {
         }
         product.decreaseStock(quantity);
         productRepository.saveAll(products);
+    }
+
+    private void validateCommonData(String id, String title, double price, int stock) {
+        requireText(id, "codigo");
+        requireText(title, "titulo");
+        if (findById(id) != null) {
+            throw new IllegalArgumentException("Ya existe un producto con codigo " + id.trim() + ".");
+        }
+        if (price <= 0) {
+            throw new IllegalArgumentException("El precio debe ser mayor que cero.");
+        }
+        if (stock < 0) {
+            throw new IllegalArgumentException("La cantidad en inventario no puede ser negativa.");
+        }
+    }
+
+    private void requireText(String value, String fieldName) {
+        if (value == null || value.trim().isEmpty()) {
+            throw new IllegalArgumentException("El campo " + fieldName + " es obligatorio.");
+        }
     }
 }
