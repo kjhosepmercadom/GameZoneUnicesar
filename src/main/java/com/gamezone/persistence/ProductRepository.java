@@ -46,6 +46,9 @@ public class ProductRepository {
             lines.add(toLine(product));
         }
         try {
+            if (filePath.getParent() != null) {
+                Files.createDirectories(filePath.getParent());
+            }
             Files.write(filePath, lines, StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new IllegalStateException("No se pudo guardar el archivo de productos: " + filePath, e);
