@@ -1,13 +1,16 @@
 package com.gamezone.persistence;
 
+import com.gamezone.model.Customer;
 import com.gamezone.model.Product;
 import com.gamezone.model.Sale;
+import com.gamezone.model.Seller;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,5 +62,80 @@ public class SaleRepository {
         } catch (IOException e) {
             throw new IllegalStateException("No se pudo guardar el archivo de ventas: " + filePath, e);
         }
+    }
+
+    /**
+     * Reads every sale stored in the file, resolving its references against
+     * the customers, sellers and products already loaded by the system.
+     *
+     * @param customers the known customers
+     * @param sellers   the known sellers
+     * @param products  the known products
+     * @return the stored sales, or an empty list if the file does not exist
+     * @throws IllegalStateException if the file cannot be read, has an invalid line
+     *                               or references an unknown entity
+     */
+    public List<Sale> loadAll(List<Customer> customers, List<Seller> sellers, List<Product> products) {
+        List<Sale> sales = new ArrayList<>();
+        if (!Files.exists(filePath)) {
+            return sales;
+        }
+        List<String> lines;
+        try {
+            lines = Files.readAllLines(filePath, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new IllegalStateException("No se pudo leer el archivo de ventas: " + filePath, e);
+        }
+        for (int i = 0; i < lines.size(); i++) {
+            String line = lines.get(i).trim();
+            if (line.isEmpty()) {
+                continue;
+            }
+            try {
+                sales.add(fromLine(line, customers, sellers, products));
+            } catch (RuntimeException e) {
+                throw new IllegalStateException("Linea " + (i + 1) + " invalida en " + filePath + ": "
+                        + e.getMessage(), e);
+            }
+        }
+        return sales;
+    }
+
+    private Sale fromLine(String line, List<Customer> customers, List<Seller> sellers, List<Product> products) {
+        String[] fields = line.split(SEPARATOR, -1);
+        Customer customer = findCustomer(customers, fields[2]);
+        Seller seller = findSeller(sellers, fields[3]);
+        List<Product> saleProducts = new ArrayList<>();
+        for (String productId : fields[4].split(PRODUCT_SEPARATOR)) {
+            saleProducts.add(findProduct(products, productId));
+        }
+        return new Sale(fields[0], LocalDate.parse(fields[1]), customer, seller, saleProducts);
+    }
+
+    private Customer findCustomer(List<Customer> customers, String identification) {
+        for (Customer customer : customers) {
+            if (customer.getIdentification().equals(identification)) {
+                return customer;
+            }
+        }
+        throw new IllegalArgumentException("cliente desconocido " + identification);
+    }
+
+    private Seller findSeller(List<Seller> sellers, String employeeCode) {
+        for (Seller seller : sellers) {
+            if (seller.getEmployeeCode().equals(employeeCode)) {
+                return seller;
+            }
+        }
+        throw new IllegalArgumentException("vendedor desconocido " + employeeCode);
+    }
+
+    private Product findProduct(List<Product> products, String productId) {
+        for (Product product : products) {
+            if (product.getId().equals(productId)) {
+                return product;
+            }
+        }
+        throw new IllegalArgumentException("producto desconocido " + productId);
     }
 }
