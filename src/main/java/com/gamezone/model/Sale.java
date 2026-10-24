@@ -85,4 +85,17 @@ public class Sale {
     public List<Product> getProducts() {
         return new ArrayList<>(products);
     }
+
+    /**
+     * Calculates the total of the sale by adding the price of every product bought.
+     *
+     * @return the sale total in Colombian pesos
+     */
+    public double calculateTotal() {
+        double total = 0;
+        for (Product product : products) {
+            total += product.getPrice();
+        }
+        return total;
+    }
 }
