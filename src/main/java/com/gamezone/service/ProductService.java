@@ -98,4 +98,32 @@ public class ProductService {
         }
         return null;
     }
+
+    /**
+     * Checks whether a product has enough stock for the requested quantity.
+     *
+     * @param productId the product identifier
+     * @param quantity  the quantity requested
+     * @return {@code true} if the product exists and its stock covers the quantity
+     */
+    public boolean hasEnoughStock(String productId, int quantity) {
+        Product product = findById(productId);
+        return product != null && product.hasEnoughStock(quantity);
+    }
+
+    /**
+     * Deducts a sold quantity from the stock of a product and persists the change.
+     *
+     * @param productId the product identifier
+     * @param quantity  the quantity sold
+     * @throws IllegalArgumentException if the product does not exist or the stock is insufficient
+     */
+    public void updateStock(String productId, int quantity) {
+        Product product = findById(productId);
+        if (product == null) {
+            throw new IllegalArgumentException("No existe un producto con codigo " + productId + ".");
+        }
+        product.decreaseStock(quantity);
+        productRepository.saveAll(products);
+    }
 }
