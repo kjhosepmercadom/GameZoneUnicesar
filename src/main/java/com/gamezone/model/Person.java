@@ -77,4 +77,13 @@ public abstract class Person {
     public void setPhone(String phone) {
         this.phone = phone;
     }
+
+    /**
+     * Builds a description of the person that includes the information of
+     * its specific role in the store. Every subclass must provide its own
+     * implementation.
+     *
+     * @return the full person description
+     */
+    public abstract String getDescription();
 }
