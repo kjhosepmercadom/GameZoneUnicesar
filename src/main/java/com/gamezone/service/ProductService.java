@@ -71,4 +71,31 @@ public class ProductService {
         productRepository.saveAll(products);
         return console;
     }
+
+    /**
+     * Returns every product registered in the inventory.
+     *
+     * @return a copy of the product list
+     */
+    public List<Product> listAllProducts() {
+        return new ArrayList<>(products);
+    }
+
+    /**
+     * Finds a product by its identifier, ignoring letter case.
+     *
+     * @param id the product identifier
+     * @return the product found, or {@code null} if it does not exist
+     */
+    public Product findById(String id) {
+        if (id == null) {
+            return null;
+        }
+        for (Product product : products) {
+            if (product.getId().equalsIgnoreCase(id.trim())) {
+                return product;
+            }
+        }
+        return null;
+    }
 }
