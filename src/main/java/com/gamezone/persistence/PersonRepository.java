@@ -95,6 +95,9 @@ public class PersonRepository {
 
     private void writeLines(Path file, List<String> lines) {
         try {
+            if (file.getParent() != null) {
+                Files.createDirectories(file.getParent());
+            }
             Files.write(file, lines, StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new IllegalStateException("No se pudo guardar el archivo: " + file, e);
