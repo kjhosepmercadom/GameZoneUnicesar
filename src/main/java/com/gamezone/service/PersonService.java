@@ -40,6 +40,16 @@ public class PersonService {
      * @throws IllegalArgumentException if any data is invalid or the identification already exists
      */
     public Customer registerCustomer(String name, String identification, String phone, String email) {
+        requireText(name, "nombre");
+        requireText(identification, "identificacion");
+        requireText(phone, "telefono");
+        requireText(email, "correo");
+        if (findCustomerById(identification) != null) {
+            throw new IllegalArgumentException("Ya existe un cliente con identificacion " + identification.trim() + ".");
+        }
+        if (!isValidEmail(email.trim())) {
+            throw new IllegalArgumentException("El correo " + email.trim() + " no tiene un formato valido.");
+        }
         Customer customer = new Customer(name.trim(), identification.trim(), phone.trim(), email.trim());
         customers.add(customer);
         personRepository.saveCustomers(customers);
@@ -98,5 +108,17 @@ public class PersonService {
             }
         }
         return null;
+    }
+
+    private boolean isValidEmail(String email) {
+        int at = email.indexOf('@');
+        return at > 0 && at == email.lastIndexOf('@') && email.indexOf('.', at) > at + 1
+                && !email.endsWith(".") && !email.contains(" ");
+    }
+
+    private void requireText(String value, String fieldName) {
+        if (value == null || value.trim().isEmpty()) {
+            throw new IllegalArgumentException("El campo " + fieldName + " es obligatorio.");
+        }
     }
 }
