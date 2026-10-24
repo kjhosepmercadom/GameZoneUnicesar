@@ -22,3 +22,20 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# Maven build output
+target/
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+nbproject/
+nbactions.xml
+.settings/
+.project
+.classpath
+
+# Data generated at runtime by the application
+data/customers.csv
+data/sales.csv
