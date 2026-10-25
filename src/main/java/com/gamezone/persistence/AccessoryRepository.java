@@ -2,12 +2,8 @@ package com.gamezone.persistence;
 
 import com.gamezone.exceptions.PersistenceException;
 import com.gamezone.model.Accessory;
-import com.gamezone.model.Cable;
-import com.gamezone.model.Controller;
-import com.gamezone.model.Memory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -18,9 +14,9 @@ import java.util.List;
 public class AccessoryRepository {
 
     private static final String SEPARATOR = ";";
-    private static final String LIST_SEPARATOR = ",";
 
     private final CsvFile file;
+    private final List<RecordMapper<Accessory>> mappers;
 
     /**
      * Creates a repository that works over the given file.
@@ -29,6 +25,7 @@ public class AccessoryRepository {
      */
     public AccessoryRepository(String filePath) {
         this.file = new CsvFile(filePath);
+        this.mappers = List.of(new ControllerRecordMapper(), new CableRecordMapper(), new MemoryRecordMapper());
     }
 
     /**
@@ -72,44 +69,20 @@ public class AccessoryRepository {
     private Accessory fromLine(String line) {
         String[] fields = line.split(SEPARATOR, -1);
         String type = fields[0];
-        String id = fields[1];
-        String title = fields[2];
-        double price = Double.parseDouble(fields[3]);
-        int stock = Integer.parseInt(fields[4]);
-        List<String> compatible = fields[5].isEmpty()
-                ? new ArrayList<>() : new ArrayList<>(Arrays.asList(fields[5].split(LIST_SEPARATOR)));
-        switch (type) {
-            case "CONTROLLER":
-                return new Controller(id, title, price, stock, compatible, fields[6]);
-            case "CABLE":
-                return new Cable(id, title, price, stock, compatible, Double.parseDouble(fields[6]), fields[7]);
-            case "MEMORY":
-                return new Memory(id, title, price, stock, compatible, Integer.parseInt(fields[6]), fields[7]);
-            default:
-                throw new IllegalArgumentException("Tipo de accesorio desconocido: " + type);
+        for (RecordMapper<Accessory> mapper : mappers) {
+            if (mapper.getTypeCode().equals(type)) {
+                return mapper.fromFields(fields);
+            }
         }
+        throw new IllegalArgumentException("Tipo de accesorio desconocido: " + type);
     }
 
     private String toLine(Accessory accessory) {
-        String common = accessory.getAccessoryType() + SEPARATOR + clean(accessory.getId()) + SEPARATOR
-                + clean(accessory.getTitle()) + SEPARATOR + accessory.getPrice() + SEPARATOR
-                + accessory.getStock() + SEPARATOR
-                + String.join(LIST_SEPARATOR, accessory.getCompatibleConsoleIds());
-        if (accessory instanceof Controller) {
-            return common + SEPARATOR + clean(((Controller) accessory).getConnectionType());
-        }
-        if (accessory instanceof Cable) {
-            Cable cable = (Cable) accessory;
-            return common + SEPARATOR + cable.getLengthInMeters() + SEPARATOR + clean(cable.getConnectorType());
-        }
-        if (accessory instanceof Memory) {
-            Memory memory = (Memory) accessory;
-            return common + SEPARATOR + memory.getCapacityInGb() + SEPARATOR + clean(memory.getMemoryType());
+        for (RecordMapper<Accessory> mapper : mappers) {
+            if (mapper.supports(accessory)) {
+                return mapper.getTypeCode() + SEPARATOR + mapper.toColumns(accessory);
+            }
         }
         throw new IllegalArgumentException("Tipo de accesorio no soportado: " + accessory.getClass().getSimpleName());
-    }
-
-    private String clean(String value) {
-        return CsvFile.clean(value);
     }
 }

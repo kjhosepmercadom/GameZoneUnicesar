@@ -141,3 +141,48 @@ member's account.
 | Response        | Proposed temporary private methods in `ConsoleMenu` that delegate to the new classes while the remaining submenus are moved, and removing them at the end. |
 | Decision        | Accepted. After the last commit `ConsoleMenu` only has the main menu. The final regression run is identical to the reference. |
 | Related commit  | `refactor: move the sales submenu to SaleMenu (V-01)` |
+
+## Requirement 8 - SOLID audit and correction
+
+### Phase 1 - Audit
+
+#### Entry 11 - SOLID audit of the leader code and consolidation
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Requirement 8, Phase 1 - `feature/solid-audit` |
+| Objective       | Audit the sales module, the user interface and `Main` against SOLID and consolidate the three reports. |
+| Query           | "Audit the leader code against SRP, OCP, LSP, ISP and DIP and consolidate the three reports, relating them with the GRASP audit." |
+| Response        | Found that `SaleService` depends on the concrete product and accessory services and on item types (OCP, DIP), the same problem reported by Developer 2 in `ReturnService`. It related the findings with R7: the split of the menu and `CsvFile` solved SRP problems. |
+| Decision        | Accepted. The two reports of the inventory problem were merged into one violation with three responsible members. |
+| Related commit  | `docs: consolidate SOLID audit findings from the three reports` |
+
+### Phase 2 - Correction
+
+#### Entry 12 - Inventory abstraction
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Requirement 8, Phase 2 - `feature/solid-refactor` |
+| Objective       | Create the abstraction that the three members need for V-01. |
+| Query           | "Create an InventoryService interface with the operations that SaleService and ReturnService use." |
+| Response        | Proposed `findById`, `updateStock` and `restoreStock`, which `ProductService` and `AccessoryService` already have with compatible signatures. |
+| Decision        | Accepted. Delivered alone in the first Pull Request so the developers can implement it. |
+| Related commit  | `refactor: add the InventoryService abstraction (V-01)` |
+
+#### Entry 13 - Sale items through InventoryService
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Requirement 8, Phase 2 - `feature/solid-refactor` |
+| Objective       | Finish V-01 in `SaleService` and close the requirement. |
+| Query           | "Make SaleService resolve and update the items through a list of InventoryService without changing its constructor." |
+| Response        | The list is built in the constructor (`List.of(productService, accessoryService)`), keeping the order in which items were resolved before (products first). |
+| Decision        | Accepted. `Main` did not change. The final regression run is identical to the reference. |
+| Related commit  | `refactor: resolve and update sale items through InventoryService (V-01)` |

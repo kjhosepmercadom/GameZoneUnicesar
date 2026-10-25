@@ -143,6 +143,21 @@ Documents: [analysis](docs/grasp-analysis.md), [before/after diagram](docs/grasp
 [refactor log and non-regression evidence](docs/grasp-refactor-log.md). The
 regression script is `docs/regression/menu-operations-input.txt`.
 
+## Design review: SOLID (Requirement 8)
+
+After the GRASP correction the code was audited against the five SOLID
+principles (`docs/solid-audit/`) and the three violations of the
+[consolidated audit](docs/solid-audit/consolidated-audit.md) were fixed:
+
+| ID   | Change |
+|------|--------|
+| V-01 | `InventoryService` interface implemented by `ProductService` and `AccessoryService`; `SaleService` and `ReturnService` no longer check item types |
+| V-02 | `RecordMapper` and `WarrantyRecordMapper`: one mapper per subtype in the product, accessory, promotion and warranty repositories |
+| V-03 | `MonthlyBalanceCalculator` takes the report arithmetic out of `ReturnService` |
+
+Documents: [analysis](docs/solid-analysis.md), [before/after diagram](docs/solid-class-diagram.md),
+[refactor log and non-regression evidence](docs/solid-refactor-log.md).
+
 ## License
 
 [MIT](LICENSE)

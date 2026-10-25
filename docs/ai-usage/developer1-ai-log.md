@@ -128,3 +128,35 @@ member's account.
 | Response        | Added `increaseStock` with the same message used by the services, `getCategory()` abstract in `Product` with one implementation per type (`Accessory` answers for all accessories), and replaced `discountRate()` in `Return`. |
 | Decision        | Accepted. Checked with the regression script that the output and the data files are identical to the reference run. |
 | Related commit  | `refactor: declare the product category polymorphically (V-05)` |
+
+## Requirement 8 - SOLID audit and correction
+
+### Phase 1 - Audit
+
+#### Entry 10 - SOLID audit of the developer 1 code
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Requirement 8, Phase 1 - `feature/solid-audit` |
+| Objective       | Review the same code, including the classes changed in R7, against the five SOLID principles. |
+| Query           | "Audit the classes of Developer 1 against SRP, OCP, LSP, ISP and DIP, considering the GRASP corrections." |
+| Response        | Found that `ProductRepository` is not closed for new product types (OCP) and confirmed that the hierarchies satisfy LSP. It noted that `CategoryDiscount` is now closed for new categories thanks to R7. |
+| Decision        | Accepted the OCP finding. The use of `ProductService` as a concrete class by other services was reported to the Leader, because it is a dependency of their code. |
+| Related commit  | `docs: add product module findings to developer1 SOLID audit` |
+
+### Phase 2 - Correction
+
+#### Entry 11 - SOLID corrections V-01 and V-02
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Requirement 8, Phase 2 - `feature/solid-refactor` |
+| Objective       | Make `ProductService` implement `InventoryService` and replace the type checks of `ProductRepository` with mappers. |
+| Query           | "Create the RecordMapper abstraction and the video game and console mappers, producing exactly the same CSV lines." |
+| Response        | Proposed `RecordMapper<T>` with `getTypeCode`, `supports`, `toColumns` and `fromFields`, and one package-private mapper per product type. |
+| Decision        | Accepted. The interface is package-private because only the repositories use it. The regression run gave identical output and data. |
+| Related commit  | `refactor: add the RecordMapper abstraction for typed CSV lines (V-02)` |

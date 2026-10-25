@@ -1,9 +1,7 @@
 package com.gamezone.persistence;
 
 import com.gamezone.exceptions.PersistenceException;
-import com.gamezone.model.Console;
 import com.gamezone.model.Product;
-import com.gamezone.model.VideoGame;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,10 +14,9 @@ import java.util.List;
 public class ProductRepository {
 
     private static final String SEPARATOR = ";";
-    private static final String VIDEO_GAME_TYPE = "VIDEOGAME";
-    private static final String CONSOLE_TYPE = "CONSOLE";
 
     private final CsvFile file;
+    private final List<RecordMapper<Product>> mappers;
 
     /**
      * Creates a repository that works over the given file.
@@ -28,6 +25,7 @@ public class ProductRepository {
      */
     public ProductRepository(String filePath) {
         this.file = new CsvFile(filePath);
+        this.mappers = List.of(new VideoGameRecordMapper(), new ConsoleRecordMapper());
     }
 
     /**
@@ -71,36 +69,20 @@ public class ProductRepository {
     private Product fromLine(String line) {
         String[] fields = line.split(SEPARATOR, -1);
         String type = fields[0];
-        String id = fields[1];
-        String title = fields[2];
-        double price = Double.parseDouble(fields[3]);
-        int stock = Integer.parseInt(fields[4]);
-        if (VIDEO_GAME_TYPE.equals(type)) {
-            return new VideoGame(id, title, price, stock, fields[5], fields[6], fields[7]);
-        }
-        if (CONSOLE_TYPE.equals(type)) {
-            return new Console(id, title, price, stock, fields[5], fields[6], Integer.parseInt(fields[7]));
+        for (RecordMapper<Product> mapper : mappers) {
+            if (mapper.getTypeCode().equals(type)) {
+                return mapper.fromFields(fields);
+            }
         }
         throw new IllegalArgumentException("Tipo de producto desconocido: " + type);
     }
 
     private String toLine(Product product) {
-        String common = clean(product.getId()) + SEPARATOR + clean(product.getTitle()) + SEPARATOR
-                + product.getPrice() + SEPARATOR + product.getStock();
-        if (product instanceof VideoGame) {
-            VideoGame videoGame = (VideoGame) product;
-            return VIDEO_GAME_TYPE + SEPARATOR + common + SEPARATOR + clean(videoGame.getPlatform())
-                    + SEPARATOR + clean(videoGame.getGenre()) + SEPARATOR + clean(videoGame.getAgeRating());
-        }
-        if (product instanceof Console) {
-            Console console = (Console) product;
-            return CONSOLE_TYPE + SEPARATOR + common + SEPARATOR + clean(console.getBrand())
-                    + SEPARATOR + clean(console.getModel()) + SEPARATOR + console.getGeneration();
+        for (RecordMapper<Product> mapper : mappers) {
+            if (mapper.supports(product)) {
+                return mapper.getTypeCode() + SEPARATOR + mapper.toColumns(product);
+            }
         }
         throw new IllegalArgumentException("Tipo de producto no soportado: " + product.getClass().getSimpleName());
-    }
-
-    private String clean(String value) {
-        return CsvFile.clean(value);
     }
 }
