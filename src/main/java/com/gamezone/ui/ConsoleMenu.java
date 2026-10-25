@@ -654,6 +654,8 @@ public class ConsoleMenu {
         System.out.println("--- Gestion de devoluciones ---");
         System.out.println("1. Registrar devolucion");
         System.out.println("2. Consultar todas las devoluciones");
+        System.out.println("3. Consultar devoluciones por cliente");
+        System.out.println("4. Consultar devoluciones por venta");
         System.out.println("0. Volver");
         int option = readInt("Seleccione una opcion: ");
         try {
@@ -663,6 +665,16 @@ public class ConsoleMenu {
                     break;
                 case 2:
                     printReturns(returnService.viewAllReturns(), "No hay devoluciones registradas.");
+                    break;
+                case 3:
+                    printCustomers();
+                    String customerId = readText("Identificacion del cliente: ");
+                    printReturns(returnService.viewReturnsByCustomer(customerId),
+                            "El cliente no tiene devoluciones registradas.");
+                    break;
+                case 4:
+                    String saleId = readText("Codigo de la venta: ");
+                    printReturns(returnService.viewReturnsBySale(saleId), "La venta no tiene devoluciones registradas.");
                     break;
                 case 0:
                     break;
