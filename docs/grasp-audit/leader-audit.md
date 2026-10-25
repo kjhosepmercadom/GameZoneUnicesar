@@ -43,3 +43,60 @@ Verdict legend: **violation**, **correct**, **not applicable**.
 | Pure Fabrication      | correct | The validators are used for the rules; no domain class does service work. |
 | Indirection           | correct | The service reaches the inventories through `ProductService` and `AccessoryService`, never through their repositories. |
 | Protected Variations  | correct | The promotion rules are hidden behind `PromotionService.findBestPromotionFor`; the warranty types behind `WarrantyService`. |
+
+## `ConsoleMenu`, `Main` and `ProductService.restoreStock`
+
+| Pattern               | Verdict | Evidence |
+|-----------------------|---------|----------|
+| Information Expert    | **violation** (boundary) | `ProductService.restoreStock`: `product.setStock(product.getStock() + quantity)` (see V-02). |
+| Creator               | correct | `Main` creates every repository, service and the menu: it is the composition root and the only class that knows the concrete classes of every layer. |
+| Controller            | correct | `ConsoleMenu` reads the options and delegates every system event to a service; it contains no business rule. |
+| Low Coupling          | correct | `ConsoleMenu` depends on the services and on model objects returned by them; never on repositories. |
+| High Cohesion         | **violation** | `ConsoleMenu` (see V-01). |
+| Polymorphism          | correct | Lists are printed through `getDescription()` of each object; exceptions are handled by type in `showError`. |
+| Pure Fabrication      | violation (same point as V-01) | Input reading and error printing are mixed into the menu instead of being separate artificial classes. |
+| Indirection           | correct | The menu never calls a repository. |
+| Protected Variations  | violation (same point as V-01) | Every requirement had to modify the same class. |
+
+### V-01 - The console menu concentrates every module of the user interface
+
+| Field | Content |
+|-------|---------|
+| Pattern | High Cohesion (also Pure Fabrication and Protected Variations) |
+| Module | User interface (Taller 1, R1 to R6) - `ConsoleMenu` |
+| Evidence | `ConsoleMenu` has 811 lines and 39 methods: the seven submenus (`showProductMenu`, `showPersonMenu`, `showSaleMenu`, `showAccessoryMenu`, `showPromotionMenu`, `showWarrantyMenu`, `showReturnMenu`) with every registration and listing method, the input readers (`readLine`, `readText`, `readInt`, `readDouble`, `readDate`) and the error presentation (`showError`). |
+| Explanation | The class has many unrelated responsibilities: one per module plus input parsing and error messages. |
+| Consequence | Requirements 1, 2, 3, 4 and 6 all modified this class, which concentrates conflicts in the shared branch and makes any change in one submenu risky for the others. |
+| Proposed solution | Pure fabrications `ConsoleInput` (input rules) and `ErrorPrinter` (error messages), one submenu class per module (`ProductMenu`, `PersonMenu`, `SaleMenu`, `AccessoryMenu`, `PromotionMenu`, `WarrantyMenu`, `ReturnMenu`), and `ConsoleMenu` reduced to the main menu that delegates (High Cohesion, Indirection). |
+| Code of another member | No. |
+
+### V-02 - Stock restoration outside the expert (boundary)
+
+| Field | Content |
+|-------|---------|
+| Pattern | Information Expert |
+| Module | Returns (R3) - `ProductService.restoreStock` |
+| Evidence | `product.setStock(product.getStock() + quantity);` |
+| Explanation | The product owns its stock and already decreases it; adding units is done outside the expert. |
+| Consequence | The stock rules are split between the model and the services. |
+| Proposed solution | Use `Product.increaseStock(int)` (added by Developer 1). |
+| Code of another member | Yes: `Product` (Developer 1). Same finding as Developer 1 V-01 and Developer 2 V-04. |
+
+### V-03 - File handling duplicated in `SaleRepository` (boundary)
+
+Same finding as Developer 2 V-03. The Leader migrates `SaleRepository` to the
+`CsvFile` helper created by Developer 2.
+
+## Summary
+
+| Pattern               | Verdict of this report |
+|-----------------------|------------------------|
+| Information Expert    | violation (V-02) |
+| Creator               | correct |
+| Controller            | correct |
+| Low Coupling          | correct |
+| High Cohesion         | violation (V-01) |
+| Polymorphism          | correct |
+| Pure Fabrication      | violation (V-01, V-03) |
+| Indirection           | correct |
+| Protected Variations  | violation (V-01) |
