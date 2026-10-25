@@ -121,3 +121,31 @@ Verdict legend: **violation**, **correct**, **not applicable**.
 | Pure Fabrication      | not applicable | - |
 | Indirection           | not applicable | - |
 | Protected Variations  | correct | A new warranty type is a new subclass; the calculation of dates does not change. |
+
+## Exception and validation packages
+
+| Pattern               | Verdict | Evidence |
+|-----------------------|---------|----------|
+| Information Expert    | correct | Each exception builds its own message from its data (`ResourceNotFoundException(resourceType, id)`, `InvalidDataException(field, problem)`). |
+| Creator               | not applicable | The validators throw exceptions; they do not keep or aggregate objects. |
+| Controller            | not applicable | - |
+| Low Coupling          | correct | Validators depend only on the model and the exceptions; they never call services or repositories. |
+| High Cohesion         | correct | One validator per module, each with only validation methods. |
+| Polymorphism          | correct | `ConsoleMenu.showError` relies on the exception hierarchy: each subclass is caught by its type. |
+| Pure Fabrication      | correct | `ProductValidator`, `PersonValidator` and `SaleValidator` are artificial classes that keep the domain classes free of validation code. |
+| Indirection           | correct | The services call the validators instead of checking every rule inline. |
+| Protected Variations  | correct | `GameZoneException` is the stable root; a new error category is a new subclass. |
+
+## Summary
+
+| Pattern               | Verdict of this report |
+|-----------------------|------------------------|
+| Information Expert    | violation (V-01, V-03) |
+| Creator               | correct |
+| Controller            | correct |
+| Low Coupling          | correct |
+| High Cohesion         | correct |
+| Polymorphism          | violation (V-02) |
+| Pure Fabrication      | violation (boundary, file handling in `ProductRepository`, reported to the Leader) |
+| Indirection           | correct |
+| Protected Variations  | violation (V-02, same point) |
