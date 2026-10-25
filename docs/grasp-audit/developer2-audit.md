@@ -95,3 +95,43 @@ Verdict legend: **violation**, **correct**, **not applicable**.
 | Consequence | A change in the file handling (encoding, backup before writing, a different error message) must be repeated in seven classes and the copies can diverge. |
 | Proposed solution | A pure fabrication `CsvFile` in the persistence package with `readLines`, `writeLines` and `clean`; every repository uses it. Developer 2 creates it and migrates five repositories; `ProductRepository` (Developer 1) and `SaleRepository` (Leader) are migrated by their owners. |
 | Code of another member | Yes: `ProductRepository` (Developer 1) and `SaleRepository` (Leader). Reported to the Leader. |
+
+## Use of exceptions and validators in services and repositories
+
+| Pattern               | Verdict | Evidence |
+|-----------------------|---------|----------|
+| Information Expert    | **violation** (same point as V-04) | `AccessoryService.restoreStock` updates the stock outside the accessory. |
+| Creator               | correct | Each service creates its own exceptions with the data of the failed operation. |
+| Controller            | not applicable | The exception handling is not a system event. |
+| Low Coupling          | correct | Services depend on the validators, not the other way around. |
+| High Cohesion         | correct | Validation is delegated to `ProductValidator`, `PersonValidator` and `SaleValidator`. |
+| Polymorphism          | correct | Services throw the specific subclass; the menu reacts to its type. |
+| Pure Fabrication      | correct | The validators are the pure fabrication for validation rules. |
+| Indirection           | correct | Repositories wrap `IOException` in `PersistenceException`, so the upper layers never handle `java.io`. |
+| Protected Variations  | correct | A change of storage would change only the cause wrapped by `PersistenceException`. |
+
+### V-04 - Stock restoration of accessories outside the expert (boundary)
+
+| Field | Content |
+|-------|---------|
+| Pattern | Information Expert |
+| Module | Accessories (A4) - `AccessoryService.restoreStock`; needs `Product` (Developer 1) |
+| Evidence | `accessory.setStock(accessory.getStock() + quantity);` |
+| Explanation | The accessory (a `Product`) owns its stock; the service adds units directly through the setter. |
+| Consequence | Same as Developer 1 V-01: the stock rules are spread between the model and the services. |
+| Proposed solution | Use `Product.increaseStock(int)` once Developer 1 adds it. |
+| Code of another member | Yes: `Product` (Developer 1). Reported to the Leader as the same boundary finding of Developer 1 V-01. |
+
+## Summary
+
+| Pattern               | Verdict of this report |
+|-----------------------|------------------------|
+| Information Expert    | violation (V-02, V-04) |
+| Creator               | correct |
+| Controller            | correct |
+| Low Coupling          | correct |
+| High Cohesion         | violation (V-03, same point as Pure Fabrication) |
+| Polymorphism          | violation (V-01) |
+| Pure Fabrication      | violation (V-03) |
+| Indirection           | correct |
+| Protected Variations  | correct |
