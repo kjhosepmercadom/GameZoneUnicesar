@@ -113,6 +113,40 @@ public class AccessoryService {
         return result;
     }
 
+    /**
+     * Returns the accessories compatible with a specific console.
+     *
+     * @param consoleId identifier of the console
+     * @return the compatible accessories, possibly empty
+     */
+    public List<Accessory> findAccessoriesCompatibleWith(String consoleId) {
+        List<Accessory> result = new ArrayList<>();
+        for (Accessory accessory : accessories) {
+            if (accessory.isCompatibleWith(consoleId)) {
+                result.add(accessory);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Finds an accessory by its identifier, ignoring letter case.
+     *
+     * @param id the accessory identifier
+     * @return the accessory found, or {@code null} if it does not exist
+     */
+    public Accessory findById(String id) {
+        if (id == null) {
+            return null;
+        }
+        for (Accessory accessory : accessories) {
+            if (accessory.getId().equalsIgnoreCase(id.trim())) {
+                return accessory;
+            }
+        }
+        return null;
+    }
+
     private <T extends Accessory> T save(T accessory) {
         accessories.add(accessory);
         accessoryRepository.saveAll(accessories);
