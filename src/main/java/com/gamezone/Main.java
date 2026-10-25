@@ -36,19 +36,15 @@ public class Main {
             SaleRepository saleRepository = new SaleRepository(DATA_DIRECTORY + "sales.csv");
             AccessoryRepository accessoryRepository = new AccessoryRepository(DATA_DIRECTORY + "accessories.csv");
             PromotionRepository promotionRepository = new PromotionRepository(DATA_DIRECTORY + "promotions.csv");
+            WarrantyRepository warrantyRepository = new WarrantyRepository(DATA_DIRECTORY + "warranties.csv");
 
             ProductService productService = new ProductService(productRepository);
             PersonService personService = new PersonService(personRepository);
             AccessoryService accessoryService = new AccessoryService(accessoryRepository);
             PromotionService promotionService = new PromotionService(promotionRepository);
-            SaleService saleService = new SaleService(saleRepository, productService, personService,
-                    accessoryService, promotionService);
-            // The warranty repository needs the sale service to load its data, so the
-            // warranty service cannot be injected into SaleService through its constructor.
-            WarrantyRepository warrantyRepository = new WarrantyRepository(DATA_DIRECTORY + "warranties.csv",
-                    saleService, productService);
             WarrantyService warrantyService = new WarrantyService(warrantyRepository);
-            saleService.setWarrantyService(warrantyService);
+            SaleService saleService = new SaleService(saleRepository, productService, personService,
+                    accessoryService, promotionService, warrantyService);
 
             ConsoleMenu consoleMenu = new ConsoleMenu(productService, personService, saleService, accessoryService,
                     promotionService, warrantyService);

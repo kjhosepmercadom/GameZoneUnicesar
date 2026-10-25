@@ -21,13 +21,25 @@ public class WarrantyService {
     private final List<Warranty> warranties;
 
     /**
-     * Creates the service and loads the stored warranties.
+     * Creates the service. The stored warranties are loaded with
+     * {@link #loadWarranties(List)} once the sales they reference are available.
      *
      * @param warrantyRepository repository used to persist the warranties
      */
     public WarrantyService(WarrantyRepository warrantyRepository) {
         this.warrantyRepository = warrantyRepository;
-        this.warranties = warrantyRepository.loadAll();
+        this.warranties = new ArrayList<>();
+    }
+
+    /**
+     * Loads the stored warranties, resolving their references against the
+     * given sales. Any warranty previously kept in memory is replaced.
+     *
+     * @param sales the sales already loaded by the system
+     */
+    public void loadWarranties(List<Sale> sales) {
+        warranties.clear();
+        warranties.addAll(warrantyRepository.loadAll(sales));
     }
 
     /**

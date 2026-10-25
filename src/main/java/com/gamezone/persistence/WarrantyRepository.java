@@ -5,8 +5,6 @@ import com.gamezone.model.ExtendedWarranty;
 import com.gamezone.model.Product;
 import com.gamezone.model.Sale;
 import com.gamezone.model.Warranty;
-import com.gamezone.service.ProductService;
-import com.gamezone.service.SaleService;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -27,21 +25,14 @@ public class WarrantyRepository {
     private static final String SEPARATOR = ";";
 
     private final Path filePath;
-    private final SaleService saleService;
-    private final ProductService productService;
 
     /**
-     * Creates a repository that works over the given file. The services are
-     * used to resolve the sale and product references while loading.
+     * Creates a repository that works over the given file.
      *
-     * @param filePath       path of the CSV file that stores the warranties
-     * @param saleService    service used to find the sales by identifier
-     * @param productService service used to find the products by identifier
+     * @param filePath path of the CSV file that stores the warranties
      */
-    public WarrantyRepository(String filePath, SaleService saleService, ProductService productService) {
+    public WarrantyRepository(String filePath) {
         this.filePath = Paths.get(filePath);
-        this.saleService = saleService;
-        this.productService = productService;
     }
 
     /**
@@ -69,22 +60,42 @@ public class WarrantyRepository {
 
     /**
      * Reads every warranty stored in the file, resolving the sale and the
-     * product through the services.
+     * covered product from the identifiers against the given sales.
      *
+     * @param sales the sales already loaded by the system
      * @return the stored warranties, or an empty list if the file does not exist
-     * @throws IllegalStateException if the file cannot be read or has an invalid line
+     * @throws IllegalStateException if the file cannot be read, has an invalid line
+     *                               or references an unknown sale or product
      */
-    public List<Warranty> loadAll() {
+    public List<Warranty> loadAll(List<Sale> sales) {
         List<Warranty> warranties = new ArrayList<>();
         for (String[] fields : readRecords()) {
-            Sale sale = saleService.findSaleById(fields[3]);
-            Product product = productService.findById(fields[2]);
+            Sale sale = findSale(sales, fields[3]);
+            Product product = sale == null ? null : findProduct(sale, fields[2]);
             if (sale == null || product == null) {
                 throw new IllegalStateException("Garantia " + fields[1] + " con referencias invalidas en " + filePath);
             }
             warranties.add(create(fields, product, sale));
         }
         return warranties;
+    }
+
+    private Sale findSale(List<Sale> sales, String saleId) {
+        for (Sale sale : sales) {
+            if (sale.getId().equals(saleId)) {
+                return sale;
+            }
+        }
+        return null;
+    }
+
+    private Product findProduct(Sale sale, String productId) {
+        for (Product product : sale.getProducts()) {
+            if (product.getId().equals(productId)) {
+                return product;
+            }
+        }
+        return null;
     }
 
     private Warranty create(String[] fields, Product product, Sale sale) {
