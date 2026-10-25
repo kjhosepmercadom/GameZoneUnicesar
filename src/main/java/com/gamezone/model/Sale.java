@@ -170,7 +170,13 @@ public class Sale {
         }
         receipt.append("----------------------------------------\n");
         receipt.append(String.format("Productos: %d%n", products.size()));
-        receipt.append(String.format("TOTAL: $%,.0f%n", calculateTotal()));
+        receipt.append(String.format("Subtotal: $%,.0f%n", calculateTotal()));
+        if (appliedPromotionName != null && discountAmount > 0) {
+            receipt.append(String.format("Descuento (%s): -$%,.0f%n", appliedPromotionName, discountAmount));
+        } else {
+            receipt.append("Descuento: no aplica\n");
+        }
+        receipt.append(String.format("TOTAL: $%,.0f%n", calculateFinalTotal()));
         receipt.append("========================================");
         return receipt.toString();
     }
