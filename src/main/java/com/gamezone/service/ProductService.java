@@ -137,6 +137,25 @@ public class ProductService {
         productRepository.saveAll(products);
     }
 
+    /**
+     * Adds returned units back to the stock of a product and persists the change.
+     *
+     * @param productId the product identifier
+     * @param quantity  the quantity returned, must be positive
+     * @throws IllegalArgumentException if the product does not exist or the quantity is not positive
+     */
+    public void restoreStock(String productId, int quantity) {
+        Product product = findById(productId);
+        if (product == null) {
+            throw new IllegalArgumentException("No existe un producto con codigo " + productId + ".");
+        }
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("La cantidad a restaurar debe ser mayor que cero.");
+        }
+        product.setStock(product.getStock() + quantity);
+        productRepository.saveAll(products);
+    }
+
     private void validateCommonData(String id, String title, double price, int stock) {
         requireText(id, "codigo");
         requireText(title, "titulo");
