@@ -58,3 +58,23 @@ Verdict legend: **violation**, **correct**, **not applicable**.
 | LSP | correct | `BasicWarranty` and `ExtendedWarranty` satisfy the contract of `Warranty`: positive duration, non negative cost. The constructor of `Warranty` calls `getDurationInMonths()`; this is safe because both subclasses return constants and do not depend on their own fields. |
 | ISP | not applicable | No interfaces. |
 | DIP | correct | `Return` and `Warranty` depend on the abstraction `Product`. |
+
+## Exceptions, validation and classes created in the GRASP correction
+
+| Principle | Verdict | Evidence |
+|-----------|---------|----------|
+| SRP | correct | One exception per error category; one validator per module. `Product.increaseStock` and `getCategory` keep the stock and category in the product. |
+| OCP | correct | A new error category is a new subclass of `GameZoneException`; the existing ones do not change. |
+| LSP | correct | Every subclass of `GameZoneException` can be handled as a `GameZoneException` and keeps a message and an error code. |
+| ISP | correct | The validators expose small sets of static methods; each service calls only the validator of its module. |
+| DIP | not applicable | The validators are stateless static helpers; there is no dependency to invert. |
+
+## Summary
+
+| Principle | Verdict of this report |
+|-----------|------------------------|
+| SRP | correct |
+| OCP | violation (V-01) |
+| LSP | correct |
+| ISP | correct |
+| DIP | correct (client side reported to the Leader) |
