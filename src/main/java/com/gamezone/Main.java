@@ -48,7 +48,8 @@ public class Main {
             WarrantyService warrantyService = new WarrantyService(warrantyRepository);
             SaleService saleService = new SaleService(saleRepository, productService, personService,
                     accessoryService, promotionService, warrantyService);
-            ReturnService returnService = new ReturnService(returnRepository, saleService, productService);
+            ReturnService returnService = new ReturnService(returnRepository, saleService, productService,
+                    accessoryService);
 
             ConsoleMenu consoleMenu = new ConsoleMenu(productService, personService, saleService, accessoryService,
                     promotionService, warrantyService, returnService);
