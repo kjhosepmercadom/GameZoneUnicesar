@@ -31,3 +31,16 @@ member's account.
 | Response        | Proposed the abstract class with the validity period, the abstract `calculateDiscount` and `getDescription`, and a protected helper `describePeriod()` shared by the descriptions of the subclasses. |
 | Decision        | Accepted. `getDescription()` was kept abstract so the menu can list any promotion polymorphically. The category check uses `instanceof`, as the requirement describes the category by product type. |
 | Related commit  | `feat: declare abstract discount calculation and description in Promotion` |
+
+## Entry 3 - Accessory category discount (A1)
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Phase 2 - `feature/accessory-category-discount` |
+| Objective       | Allow category promotions on accessories. |
+| Query           | "Apply adjustment A1: accept ACCESSORY in CategoryDiscount, validate the three categories in PromotionService, add the option to the menu and preload an accessory promotion." |
+| Response        | Added the `ACCESSORY` branch to `belongsToTargetCategory`, the validation of the three values, the third menu option and promotion `PR004`. |
+| Decision        | Accepted. Verified with a sale that only has accessories that the 25% accessory promotion is selected when it is the best one. |
+| Related commit  | `feat: support ACCESSORY as target category in CategoryDiscount` |
