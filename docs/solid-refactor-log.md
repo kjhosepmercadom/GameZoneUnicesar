@@ -20,3 +20,4 @@ the same values of the final run of Requirement 7.
 
 | Class | Change | Violation | Principle applied | Commit / PR | Responsible |
 |-------|--------|-----------|-------------------|-------------|-------------|
+| `InventoryService` | New interface with `findById`, `updateStock`, `restoreStock` | V-01 | DIP, OCP | `refactor: add the InventoryService abstraction (V-01)` / PR "prepare the SOLID corrections" | Leader |
