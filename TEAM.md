@@ -83,3 +83,29 @@ approved by a member different from its author before merging:
 | `feature/sale-module` -> `develop`   | Kevin  | Diego    |
 | `feature/console-ui` -> `develop`    | Kevin  | Dair     |
 | `develop` -> `main` (release)        | Kevin  | Diego    |
+
+## Integration responsibilities (Requirements 1 to 6)
+
+Each member keeps the role of the Taller in every module: Developer 1 builds
+the model hierarchies, Developer 2 the persistence and services, and the
+Technical Lead the integration in sales, the console menu and the README.
+
+| Module / adjustment                  | Kevin Mercado (Lead)                                 | Diego Amaya (Dev 1)                                   | Dair Quintero (Dev 2)                                |
+|--------------------------------------|------------------------------------------------------|-------------------------------------------------------|------------------------------------------------------|
+| Accessories (R1)                     | `SaleService` and `ConsoleMenu` integration          | `Accessory`, `Controller`, `Cable`, `Memory`          | `AccessoryRepository`, `AccessoryService`            |
+| Promotions (R2)                      | Discount in `Sale` and `SaleService`, menu           | `Promotion`, `PercentageDiscount`, `CategoryDiscount`, `BulkPurchaseDiscount` | `PromotionRepository`, `PromotionService` |
+| Warranties (R4)                      | Warranties in `SaleService`, menu                    | `Warranty`, `BasicWarranty`, `ExtendedWarranty`       | `WarrantyRepository`, `WarrantyService`              |
+| Returns (R3)                         | `ProductService.restoreStock`, menu                  | `Return`, `Sale.canBeReturned`                        | `ReturnRepository`, `ReturnService`                  |
+| Integration adjustments (R5)         | A3, A8, A9                                           | A1, A5                                                | A2, A4, A6, A7                                       |
+| Exceptions and validation (R6)       | Differentiated handling in `ConsoleMenu` and `Main`  | `exceptions` and `validation` packages                | Validators and typed exceptions in services and repositories |
+
+Branches used: `feature/accessory-module`, `feature/promotion-module`,
+`feature/warranty-module`, `feature/return-module`,
+`feature/accessory-category-discount`, `fix/warranty-circular-dependency`,
+`refactor/unified-sale-registration`, `fix/return-accessory-stock`,
+`fix/return-discounted-refund`, `fix/monthly-balance-report`,
+`feature/return-warranty-cancellation`, `docs/integration-documentation` and
+`feature/exception-handling`.
+
+Each member keeps a personal AI usage log in `docs/ai-usage/`
+(`leader-ai-log.md`, `developer1-ai-log.md`, `developer2-ai-log.md`).

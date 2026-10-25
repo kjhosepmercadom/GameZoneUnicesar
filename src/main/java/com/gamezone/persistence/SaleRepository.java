@@ -52,7 +52,10 @@ public class SaleRepository {
             lines.add(sale.getId() + SEPARATOR + sale.getDate() + SEPARATOR
                     + sale.getCustomer().getIdentification() + SEPARATOR
                     + sale.getSeller().getEmployeeCode() + SEPARATOR
-                    + String.join(PRODUCT_SEPARATOR, productIds));
+                    + String.join(PRODUCT_SEPARATOR, productIds)
+                    + SEPARATOR + clean(sale.getAppliedPromotionName()) + SEPARATOR + sale.getDiscountAmount()
+                    + SEPARATOR + sale.getExtendedWarrantyCost()
+            );
         }
         try {
             if (filePath.getParent() != null) {
@@ -109,7 +112,19 @@ public class SaleRepository {
         for (String productId : fields[4].split(PRODUCT_SEPARATOR)) {
             saleProducts.add(findProduct(products, productId));
         }
-        return new Sale(fields[0], LocalDate.parse(fields[1]), customer, seller, saleProducts);
+        Sale sale = new Sale(fields[0], LocalDate.parse(fields[1]), customer, seller, saleProducts);
+        if (fields.length > 6) {
+            sale.setAppliedPromotionName(fields[5].isEmpty() ? null : fields[5]);
+            sale.setDiscountAmount(Double.parseDouble(fields[6]));
+        }
+        if (fields.length > 7) {
+            sale.setExtendedWarrantyCost(Double.parseDouble(fields[7]));
+        }
+        return sale;
+    }
+
+    private String clean(String value) {
+        return value == null ? "" : value.replace(SEPARATOR, ",").replace("\n", " ").replace("\r", " ");
     }
 
     private Customer findCustomer(List<Customer> customers, String identification) {

@@ -1,6 +1,6 @@
 # Layers Diagram - GameZone Unicesar
 
-The system is organized in four layers. Arrows show the allowed dependency
+The integrated system is organized in four layers. Arrows show the allowed dependency
 direction: `ui -> service -> persistence -> model`, and `service -> model`.
 The model does not depend on any other layer.
 
@@ -16,22 +16,30 @@ flowchart TB
         ProductService
         PersonService
         SaleService
+        AccessoryService
+        PromotionService
+        WarrantyService
+        ReturnService
     end
 
     subgraph persistence["Persistence layer - com.gamezone.persistence"]
         ProductRepository
         PersonRepository
         SaleRepository
+        AccessoryRepository
+        PromotionRepository
+        WarrantyRepository
+        ReturnRepository
     end
 
     subgraph model["Model layer - com.gamezone.model"]
-        Person
-        Customer
-        Seller
-        Product
-        VideoGame
-        Console
-        Sale
+        direction LR
+        People["Person, Customer, Seller"]
+        Products["Product, VideoGame, Console"]
+        Accessories["Accessory, Controller, Cable, Memory"]
+        Promotions["Promotion, PercentageDiscount, CategoryDiscount, BulkPurchaseDiscount"]
+        Warranties["Warranty, BasicWarranty, ExtendedWarranty"]
+        Sales["Sale, Return"]
     end
 
     files[("data/*.csv files")]
@@ -45,12 +53,13 @@ flowchart TB
     ui -. "only uses objects returned by services" .-> model
 ```
 
-| Layer       | Classes                                                                   | May depend on          |
-|-------------|---------------------------------------------------------------------------|------------------------|
-| UI          | `ConsoleMenu`                                                             | Service (and model objects returned by it) |
-| Service     | `ProductService`, `PersonService`, `SaleService`                          | Persistence, Model     |
-| Persistence | `ProductRepository`, `PersonRepository`, `SaleRepository`                 | Model                  |
-| Model       | `Person`, `Customer`, `Seller`, `Product`, `VideoGame`, `Console`, `Sale` | None                   |
+| Layer       | Classes                                                                                                   | May depend on                              |
+|-------------|-----------------------------------------------------------------------------------------------------------|--------------------------------------------|
+| UI          | `ConsoleMenu`                                                                                             | Service (and model objects returned by it) |
+| Service     | `ProductService`, `PersonService`, `SaleService`, `AccessoryService`, `PromotionService`, `WarrantyService`, `ReturnService` | Persistence, Model                         |
+| Persistence | `ProductRepository`, `PersonRepository`, `SaleRepository`, `AccessoryRepository`, `PromotionRepository`, `WarrantyRepository`, `ReturnRepository` | Model                                      |
+| Model       | People, products, accessories, promotions, warranties, sales and returns                                  | None                                       |
 
-`ConsoleMenu` uses model objects only as values returned by the services
-(for example, to print `getDescription()`); it never calls a repository.
+After adjustment A2 no repository depends on a service: references between
+files (sale of a warranty, sale of a return) are resolved from the objects
+that the services pass to `loadAll`.

@@ -17,6 +17,9 @@ public class Sale {
     private Customer customer;
     private Seller seller;
     private List<Product> products;
+    private String appliedPromotionName;
+    private double discountAmount;
+    private double extendedWarrantyCost;
 
     /**
      * Creates a sale with all its information.
@@ -101,6 +104,80 @@ public class Sale {
     }
 
     /**
+     * Returns the name of the promotion applied to the sale.
+     *
+     * @return the promotion name, or {@code null} if no promotion was applied
+     */
+    public String getAppliedPromotionName() {
+        return appliedPromotionName;
+    }
+
+    /**
+     * Sets the name of the promotion applied to the sale.
+     *
+     * @param appliedPromotionName the promotion name, or {@code null} if none
+     */
+    public void setAppliedPromotionName(String appliedPromotionName) {
+        this.appliedPromotionName = appliedPromotionName;
+    }
+
+    /**
+     * Returns the discount granted by the applied promotion.
+     *
+     * @return the discount amount in Colombian pesos
+     */
+    public double getDiscountAmount() {
+        return discountAmount;
+    }
+
+    /**
+     * Sets the discount granted by the applied promotion.
+     *
+     * @param discountAmount the discount amount in Colombian pesos
+     */
+    public void setDiscountAmount(double discountAmount) {
+        this.discountAmount = discountAmount;
+    }
+
+    /**
+     * Returns the cost of the extended warranties bought in the sale.
+     *
+     * @return the extended warranty cost in Colombian pesos
+     */
+    public double getExtendedWarrantyCost() {
+        return extendedWarrantyCost;
+    }
+
+    /**
+     * Sets the cost of the extended warranties bought in the sale.
+     *
+     * @param extendedWarrantyCost the extended warranty cost in Colombian pesos
+     */
+    public void setExtendedWarrantyCost(double extendedWarrantyCost) {
+        this.extendedWarrantyCost = extendedWarrantyCost;
+    }
+
+    /**
+     * Calculates the final total of the sale: subtotal minus the discount plus
+     * the cost of the extended warranties.
+     *
+     * @return the final total in Colombian pesos
+     */
+    public double calculateFinalTotal() {
+        return calculateTotal() - discountAmount + extendedWarrantyCost;
+    }
+
+    /**
+     * Checks whether the sale can still receive returns: a return is accepted
+     * up to thirty calendar days after the sale date.
+     *
+     * @return {@code true} if today is within the return period
+     */
+    public boolean canBeReturned() {
+        return !LocalDate.now().isAfter(date.plusDays(30));
+    }
+
+    /**
      * Builds a receipt in Spanish with the sale details: identifier, date,
      * customer, seller, products bought and total.
      *
@@ -123,7 +200,16 @@ public class Sale {
         }
         receipt.append("----------------------------------------\n");
         receipt.append(String.format("Productos: %d%n", products.size()));
-        receipt.append(String.format("TOTAL: $%,.0f%n", calculateTotal()));
+        receipt.append(String.format("Subtotal: $%,.0f%n", calculateTotal()));
+        if (appliedPromotionName != null && discountAmount > 0) {
+            receipt.append(String.format("Descuento (%s): -$%,.0f%n", appliedPromotionName, discountAmount));
+        } else {
+            receipt.append("Descuento: no aplica\n");
+        }
+        if (extendedWarrantyCost > 0) {
+            receipt.append(String.format("Garantias extendidas: +$%,.0f%n", extendedWarrantyCost));
+        }
+        receipt.append(String.format("TOTAL: $%,.0f%n", calculateFinalTotal()));
         receipt.append("========================================");
         return receipt.toString();
     }

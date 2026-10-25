@@ -1,0 +1,174 @@
+package com.gamezone.model;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Return of one or more products bought in a previous sale. A return can be
+ * partial: it contains only the products the customer gives back, one entry
+ * per returned unit.
+ */
+public class Return {
+
+    private String id;
+    private LocalDate date;
+    private Sale sale;
+    private List<Product> returnedProducts;
+    private String reason;
+    private double refundAmount;
+    private double warrantyRefundAmount;
+
+    /**
+     * Creates a return. The refund amount starts at zero and is set by
+     * {@link #calculateRefundAmount()}.
+     *
+     * @param id               unique return identifier
+     * @param date             date of the return
+     * @param sale             original sale the products belong to
+     * @param returnedProducts products given back, one entry per unit
+     * @param reason           reason given by the customer
+     */
+    public Return(String id, LocalDate date, Sale sale, List<Product> returnedProducts, String reason) {
+        this.id = id;
+        this.date = date;
+        this.sale = sale;
+        this.returnedProducts = new ArrayList<>(returnedProducts);
+        this.reason = reason;
+    }
+
+    /**
+     * Returns the return identifier.
+     *
+     * @return the identifier
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Returns the date of the return.
+     *
+     * @return the return date
+     */
+    public LocalDate getDate() {
+        return date;
+    }
+
+    /**
+     * Returns the original sale of the returned products.
+     *
+     * @return the original sale
+     */
+    public Sale getSale() {
+        return sale;
+    }
+
+    /**
+     * Returns the products given back.
+     *
+     * @return a copy of the returned products
+     */
+    public List<Product> getReturnedProducts() {
+        return new ArrayList<>(returnedProducts);
+    }
+
+    /**
+     * Returns the reason of the return.
+     *
+     * @return the reason
+     */
+    public String getReason() {
+        return reason;
+    }
+
+    /**
+     * Returns the amount refunded to the customer.
+     *
+     * @return the refund amount in Colombian pesos
+     */
+    public double getRefundAmount() {
+        return refundAmount;
+    }
+
+    /**
+     * Returns the part of the refund that corresponds to cancelled warranties.
+     *
+     * @return the warranty refund in Colombian pesos
+     */
+    public double getWarrantyRefundAmount() {
+        return warrantyRefundAmount;
+    }
+
+    /**
+     * Sets the amount refunded for the warranties cancelled by this return.
+     * It is added to the refund the next time it is calculated.
+     *
+     * @param warrantyRefundAmount the warranty refund in Colombian pesos
+     */
+    public void setWarrantyRefundAmount(double warrantyRefundAmount) {
+        this.warrantyRefundAmount = warrantyRefundAmount;
+    }
+
+    /**
+     * Calculates the refund of every returned product proportionally to the
+     * discount of the original sale, adds the refund of the cancelled
+     * warranties, and stores the result in the return.
+     *
+     * @return the calculated refund amount
+     */
+    public double calculateRefundAmount() {
+        double total = 0;
+        for (Product product : returnedProducts) {
+            total += refundOf(product);
+        }
+        refundAmount = total + warrantyRefundAmount;
+        return refundAmount;
+    }
+
+    private double discountRate() {
+        double subtotal = sale.calculateTotal();
+        if (subtotal <= 0) {
+            return 0;
+        }
+        return sale.getDiscountAmount() / subtotal;
+    }
+
+    private double refundOf(Product product) {
+        return product.getPrice() * (1 - discountRate());
+    }
+
+    /**
+     * Builds a receipt in Spanish with the details of the return.
+     *
+     * @return the formatted return receipt
+     */
+    public String generateReturnReceipt() {
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        StringBuilder receipt = new StringBuilder();
+        receipt.append("========================================\n");
+        receipt.append("     GAMEZONE UNICESAR - DEVOLUCION\n");
+        receipt.append("========================================\n");
+        receipt.append("Devolucion: ").append(id).append('\n');
+        receipt.append("Fecha: ").append(date.format(format)).append('\n');
+        receipt.append("Venta original: ").append(sale.getId())
+                .append(" (").append(sale.getDate().format(format)).append(")\n");
+        receipt.append("Cliente: ").append(sale.getCustomer().getName()).append('\n');
+        receipt.append("Motivo: ").append(reason).append('\n');
+        receipt.append("----------------------------------------\n");
+        receipt.append(String.format("%-8s %-16s %12s %12s %12s%n", "Codigo", "Producto", "Precio", "Descuento", "Reembolso"));
+        for (Product product : returnedProducts) {
+            double refund = refundOf(product);
+            receipt.append(String.format("%-8s %-16s $%,11.0f $%,11.0f $%,11.0f%n", product.getId(),
+                    product.getTitle(), product.getPrice(), product.getPrice() - refund, refund));
+        }
+        receipt.append("----------------------------------------\n");
+        if (warrantyRefundAmount > 0) {
+            receipt.append(String.format("Reembolso garantias extendidas: $%,.0f%n", warrantyRefundAmount));
+        }
+        receipt.append(String.format("MONTO REEMBOLSADO: $%,.0f%n", refundAmount));
+        receipt.append("========================================");
+        return receipt.toString();
+    }
+}

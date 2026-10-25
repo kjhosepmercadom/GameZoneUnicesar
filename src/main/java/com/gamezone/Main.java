@@ -1,11 +1,19 @@
 package com.gamezone;
 
+import com.gamezone.persistence.AccessoryRepository;
 import com.gamezone.persistence.PersonRepository;
 import com.gamezone.persistence.ProductRepository;
+import com.gamezone.persistence.PromotionRepository;
+import com.gamezone.persistence.ReturnRepository;
 import com.gamezone.persistence.SaleRepository;
+import com.gamezone.persistence.WarrantyRepository;
+import com.gamezone.service.AccessoryService;
 import com.gamezone.service.PersonService;
 import com.gamezone.service.ProductService;
+import com.gamezone.service.PromotionService;
+import com.gamezone.service.ReturnService;
 import com.gamezone.service.SaleService;
+import com.gamezone.service.WarrantyService;
 import com.gamezone.ui.ConsoleMenu;
 
 /**
@@ -28,12 +36,23 @@ public class Main {
             PersonRepository personRepository = new PersonRepository(DATA_DIRECTORY + "customers.csv",
                     DATA_DIRECTORY + "sellers.csv");
             SaleRepository saleRepository = new SaleRepository(DATA_DIRECTORY + "sales.csv");
+            AccessoryRepository accessoryRepository = new AccessoryRepository(DATA_DIRECTORY + "accessories.csv");
+            PromotionRepository promotionRepository = new PromotionRepository(DATA_DIRECTORY + "promotions.csv");
+            WarrantyRepository warrantyRepository = new WarrantyRepository(DATA_DIRECTORY + "warranties.csv");
+            ReturnRepository returnRepository = new ReturnRepository(DATA_DIRECTORY + "returns.csv");
 
             ProductService productService = new ProductService(productRepository);
             PersonService personService = new PersonService(personRepository);
-            SaleService saleService = new SaleService(saleRepository, productService, personService);
+            AccessoryService accessoryService = new AccessoryService(accessoryRepository);
+            PromotionService promotionService = new PromotionService(promotionRepository);
+            WarrantyService warrantyService = new WarrantyService(warrantyRepository);
+            SaleService saleService = new SaleService(saleRepository, productService, personService,
+                    accessoryService, promotionService, warrantyService);
+            ReturnService returnService = new ReturnService(returnRepository, saleService, productService,
+                    accessoryService, warrantyService);
 
-            ConsoleMenu consoleMenu = new ConsoleMenu(productService, personService, saleService);
+            ConsoleMenu consoleMenu = new ConsoleMenu(productService, personService, saleService, accessoryService,
+                    promotionService, warrantyService, returnService);
             consoleMenu.start();
         } catch (IllegalStateException e) {
             System.out.println("Error: " + e.getMessage());

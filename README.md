@@ -1,57 +1,62 @@
 # GameZone Unicesar
 
 Information system for **GameZone Unicesar**, a video game store located in
-the university area of Valledupar. The application manages products (video
-games and consoles), people (customers and sellers) and sales, and keeps all
-the information in files between executions.
+the university area of Valledupar. The integrated system manages products
+(video games and consoles), accessories, people (customers and sellers),
+sales with automatic promotions and warranties, and partial returns. All the
+information is kept in files between executions.
 
 Programming III - Universidad Popular del Cesar.
 
 ## Features
 
-The console menu (in Spanish) offers ten operations:
+The console menu (in Spanish) is organized in seven submenus:
 
-| Module   | Operation                                                         |
-|----------|-------------------------------------------------------------------|
-| Products | 1. Register a video game                                          |
-|          | 2. Register a console                                             |
-|          | 3. List the product inventory                                     |
-| People   | 4. Register a customer                                            |
-|          | 5. List customers                                                 |
-|          | 6. List sellers                                                   |
-| Sales    | 7. Register a sale (customer, seller and one or more products)    |
-|          | 8. Show the complete sales history                                |
-|          | 9. Show the purchase history of a customer                        |
-|          | 10. Show the sales attended by a seller                           |
+| Menu                        | Operations                                                                                     |
+|-----------------------------|------------------------------------------------------------------------------------------------|
+| 1. Gestion de productos     | Register a video game, register a console, list the inventory                                 |
+| 2. Gestion de personas      | Register a customer, list customers, list sellers                                             |
+| 3. Gestion de ventas        | Register a sale, full history, history of a customer, sales of a seller, detail of a sale     |
+| 4. Gestion de accesorios    | Register a controller, a cable or a memory, list all, list by type, compatible with a console |
+| 5. Gestion de promociones   | Register percentage, category and bulk promotions, list all, list active                      |
+| 6. Gestion de garantias     | Warranty of a product in a sale, list all, list active, list expiring soon                    |
+| 7. Gestion de devoluciones  | Register a return, list all, by customer, by sale, monthly balance                            |
 
-Business rules:
+Business rules of the integrated sale (see the [integration analysis](docs/integration-analysis.md)):
 
-- A sale must contain at least one product.
-- A product cannot be sold when its stock is insufficient.
-- Registering a sale deducts the sold quantities from the inventory.
-- The sale total is the sum of the prices of the products bought.
-- Data is loaded automatically at startup and saved after every operation.
+1. A sale must contain at least one item (product or accessory).
+2. Every item must exist and have enough stock.
+3. The best active promotion is applied over the subtotal of the items.
+4. Every console gets a six month basic warranty; an extended twelve month
+   warranty can be added for 10% of the console price.
+5. Final total = subtotal - discount + extended warranties.
+6. The stock of every item is deducted through the service of its type.
+7. Returns are accepted within thirty days and only for items of the sale; the
+   refund is proportional to the discount of the sale and includes the cost of
+   the cancelled extended warranties, and the stock is restored.
 
 ## Architecture
 
-The code lives in the `com.gamezone` package and is organized in four layers:
-
 ```
 src/main/java/com/gamezone
-├── model         Domain classes: Person, Customer, Seller, Product, VideoGame, Console, Sale
-├── persistence   CSV repositories: ProductRepository, PersonRepository, SaleRepository
-├── service       Business rules: ProductService, PersonService, SaleService
-├── ui            Console menu: ConsoleMenu
+├── model         Person, Customer, Seller, Product, VideoGame, Console, Accessory, Controller,
+│                 Cable, Memory, Sale, Promotion (3 types), Warranty (2 types), Return
+├── persistence   One CSV repository per module
+├── service       Business rules: one service per module
+├── ui            ConsoleMenu
 └── Main.java     Builds the layers and starts the application
 ```
 
-Allowed dependencies: `ui -> service -> persistence -> model`. See the design
-documents for details:
+Allowed dependencies: `ui -> service -> persistence -> model`. Design documents:
 
-- [Analysis](docs/analysis.md)
-- [Hierarchy diagram](docs/hierarchy-diagram.md)
-- [Class diagram](docs/class-diagram.md)
-- [Layers diagram](docs/layers-diagram.md)
+- Taller: [analysis](docs/analysis.md), [hierarchy](docs/hierarchy-diagram.md),
+  [class diagram](docs/class-diagram.md), [layers](docs/layers-diagram.md)
+- Modules: [accessories](docs/accessory-analysis.md) ([diagram](docs/accessory-class-diagram.md)),
+  [promotions](docs/promotion-analysis.md) ([diagram](docs/promotion-class-diagram.md)),
+  [warranties](docs/warranty-analysis.md) ([diagram](docs/warranty-class-diagram.md)),
+  [returns](docs/return-analysis.md) ([diagram](docs/return-class-diagram.md))
+- Integration: [analysis](docs/integration-analysis.md), [integrated class diagram](docs/integrated-class-diagram.md)
+- AI usage logs: [docs/ai-usage](docs/ai-usage)
 
 ## Requirements
 
@@ -68,40 +73,38 @@ mvn clean package
 java -jar target/gamezone-unicesar-1.0.0.jar
 ```
 
-Alternatively, compile and run in one step:
-
-```bash
-mvn compile exec:java
-```
-
-In NetBeans: *File > Open Project*, select the repository folder and press
-*Run Project* (F6).
+Alternatively, `mvn compile exec:java`. In NetBeans: *File > Open Project*,
+select the repository folder and press *Run Project* (F6).
 
 ## Data files
 
-| File                  | Content                                   | Versioned |
-|-----------------------|-------------------------------------------|-----------|
-| `data/sellers.csv`    | Sellers of the store (3 preloaded)        | Yes       |
-| `data/products.csv`   | Product inventory (preloaded examples)    | Yes       |
-| `data/customers.csv`  | Customers registered from the menu        | No        |
-| `data/sales.csv`      | Sales registered from the menu            | No        |
+| File                    | Content                                         | Versioned |
+|-------------------------|-------------------------------------------------|-----------|
+| `data/sellers.csv`      | Sellers of the store (3 preloaded)              | Yes       |
+| `data/products.csv`     | Video games and consoles (preloaded examples)   | Yes       |
+| `data/accessories.csv`  | Accessories (one of each type preloaded)        | Yes       |
+| `data/promotions.csv`   | Promotions (one of each type, plus accessories) | Yes       |
+| `data/customers.csv`    | Customers registered from the menu              | No        |
+| `data/sales.csv`        | Sales with promotion and warranty cost          | No        |
+| `data/warranties.csv`   | Warranties generated by the sales               | No        |
+| `data/returns.csv`      | Returns                                         | No        |
 
-Files use `;` as separator. Products include a type discriminator
-(`VIDEOGAME` or `CONSOLE`) in the first column. Missing files are treated as
-empty and are created on the first save.
+## Demonstration scenario
+
+1. Register a customer and a sale with a console, a video game and an
+   accessory, adding the extended warranty to the console.
+2. Check the receipt: best promotion, extended warranty cost and final total.
+3. List the active warranties (basic and extended).
+4. Return the console and the accessory: stock restored, warranty cancelled,
+   proportional refund.
+5. Show the monthly balance: sales, returns and net balance.
 
 ## Git workflow
 
-The team follows a simplified Git Flow:
-
-- `main`: stable version, updated only through Pull Requests from `develop`.
-- `develop`: integration branch, updated only through approved Pull Requests.
-- `feature/*`: one branch per functionality, created from `develop` and
-  deleted after merging.
-
-Commit messages follow Conventional Commits (`feat:`, `fix:`, `docs:`,
-`refactor:`, `chore:`). Team roles and responsibilities are described in
-[TEAM.md](TEAM.md).
+Simplified Git Flow: `main` (stable), `develop` (integration) and work
+branches created from `develop` with the prefixes `feature/`, `fix/`,
+`refactor/` and `docs/`, integrated through reviewed Pull Requests and deleted
+after merging. Commits follow Conventional Commits. Team: [TEAM.md](TEAM.md).
 
 ## License
 
