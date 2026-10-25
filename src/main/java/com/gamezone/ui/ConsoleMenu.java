@@ -2,7 +2,6 @@ package com.gamezone.ui;
 
 import com.gamezone.model.Return;
 import com.gamezone.model.Sale;
-import com.gamezone.model.Warranty;
 import com.gamezone.service.AccessoryService;
 import com.gamezone.service.PersonService;
 import com.gamezone.service.ProductService;
@@ -36,6 +35,7 @@ public class ConsoleMenu {
     private final AccessoryMenu accessoryMenu;
     private final SaleMenu saleMenu;
     private final PromotionMenu promotionMenu;
+    private final WarrantyMenu warrantyMenu;
 
     /**
      * Creates the menu with the services it uses.
@@ -66,6 +66,7 @@ public class ConsoleMenu {
         this.saleMenu = new SaleMenu(saleService, personService, productService, accessoryService,
                 personMenu, productMenu, accessoryMenu, input, errorPrinter);
         this.promotionMenu = new PromotionMenu(promotionService, input, errorPrinter);
+        this.warrantyMenu = new WarrantyMenu(warrantyService, input, errorPrinter);
     }
 
     /**
@@ -102,7 +103,7 @@ public class ConsoleMenu {
                     promotionMenu.show();
                     break;
                 case 6:
-                    showWarrantyMenu();
+                    warrantyMenu.show();
                     break;
                 case 7:
                     showReturnMenu();
@@ -139,59 +140,6 @@ public class ConsoleMenu {
 
     private void showError(RuntimeException error) {
         errorPrinter.print(error);
-    }
-
-    private void showWarrantyMenu() {
-        System.out.println();
-        System.out.println("--- Gestion de garantias ---");
-        System.out.println("1. Consultar la garantia de un producto en una venta");
-        System.out.println("2. Listar todas las garantias");
-        System.out.println("3. Listar garantias vigentes");
-        System.out.println("4. Listar garantias proximas a vencer");
-        System.out.println("0. Volver");
-        int option = readInt("Seleccione una opcion: ");
-        try {
-            switch (option) {
-                case 1:
-                    String saleId = readText("Codigo de la venta: ");
-                    String productId = readText("Codigo del producto: ");
-                    Warranty warranty = warrantyService.findWarrantyByProduct(productId, saleId);
-                    if (warranty == null) {
-                        System.out.println("No existe una garantia para el producto " + productId
-                                + " en la venta " + saleId + ".");
-                    } else {
-                        System.out.println(warranty.generateWarrantyCertificate());
-                    }
-                    break;
-                case 2:
-                    printWarranties(warrantyService.listAllWarranties(), "No hay garantias registradas.");
-                    break;
-                case 3:
-                    printWarranties(warrantyService.listActiveWarranties(), "No hay garantias vigentes.");
-                    break;
-                case 4:
-                    int days = readInt("Dias de anticipacion: ");
-                    printWarranties(warrantyService.listWarrantiesExpiringSoon(days),
-                            "No hay garantias que venzan en los proximos " + days + " dias.");
-                    break;
-                case 0:
-                    break;
-                default:
-                    System.out.println("Opcion no valida.");
-            }
-        } catch (RuntimeException e) {
-            showError(e);
-        }
-    }
-
-    private void printWarranties(List<Warranty> warranties, String emptyMessage) {
-        if (warranties.isEmpty()) {
-            System.out.println(emptyMessage);
-            return;
-        }
-        for (Warranty warranty : warranties) {
-            System.out.println(warranty.generateWarrantyCertificate());
-        }
     }
 
     private void showReturnMenu() {
