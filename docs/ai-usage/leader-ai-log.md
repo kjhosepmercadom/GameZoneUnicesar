@@ -44,3 +44,16 @@ member's account.
 | Response        | Explained that `WarrantyRepository` needs `SaleService` to load, so `WarrantyService` cannot be passed to the constructor of `SaleService`. Proposed a temporary setter (`setWarrantyService`) wired in `Main`. |
 | Decision        | Accepted the setter only as a temporary workaround to keep the system working; it is removed by adjustment A2. The menu asks for the extended warranty once per console product. |
 | Related commit  | `feat: generate basic and extended warranties when registering a sale` |
+
+## Entry 4 - Unified sale registration (A3)
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Phase 3 - `refactor/unified-sale-registration` |
+| Objective       | Reorganize `registerSale` in the eight steps of adjustment A3. |
+| Query           | "Apply adjustment A3 without changing the results of the sales." |
+| Response        | Reordered the method into the eight numbered steps with the private methods `applyBestPromotion` and `assignWarranties`, added the extended warranty line to the receipt and split the sales menu into `readSaleItems` and `askExtendedWarranties`. |
+| Decision        | Accepted. Before and after the refactor the same sale (console + controller with extended warranty) gives the same total, $1.996.810. |
+| Related commit  | `refactor: reorganize registerSale into the eight integration steps` |
