@@ -55,3 +55,30 @@ Executed on `develop` before the first commit of `feature/grasp-refactor`:
 | `ReturnService` | Uses `sale.findProduct` and `sale.countUnitsOf`; `findInSale` and `countInSale` were removed | V-04 | Information Expert | `refactor: ask the sale for its products in ReturnService (V-04)` / same PR | Developer 2 |
 | `WarrantyService` | `findWarrantyByProduct` keeps the warranty with the longest `getDurationInMonths()` | V-06 | Polymorphism | `refactor: choose the warranty with the longest coverage without type checks (V-06)` / same PR | Developer 2 |
 | `ProductRepository` | Uses `CsvFile` | V-07 | Pure Fabrication, High Cohesion | `refactor: use CsvFile in ProductRepository (V-07)` / PR "use CsvFile in ProductRepository" | Developer 1 |
+| `ConsoleInput`, `ErrorPrinter` | New classes with the input readers and the error messages | V-01 | Pure Fabrication | `refactor: extract ConsoleInput and ErrorPrinter from ConsoleMenu (V-01)` / PR "split the console menu" | Leader |
+| `ProductMenu`, `PersonMenu`, `AccessoryMenu`, `SaleMenu`, `PromotionMenu`, `WarrantyMenu`, `ReturnMenu` | One submenu class per module, moved without changing texts | V-01 | High Cohesion, Indirection | seven commits `refactor: move the ... submenu to ...Menu (V-01)` / same PR | Leader |
+| `ConsoleMenu` | Only the main menu; delegates to the submenus | V-01 | High Cohesion, Controller | same commits | Leader |
+| `ProductService` | `restoreStock` calls `product.increaseStock(quantity)` | V-02 | Information Expert | `refactor: use Product.increaseStock in ProductService.restoreStock (V-02)` / same PR | Leader |
+| `SaleRepository` | Uses `CsvFile` | V-07 | Pure Fabrication, High Cohesion | `refactor: use CsvFile in SaleRepository (V-07)` / same PR | Leader |
+
+Every violation V-01 to V-07 of the consolidated audit appears in this log.
+No violation was moved to the out of scope findings. No pattern was sacrificed:
+`ConsoleMenu` still receives the seven services, but only to build the
+submenus; each submenu receives only the services it uses.
+
+## Verification per Pull Request
+
+| Pull Request | Affected operations | Result |
+|--------------|---------------------|--------|
+| prepare the GRASP corrections | sales, returns | identical output and data |
+| apply developer 1 GRASP corrections | promotions by category, returns, stock | identical output and data |
+| apply developer 2 GRASP corrections | every operation that reads or writes files, returns, warranties | identical output and data |
+| use CsvFile in ProductRepository | products | identical output and data |
+| split the console menu and complete the GRASP corrections | every operation | identical output and data |
+
+## Final verification
+
+The complete script was executed after the last correction and compared with
+the reference run: the 1376 lines of output and every file of `data/` are
+identical (`diff` returned no differences). The project compiles without
+errors after every commit of the phase.

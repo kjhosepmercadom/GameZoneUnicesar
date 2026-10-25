@@ -87,3 +87,113 @@ classDiagram
     ReturnService ..> Sale : getProducts
     CategoryDiscount ..> Product : instanceof
 ```
+
+## After the correction
+
+The same classes with the new classes and methods introduced in Phase 2.
+
+```mermaid
+classDiagram
+    direction TB
+
+    class ConsoleMenu {
+        -ConsoleInput input
+        +start() void
+    }
+    note for ConsoleMenu "V-01: only the main menu; delegates to one submenu per module"
+    class ConsoleInput {
+        +readLine(String prompt) String
+        +readText(String prompt) String
+        +readInt(String prompt) int
+        +readDouble(String prompt) double
+        +readDate(String prompt) LocalDate
+    }
+    class ErrorPrinter {
+        +print(RuntimeException error) void
+    }
+    class ProductMenu {
+        +show() void
+        +printProducts() void
+    }
+    class PersonMenu {
+        +show() void
+        +printCustomers() void
+        +printSellers() void
+    }
+    class SaleMenu {
+        +show() void
+    }
+    class AccessoryMenu {
+        +show() void
+        +printAccessories(List~Accessory~ accessories, String emptyMessage) void
+    }
+    class PromotionMenu {
+        +show() void
+    }
+    class WarrantyMenu {
+        +show() void
+    }
+    class ReturnMenu {
+        +show() void
+    }
+
+    class Product {
+        <<abstract>>
+        -int stock
+        +decreaseStock(int quantity) void
+        +increaseStock(int quantity) void
+        +getCategory()* String
+    }
+    note for Product "V-02: increaseStock; V-05: getCategory implemented by each product type"
+    class Sale {
+        +calculateDiscountRate() double
+        +findProduct(String productId) Product
+        +countUnitsOf(String productId) int
+    }
+    note for Sale "V-03, V-04: the sale answers about its discount and its items"
+    class Return {
+        -refundOf(Product product) double
+    }
+    class ReturnService
+    class CategoryDiscount {
+        -belongsToTargetCategory(Product product) boolean
+    }
+    class WarrantyService {
+        +findWarrantyByProduct(String productId, String saleId) Warranty
+    }
+    note for WarrantyService "V-06: keeps the warranty with the longest getDurationInMonths()"
+    class CsvFile {
+        -Path path
+        ~readLines(String errorMessage) List~String~
+        ~writeLines(List~String~ lines, String errorMessage) void
+        ~clean(String value)$ String
+    }
+    note for CsvFile "V-07: pure fabrication used by the seven repositories"
+    class ProductRepository
+    class SaleRepository
+    class PersonRepository
+
+    ConsoleMenu --> ConsoleInput
+    ConsoleMenu --> ProductMenu
+    ConsoleMenu --> PersonMenu
+    ConsoleMenu --> SaleMenu
+    ConsoleMenu --> AccessoryMenu
+    ConsoleMenu --> PromotionMenu
+    ConsoleMenu --> WarrantyMenu
+    ConsoleMenu --> ReturnMenu
+    ProductMenu --> ErrorPrinter
+    SaleMenu --> PersonMenu
+    SaleMenu --> ProductMenu
+    SaleMenu --> AccessoryMenu
+    ReturnMenu --> PersonMenu
+    Return ..> Sale : calculateDiscountRate
+    ReturnService ..> Sale : findProduct, countUnitsOf
+    CategoryDiscount ..> Product : getCategory
+    ProductRepository --> CsvFile
+    SaleRepository --> CsvFile
+    PersonRepository --> CsvFile
+```
+
+Every submenu receives the same `ConsoleInput` and `ErrorPrinter`. The other
+repositories (`AccessoryRepository`, `PromotionRepository`,
+`WarrantyRepository`, `ReturnRepository`) also use `CsvFile`.
