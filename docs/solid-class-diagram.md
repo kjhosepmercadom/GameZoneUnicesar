@@ -56,3 +56,90 @@ classDiagram
     ReturnService --> ProductService
     ReturnService --> AccessoryService
 ```
+
+## After the correction
+
+```mermaid
+classDiagram
+    direction TB
+
+    class InventoryService {
+        <<interface>>
+        +findById(String id) Product
+        +updateStock(String itemId, int quantity) void
+        +restoreStock(String itemId, int quantity) void
+    }
+    note for InventoryService "V-01: abstraction of an inventory"
+    class ProductService
+    class AccessoryService
+    class SaleService {
+        -List~InventoryService~ inventories
+        -inventoryOf(String itemId) InventoryService
+    }
+    class ReturnService {
+        -List~InventoryService~ inventories
+        -MonthlyBalanceCalculator balanceCalculator
+        -inventoryOf(String itemId) InventoryService
+    }
+    class MonthlyBalanceCalculator {
+        +calculateSales(List~Sale~ sales, int month, int year) double
+        +calculateReturns(List~Return~ returns, int month, int year) double
+    }
+    note for MonthlyBalanceCalculator "V-03: report arithmetic out of ReturnService"
+
+    class RecordMapper~T~ {
+        <<interface>>
+        +getTypeCode() String
+        +supports(T value) boolean
+        +toColumns(T value) String
+        +fromFields(String[] fields) T
+    }
+    note for RecordMapper "V-02: one mapper per subtype"
+    class VideoGameRecordMapper
+    class ConsoleRecordMapper
+    class AccessoryRecordMapper {
+        <<abstract>>
+    }
+    class ControllerRecordMapper
+    class CableRecordMapper
+    class MemoryRecordMapper
+    class PercentageDiscountRecordMapper
+    class CategoryDiscountRecordMapper
+    class BulkPurchaseDiscountRecordMapper
+    class WarrantyRecordMapper {
+        <<interface>>
+        +getTypeCode() String
+        +supports(Warranty warranty) boolean
+        +create(String id, Product product, Sale sale, LocalDate startDate) Warranty
+    }
+    class BasicWarrantyRecordMapper
+    class ExtendedWarrantyRecordMapper
+    class ProductRepository
+    class AccessoryRepository
+    class PromotionRepository
+    class WarrantyRepository
+
+    InventoryService <|.. ProductService
+    InventoryService <|.. AccessoryService
+    SaleService --> InventoryService
+    ReturnService --> InventoryService
+    ReturnService --> MonthlyBalanceCalculator
+    RecordMapper <|.. VideoGameRecordMapper
+    RecordMapper <|.. ConsoleRecordMapper
+    RecordMapper <|.. AccessoryRecordMapper
+    AccessoryRecordMapper <|-- ControllerRecordMapper
+    AccessoryRecordMapper <|-- CableRecordMapper
+    AccessoryRecordMapper <|-- MemoryRecordMapper
+    RecordMapper <|.. PercentageDiscountRecordMapper
+    RecordMapper <|.. CategoryDiscountRecordMapper
+    RecordMapper <|.. BulkPurchaseDiscountRecordMapper
+    WarrantyRecordMapper <|.. BasicWarrantyRecordMapper
+    WarrantyRecordMapper <|.. ExtendedWarrantyRecordMapper
+    ProductRepository --> RecordMapper
+    AccessoryRepository --> RecordMapper
+    PromotionRepository --> RecordMapper
+    WarrantyRepository --> WarrantyRecordMapper
+```
+
+The constructors of `SaleService` and `ReturnService` keep their parameters,
+so `Main` did not change.
