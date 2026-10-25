@@ -1,6 +1,7 @@
 package com.gamezone.service;
 
 import com.gamezone.model.Accessory;
+import com.gamezone.model.Console;
 import com.gamezone.model.Product;
 import com.gamezone.model.Return;
 import com.gamezone.model.Sale;
@@ -24,6 +25,7 @@ public class ReturnService {
     private final SaleService saleService;
     private final ProductService productService;
     private final AccessoryService accessoryService;
+    private final WarrantyService warrantyService;
     private final List<Return> returns;
 
     /**
@@ -33,13 +35,16 @@ public class ReturnService {
      * @param saleService      service used to find the original sales
      * @param productService   service used to restore the stock of returned products
      * @param accessoryService service used to restore the stock of returned accessories
+     * @param warrantyService  service used to cancel the warranties of returned consoles
      */
     public ReturnService(ReturnRepository returnRepository, SaleService saleService,
-                         ProductService productService, AccessoryService accessoryService) {
+                         ProductService productService, AccessoryService accessoryService,
+                         WarrantyService warrantyService) {
         this.returnRepository = returnRepository;
         this.saleService = saleService;
         this.productService = productService;
         this.accessoryService = accessoryService;
+        this.warrantyService = warrantyService;
         this.returns = returnRepository.loadAll(saleService.listAllSales());
     }
 
@@ -89,6 +94,13 @@ public class ReturnService {
         }
 
         Return productReturn = new Return(nextReturnId(), LocalDate.now(), sale, returned, reason.trim());
+        double warrantyRefund = 0;
+        for (String productId : quantities.keySet()) {
+            if (findInSale(sale, productId) instanceof Console) {
+                warrantyRefund += warrantyService.cancelWarranties(productId, sale.getId());
+            }
+        }
+        productReturn.setWarrantyRefundAmount(warrantyRefund);
         productReturn.calculateRefundAmount();
         for (Map.Entry<String, Integer> entry : quantities.entrySet()) {
             if (findInSale(sale, entry.getKey()) instanceof Accessory) {
