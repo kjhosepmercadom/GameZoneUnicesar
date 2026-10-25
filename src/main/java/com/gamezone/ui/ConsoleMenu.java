@@ -1,5 +1,9 @@
 package com.gamezone.ui;
 
+import com.gamezone.exceptions.BusinessRuleException;
+import com.gamezone.exceptions.InvalidDataException;
+import com.gamezone.exceptions.PersistenceException;
+import com.gamezone.exceptions.ResourceNotFoundException;
 import com.gamezone.model.Accessory;
 import com.gamezone.model.Console;
 import com.gamezone.model.Customer;
@@ -137,8 +141,8 @@ public class ConsoleMenu {
                 default:
                     System.out.println("Opcion no valida.");
             }
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            System.out.println("Error: " + e.getMessage());
+        } catch (RuntimeException e) {
+            showError(e);
         }
     }
 
@@ -204,8 +208,8 @@ public class ConsoleMenu {
                 default:
                     System.out.println("Opcion no valida.");
             }
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            System.out.println("Error: " + e.getMessage());
+        } catch (RuntimeException e) {
+            showError(e);
         }
     }
 
@@ -293,8 +297,8 @@ public class ConsoleMenu {
                 default:
                     System.out.println("Opcion no valida.");
             }
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            System.out.println("Error: " + e.getMessage());
+        } catch (RuntimeException e) {
+            showError(e);
         }
     }
 
@@ -406,8 +410,8 @@ public class ConsoleMenu {
                 default:
                     System.out.println("Opcion no valida.");
             }
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            System.out.println("Error: " + e.getMessage());
+        } catch (RuntimeException e) {
+            showError(e);
         }
     }
 
@@ -533,8 +537,8 @@ public class ConsoleMenu {
                 default:
                     System.out.println("Opcion no valida.");
             }
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            System.out.println("Error: " + e.getMessage());
+        } catch (RuntimeException e) {
+            showError(e);
         }
     }
 
@@ -634,8 +638,8 @@ public class ConsoleMenu {
                 default:
                     System.out.println("Opcion no valida.");
             }
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            System.out.println("Error: " + e.getMessage());
+        } catch (RuntimeException e) {
+            showError(e);
         }
     }
 
@@ -685,8 +689,8 @@ public class ConsoleMenu {
                 default:
                     System.out.println("Opcion no valida.");
             }
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            System.out.println("Error: " + e.getMessage());
+        } catch (RuntimeException e) {
+            showError(e);
         }
     }
 
@@ -741,6 +745,24 @@ public class ConsoleMenu {
         System.out.println(String.format("Total de ventas:       $%,.0f", returnService.calculateMonthlySales(month, year)));
         System.out.println(String.format("Total de devoluciones: $%,.0f", returnService.calculateMonthlyReturns(month, year)));
         System.out.println(String.format("Balance neto:          $%,.0f", returnService.generateMonthlyBalance(month, year)));
+    }
+
+    private void showError(RuntimeException error) {
+        try {
+            throw error;
+        } catch (ResourceNotFoundException e) {
+            System.out.println("No se encontro el recurso solicitado: " + e.getMessage());
+        } catch (BusinessRuleException e) {
+            System.out.println("No se puede completar la operacion: " + e.getMessage());
+        } catch (InvalidDataException e) {
+            System.out.println("Los datos ingresados no son validos: " + e.getMessage());
+        } catch (PersistenceException e) {
+            System.out.println("Ocurrio un problema al acceder a los datos del sistema. Contacte al administrador.");
+        } catch (IllegalArgumentException e) {
+            System.out.println("No se puede completar la operacion: " + e.getMessage());
+        } catch (RuntimeException e) {
+            System.out.println("Ocurrio un error inesperado. Intente de nuevo.");
+        }
     }
 
     private String readLine(String prompt) {
