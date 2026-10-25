@@ -141,3 +141,20 @@ member's account.
 | Response        | Proposed temporary private methods in `ConsoleMenu` that delegate to the new classes while the remaining submenus are moved, and removing them at the end. |
 | Decision        | Accepted. After the last commit `ConsoleMenu` only has the main menu. The final regression run is identical to the reference. |
 | Related commit  | `refactor: move the sales submenu to SaleMenu (V-01)` |
+
+## Requirement 8 - SOLID audit and correction
+
+### Phase 1 - Audit
+
+#### Entry 11 - SOLID audit of the leader code and consolidation
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Requirement 8, Phase 1 - `feature/solid-audit` |
+| Objective       | Audit the sales module, the user interface and `Main` against SOLID and consolidate the three reports. |
+| Query           | "Audit the leader code against SRP, OCP, LSP, ISP and DIP and consolidate the three reports, relating them with the GRASP audit." |
+| Response        | Found that `SaleService` depends on the concrete product and accessory services and on item types (OCP, DIP), the same problem reported by Developer 2 in `ReturnService`. It related the findings with R7: the split of the menu and `CsvFile` solved SRP problems. |
+| Decision        | Accepted. The two reports of the inventory problem were merged into one violation with three responsible members. |
+| Related commit  | `docs: consolidate SOLID audit findings from the three reports` |

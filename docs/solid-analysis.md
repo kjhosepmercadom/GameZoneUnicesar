@@ -57,3 +57,19 @@ the first correction (reference) and after every Pull Request of Phase 2, with
 the same initial data files. The output and the resulting `data/*.csv` files
 must be identical to the reference. The evidence is recorded in
 `docs/solid-refactor-log.md`.
+
+## 5. Order of the corrections and coordination (Leader)
+
+1. **Leader:** the before diagram, the regression baseline and the
+   `InventoryService` interface (V-01), because three members depend on it.
+2. **Developer 1:** `ProductService` implements `InventoryService` (V-01);
+   `RecordMapper` and the product mappers (V-02), which Developer 2 reuses.
+3. **Developer 2:** `AccessoryService` implements `InventoryService` and
+   `ReturnService` uses the inventories (V-01); mappers for accessories,
+   promotions and warranties (V-02); `MonthlyBalanceCalculator` (V-03).
+4. **Leader:** `SaleService` uses the inventories (V-01), the after diagram
+   and the final regression run.
+
+The members worked one after the other on `feature/solid-refactor`; each
+member recreated the branch from `develop` after the previous Pull Request was
+merged, so nobody edited a file that another member had pending.
