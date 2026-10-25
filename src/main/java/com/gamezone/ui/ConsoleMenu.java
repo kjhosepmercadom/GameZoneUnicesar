@@ -16,7 +16,6 @@ import com.gamezone.service.SaleService;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 
@@ -310,7 +309,18 @@ public class ConsoleMenu {
                 productIds.add(productId);
             }
         }
-        Sale sale = saleService.registerSale(customerId, sellerCode, productIds, Collections.emptyList());
+        List<String> extendedWarrantyIds = new ArrayList<>();
+        for (String itemId : productIds) {
+            Product product = productService.findById(itemId);
+            if (product instanceof Console && !extendedWarrantyIds.contains(product.getId())) {
+                String answer = readLine("Desea garantia extendida (10% del precio) para "
+                        + product.getTitle() + "? (s/n): ");
+                if (answer.equalsIgnoreCase("s")) {
+                    extendedWarrantyIds.add(product.getId());
+                }
+            }
+        }
+        Sale sale = saleService.registerSale(customerId, sellerCode, productIds, extendedWarrantyIds);
         System.out.println("Venta registrada correctamente.");
         System.out.println(sale.generateReceipt());
     }
