@@ -1,6 +1,7 @@
 package com.gamezone.model;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -103,5 +104,32 @@ public class Return {
         }
         refundAmount = total;
         return refundAmount;
+    }
+
+    /**
+     * Builds a receipt in Spanish with the details of the return.
+     *
+     * @return the formatted return receipt
+     */
+    public String generateReturnReceipt() {
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        StringBuilder receipt = new StringBuilder();
+        receipt.append("========================================\n");
+        receipt.append("     GAMEZONE UNICESAR - DEVOLUCION\n");
+        receipt.append("========================================\n");
+        receipt.append("Devolucion: ").append(id).append('\n');
+        receipt.append("Fecha: ").append(date.format(format)).append('\n');
+        receipt.append("Venta original: ").append(sale.getId())
+                .append(" (").append(sale.getDate().format(format)).append(")\n");
+        receipt.append("Cliente: ").append(sale.getCustomer().getName()).append('\n');
+        receipt.append("Motivo: ").append(reason).append('\n');
+        receipt.append("----------------------------------------\n");
+        for (Product product : returnedProducts) {
+            receipt.append(String.format("%-8s %-20s $%,12.0f%n", product.getId(), product.getTitle(), product.getPrice()));
+        }
+        receipt.append("----------------------------------------\n");
+        receipt.append(String.format("MONTO REEMBOLSADO: $%,.0f%n", refundAmount));
+        receipt.append("========================================");
+        return receipt.toString();
     }
 }
