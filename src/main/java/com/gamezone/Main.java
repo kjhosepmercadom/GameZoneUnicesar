@@ -1,8 +1,10 @@
 package com.gamezone;
 
+import com.gamezone.persistence.AccessoryRepository;
 import com.gamezone.persistence.PersonRepository;
 import com.gamezone.persistence.ProductRepository;
 import com.gamezone.persistence.SaleRepository;
+import com.gamezone.service.AccessoryService;
 import com.gamezone.service.PersonService;
 import com.gamezone.service.ProductService;
 import com.gamezone.service.SaleService;
@@ -28,10 +30,12 @@ public class Main {
             PersonRepository personRepository = new PersonRepository(DATA_DIRECTORY + "customers.csv",
                     DATA_DIRECTORY + "sellers.csv");
             SaleRepository saleRepository = new SaleRepository(DATA_DIRECTORY + "sales.csv");
+            AccessoryRepository accessoryRepository = new AccessoryRepository(DATA_DIRECTORY + "accessories.csv");
 
             ProductService productService = new ProductService(productRepository);
             PersonService personService = new PersonService(personRepository);
-            SaleService saleService = new SaleService(saleRepository, productService, personService);
+            AccessoryService accessoryService = new AccessoryService(accessoryRepository);
+            SaleService saleService = new SaleService(saleRepository, productService, personService, accessoryService);
 
             ConsoleMenu consoleMenu = new ConsoleMenu(productService, personService, saleService);
             consoleMenu.start();

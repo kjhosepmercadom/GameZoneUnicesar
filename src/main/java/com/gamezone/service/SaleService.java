@@ -23,22 +23,25 @@ public class SaleService {
     private final SaleRepository saleRepository;
     private final ProductService productService;
     private final PersonService personService;
+    private final AccessoryService accessoryService;
     private final List<Sale> sales;
 
     /**
      * Creates the service and loads the stored sales, resolving their
-     * references through the product and person services.
+     * references through the product, accessory and person services.
      *
-     * @param saleRepository repository used to persist the sales
-     * @param productService service that manages the inventory
-     * @param personService  service that manages customers and sellers
+     * @param saleRepository   repository used to persist the sales
+     * @param productService   service that manages the product inventory
+     * @param personService    service that manages customers and sellers
+     * @param accessoryService service that manages the accessory inventory
      */
-    public SaleService(SaleRepository saleRepository, ProductService productService, PersonService personService) {
+    public SaleService(SaleRepository saleRepository, ProductService productService, PersonService personService,
+                       AccessoryService accessoryService) {
         this.saleRepository = saleRepository;
         this.productService = productService;
         this.personService = personService;
-        this.sales = saleRepository.loadAll(personService.listCustomers(), personService.listSellers(),
-                productService.listAllProducts());
+        this.accessoryService = accessoryService;
+        this.sales = saleRepository.loadAll(personService.listCustomers(), personService.listSellers(), allItems());
     }
 
     /**
@@ -132,6 +135,12 @@ public class SaleService {
             }
         }
         return result;
+    }
+
+    private List<Product> allItems() {
+        List<Product> items = new ArrayList<>(productService.listAllProducts());
+        items.addAll(accessoryService.listAllAccessories());
+        return items;
     }
 
     private String nextSaleId() {
