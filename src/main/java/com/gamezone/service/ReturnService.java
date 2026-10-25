@@ -75,6 +75,13 @@ public class ReturnService {
             returned.add(product);
             quantities.merge(product.getId(), 1, Integer::sum);
         }
+        for (Map.Entry<String, Integer> entry : quantities.entrySet()) {
+            int available = countInSale(sale, entry.getKey()) - countReturned(sale, entry.getKey());
+            if (entry.getValue() > available) {
+                throw new IllegalArgumentException("Solo se pueden devolver " + available + " unidades de "
+                        + entry.getKey() + " en la venta " + sale.getId() + ".");
+            }
+        }
 
         Return productReturn = new Return(nextReturnId(), LocalDate.now(), sale, returned, reason.trim());
         productReturn.calculateRefundAmount();
@@ -162,6 +169,30 @@ public class ReturnService {
             }
         }
         return null;
+    }
+
+    private int countInSale(Sale sale, String productId) {
+        int count = 0;
+        for (Product product : sale.getProducts()) {
+            if (product.getId().equals(productId)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private int countReturned(Sale sale, String productId) {
+        int count = 0;
+        for (Return productReturn : returns) {
+            if (productReturn.getSale().getId().equals(sale.getId())) {
+                for (Product product : productReturn.getReturnedProducts()) {
+                    if (product.getId().equals(productId)) {
+                        count++;
+                    }
+                }
+            }
+        }
+        return count;
     }
 
     private String nextReturnId() {
