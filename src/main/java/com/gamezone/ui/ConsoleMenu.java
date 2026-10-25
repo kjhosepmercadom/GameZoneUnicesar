@@ -656,6 +656,7 @@ public class ConsoleMenu {
         System.out.println("2. Consultar todas las devoluciones");
         System.out.println("3. Consultar devoluciones por cliente");
         System.out.println("4. Consultar devoluciones por venta");
+        System.out.println("5. Consultar balance mensual");
         System.out.println("0. Volver");
         int option = readInt("Seleccione una opcion: ");
         try {
@@ -675,6 +676,9 @@ public class ConsoleMenu {
                 case 4:
                     String saleId = readText("Codigo de la venta: ");
                     printReturns(returnService.viewReturnsBySale(saleId), "La venta no tiene devoluciones registradas.");
+                    break;
+                case 5:
+                    showMonthlyBalance();
                     break;
                 case 0:
                     break;
@@ -724,6 +728,17 @@ public class ConsoleMenu {
         for (Return productReturn : returns) {
             System.out.println(productReturn.generateReturnReceipt());
         }
+    }
+
+    private void showMonthlyBalance() {
+        int month = readInt("Mes (1-12): ");
+        int year = readInt("Anio: ");
+        if (month < 1 || month > 12) {
+            System.out.println("El mes debe estar entre 1 y 12.");
+            return;
+        }
+        System.out.println("-- Balance mensual " + month + "/" + year + " --");
+        System.out.println(String.format("Balance neto: $%,.0f", returnService.generateMonthlyBalance(month, year)));
     }
 
     private String readLine(String prompt) {
