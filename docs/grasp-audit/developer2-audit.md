@@ -43,3 +43,41 @@ Verdict legend: **violation**, **correct**, **not applicable**.
 | Pure Fabrication      | violation (boundary) | File handling repeated in `AccessoryRepository` and `PromotionRepository` (see V-03). |
 | Indirection           | correct | The services stand between the menu and the repositories. |
 | Protected Variations  | correct | The CSV layout is hidden from the services. |
+
+## Return and warranty persistence and services
+
+| Pattern               | Verdict | Evidence |
+|-----------------------|---------|----------|
+| Information Expert    | **violation** | `ReturnService.findInSale` and `ReturnService.countInSale` (see V-02). `countReturned` is correct: the returns belong to the service. |
+| Creator               | correct | `ReturnService.registerReturn` creates the `Return`; `WarrantyService.assignBasicWarranty/assignExtendedWarranty` create the warranties of the list they aggregate. |
+| Controller            | correct | `ReturnService` coordinates validation, refund, warranty cancellation, stock restoration and persistence of a return. |
+| Low Coupling          | correct | After adjustment A2, `WarrantyRepository` does not depend on any service; references are resolved from the sales passed to `loadAll`. |
+| High Cohesion         | correct | Each service contains the rules of its module. |
+| Polymorphism          | **violation** | `WarrantyService.findWarrantyByProduct` uses `instanceof ExtendedWarranty` (see V-01). |
+| Pure Fabrication      | violation (boundary) | File handling repeated in `ReturnRepository` and `WarrantyRepository` (see V-03). |
+| Indirection           | correct | `ReturnService` uses `ProductService`, `AccessoryService` and `WarrantyService` instead of touching their repositories. |
+| Protected Variations  | correct | The thirty day rule is encapsulated in `Sale.canBeReturned()`; the refund rule in `Return.calculateRefundAmount()`. |
+
+### V-01 - Warranty preference decided with a type check
+
+| Field | Content |
+|-------|---------|
+| Pattern | Polymorphism |
+| Module | Warranties (R4) - `WarrantyService.findWarrantyByProduct` |
+| Evidence | `if (warranty instanceof ExtendedWarranty) { return warranty; } if (found == null) { found = warranty; }` |
+| Explanation | The service prefers the extended warranty by asking for the concrete class. What it really needs is "the warranty with the widest coverage", which each warranty already knows through `getDurationInMonths()`. |
+| Consequence | A new warranty type (for example, a 24 month premium warranty) would not be preferred unless this method is modified. |
+| Proposed solution | Keep the warranty with the biggest `getDurationInMonths()`; it gives the same result for basic and extended warranties (Polymorphism). |
+| Code of another member | No. |
+
+### V-02 - The return service does the work of the sale (boundary)
+
+| Field | Content |
+|-------|---------|
+| Pattern | Information Expert |
+| Module | Returns (R3) - `ReturnService`; uses `Sale` (Leader) |
+| Evidence | `private Product findInSale(Sale sale, String productId)` and `private int countInSale(Sale sale, String productId)` iterate `sale.getProducts()` to find a product and to count its units. |
+| Explanation | The sale owns its list of products, so it is the expert to find a product of the sale and to count its units. |
+| Consequence | Any other client that needs the same information (warranties, reports) has to copy the loop; the service depends on the internal representation of the sale (one entry per unit). |
+| Proposed solution | `Sale.findProduct(productId)` and `Sale.countUnitsOf(productId)` (Leader); `ReturnService` uses them and drops its helpers (Developer 2). |
+| Code of another member | Yes: new methods in `Sale` (Leader). Reported to the Leader. |
