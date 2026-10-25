@@ -57,12 +57,18 @@ public class SaleService {
     }
 
     /**
-     * Registers a new sale of products and accessories. The rules applied are:
-     * the sale must contain at least one item, the customer and the seller must
-     * exist, every item must exist and have enough stock. Every console receives
-     * a basic warranty and, if requested, an extended warranty whose cost is
-     * added to the sale. The best active promotion is applied, the stock is
-     * deducted and the sale is stored.
+     * Registers a new sale of products and accessories following the unified
+     * integration flow:
+     * <ol>
+     *     <li>validate that the sale has at least one item;</li>
+     *     <li>resolve every item as a product or an accessory and validate its stock;</li>
+     *     <li>create the sale and calculate its subtotal;</li>
+     *     <li>apply the best active promotion, calculated only over the subtotal;</li>
+     *     <li>generate the basic warranty of every console and the requested extended warranties;</li>
+     *     <li>calculate the final total: subtotal - discount + extended warranties;</li>
+     *     <li>update the inventory through the service of each item type;</li>
+     *     <li>persist the sale (warranties are persisted when they are assigned).</li>
+     * </ol>
      *
      * @param customerId          identification of the customer
      * @param sellerCode          employee code of the seller
@@ -73,33 +79,25 @@ public class SaleService {
      */
     public Sale registerSale(String customerId, String sellerCode, List<String> itemIds,
                              List<String> extendedWarrantyIds) {
+        // 1. at least one item
         if (itemIds == null || itemIds.isEmpty()) {
             throw new IllegalArgumentException("La venta debe contener al menos un producto.");
         }
         Customer customer = findCustomer(customerId);
         Seller seller = findSeller(sellerCode);
+        // 2. resolve items and validate stock
         List<Product> items = resolveItems(itemIds);
         Map<String, Integer> quantities = countQuantities(items);
         validateStock(items, quantities);
-
+        // 3. create the sale (its subtotal is calculated by Sale.calculateTotal)
         Sale sale = new Sale(nextSaleId(), LocalDate.now(), customer, seller, items);
+        // 4. best promotion over the subtotal of the items
+        applyBestPromotion(sale);
+        // 5. warranties; 6. the final total is calculated by Sale.calculateFinalTotal
+        assignWarranties(sale, extendedWarrantyIds);
+        // 7. inventory
         updateInventory(items, quantities);
-        List<String> extended = extendedWarrantyIds == null ? Collections.emptyList() : extendedWarrantyIds;
-        double warrantyCost = 0;
-        for (Product item : items) {
-            if (item instanceof Console) {
-                warrantyService.assignBasicWarranty(item, sale, sale.getDate());
-                if (containsIgnoreCase(extended, item.getId())) {
-                    warrantyCost += warrantyService.assignExtendedWarranty(item, sale, sale.getDate()).getAdditionalCost();
-                }
-            }
-        }
-        sale.setExtendedWarrantyCost(warrantyCost);
-        Promotion promotion = promotionService.findBestPromotionFor(sale);
-        if (promotion != null) {
-            sale.setAppliedPromotionName(promotion.getName());
-            sale.setDiscountAmount(promotion.calculateDiscount(sale));
-        }
+        // 8. persistence
         sales.add(sale);
         saleRepository.saveAll(sales);
         return sale;
@@ -236,6 +234,28 @@ public class SaleService {
             }
         }
         return null;
+    }
+
+    private void applyBestPromotion(Sale sale) {
+        Promotion promotion = promotionService.findBestPromotionFor(sale);
+        if (promotion != null) {
+            sale.setAppliedPromotionName(promotion.getName());
+            sale.setDiscountAmount(promotion.calculateDiscount(sale));
+        }
+    }
+
+    private void assignWarranties(Sale sale, List<String> extendedWarrantyIds) {
+        List<String> extended = extendedWarrantyIds == null ? Collections.emptyList() : extendedWarrantyIds;
+        double warrantyCost = 0;
+        for (Product item : sale.getProducts()) {
+            if (item instanceof Console) {
+                warrantyService.assignBasicWarranty(item, sale, sale.getDate());
+                if (containsIgnoreCase(extended, item.getId())) {
+                    warrantyCost += warrantyService.assignExtendedWarranty(item, sale, sale.getDate()).getAdditionalCost();
+                }
+            }
+        }
+        sale.setExtendedWarrantyCost(warrantyCost);
     }
 
     private boolean containsIgnoreCase(List<String> values, String value) {
