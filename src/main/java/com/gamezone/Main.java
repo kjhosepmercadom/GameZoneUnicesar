@@ -42,11 +42,9 @@ public class Main {
             PersonService personService = new PersonService(personRepository);
             AccessoryService accessoryService = new AccessoryService(accessoryRepository);
             PromotionService promotionService = new PromotionService(promotionRepository);
-            SaleService saleService = new SaleService(saleRepository, productService, personService,
-                    accessoryService, promotionService);
             WarrantyService warrantyService = new WarrantyService(warrantyRepository);
-            saleService.setWarrantyService(warrantyService);
-            warrantyService.loadWarranties(saleService.listAllSales());
+            SaleService saleService = new SaleService(saleRepository, productService, personService,
+                    accessoryService, promotionService, warrantyService);
 
             ConsoleMenu consoleMenu = new ConsoleMenu(productService, personService, saleService, accessoryService,
                     promotionService, warrantyService);

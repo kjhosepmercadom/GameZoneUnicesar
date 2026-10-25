@@ -29,37 +29,31 @@ public class SaleService {
     private final PersonService personService;
     private final AccessoryService accessoryService;
     private final PromotionService promotionService;
-    private WarrantyService warrantyService;
+    private final WarrantyService warrantyService;
     private final List<Sale> sales;
 
     /**
-     * Creates the service and loads the stored sales, resolving their
-     * references through the product, accessory and person services.
+     * Creates the service, loads the stored sales and then the warranties that
+     * reference them.
      *
      * @param saleRepository   repository used to persist the sales
      * @param productService   service that manages the product inventory
      * @param personService    service that manages customers and sellers
      * @param accessoryService service that manages the accessory inventory
      * @param promotionService service that selects the best promotion of each sale
+     * @param warrantyService  service that assigns the warranties of the products sold
      */
     public SaleService(SaleRepository saleRepository, ProductService productService, PersonService personService,
-                       AccessoryService accessoryService, PromotionService promotionService) {
+                       AccessoryService accessoryService, PromotionService promotionService,
+                       WarrantyService warrantyService) {
         this.saleRepository = saleRepository;
         this.productService = productService;
         this.personService = personService;
         this.accessoryService = accessoryService;
         this.promotionService = promotionService;
-        this.sales = saleRepository.loadAll(personService.listCustomers(), personService.listSellers(), allItems());
-    }
-
-    /**
-     * Connects the warranty service. It cannot be received in the constructor
-     * because the warranty repository needs this service to load its data.
-     *
-     * @param warrantyService service that assigns the warranties of the products sold
-     */
-    public void setWarrantyService(WarrantyService warrantyService) {
         this.warrantyService = warrantyService;
+        this.sales = saleRepository.loadAll(personService.listCustomers(), personService.listSellers(), allItems());
+        warrantyService.loadWarranties(sales);
     }
 
     /**
