@@ -31,3 +31,16 @@ member's account.
 | Response        | Added the two attributes, `calculateFinalTotal()`, the receipt breakdown, the new columns in `data/sales.csv` (read only when present, so old sales still load) and the promotion submenu. |
 | Decision        | Accepted. `calculateTotal()` keeps meaning "subtotal" so the promotions and the old code keep working; the final total is a separate method. Added `findSaleById` to show the detail of a sale. |
 | Related commit  | `feat: apply the best active promotion in SaleService.registerSale` |
+
+## Entry 3 - Warranty integration
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Phase 3 - `feature/warranty-module` |
+| Objective       | Generate warranties when registering a sale and add the warranty submenu. |
+| Query           | "Integrate warranties: basic warranty for every console, optional extended warranty whose cost is added to the total, and the warranty submenu." |
+| Response        | Explained that `WarrantyRepository` needs `SaleService` to load, so `WarrantyService` cannot be passed to the constructor of `SaleService`. Proposed a temporary setter (`setWarrantyService`) wired in `Main`. |
+| Decision        | Accepted the setter only as a temporary workaround to keep the system working; it is removed by adjustment A2. The menu asks for the extended warranty once per console product. |
+| Related commit  | `feat: generate basic and extended warranties when registering a sale` |

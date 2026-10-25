@@ -39,3 +39,4 @@ nbactions.xml
 # Data generated at runtime by the application
 data/customers.csv
 data/sales.csv
+data/warranties.csv
