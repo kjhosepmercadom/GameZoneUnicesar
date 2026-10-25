@@ -26,3 +26,13 @@ Verdict legend: **violation**, **correct**, **not applicable**.
 | LSP | correct | `Customer` and `Seller` can replace `Person`: both implement `getDescription()` and keep the common data. |
 | ISP | not applicable | No interfaces. |
 | DIP | correct | The repository is injected through the constructor of `PersonService`. |
+
+## Accessory and promotion persistence and services
+
+| Principle | Verdict | Evidence |
+|-----------|---------|----------|
+| SRP | correct | Each service and repository works on one module. |
+| OCP | **violation** | `AccessoryRepository.fromLine` (`switch (type) { case "CONTROLLER": ... case "CABLE": ... case "MEMORY": ... }`) and `toLine` (`instanceof Controller / Cable / Memory`); `PromotionRepository.fromLine` (`switch` on `PERCENTAGE`, `CATEGORY`, `BULK`) and `toLine` (`instanceof` chain). Same violation as Developer 1 V-01 (see V-02 below). |
+| LSP | correct | The services work with `Accessory` and `Promotion` without assumptions about the subtype. |
+| ISP | correct | `AccessoryService` and `PromotionService` expose only the operations their submenus use. |
+| DIP | correct | Repositories are injected through the constructors. |
