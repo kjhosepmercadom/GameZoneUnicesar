@@ -38,3 +38,13 @@ Verdict legend: **violation**, **correct**, **not applicable**.
 | Consequence | Adding a new product (for example, a collector edition with extra columns) changes and risks the loading of the existing products. The same pattern exists in the accessory, promotion and warranty repositories (Developer 2). |
 | Proposed solution | A `RecordMapper<T>` abstraction with one mapper per type; the repository keeps a list of mappers and only iterates it. |
 | Code of another member | The same violation exists in code of Developer 2; reported to the Leader as a boundary finding. |
+
+## Accessory and promotion hierarchies
+
+| Principle | Verdict | Evidence |
+|-----------|---------|----------|
+| SRP | correct | Each class keeps the data and the rule of one accessory or promotion type. |
+| OCP | correct | Since R7, `CategoryDiscount` uses `product.getCategory()`: a new product category does not modify the promotion. A new promotion is a new subclass of `Promotion`; `PromotionService.findBestPromotionFor` does not change. |
+| LSP | correct | Every `Accessory` can be used as a `Product` (stock, price, description). Every `Promotion` subclass returns a non negative discount and never throws for a sale without its category (it returns 0), as the base contract says. |
+| ISP | correct | `Promotion` declares only `calculateDiscount` and `getDescription`, both used by every client. |
+| DIP | correct | The promotions depend on the abstraction `Product`, not on concrete products. |
