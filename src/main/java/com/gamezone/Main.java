@@ -1,5 +1,6 @@
 package com.gamezone;
 
+import com.gamezone.exceptions.PersistenceException;
 import com.gamezone.persistence.AccessoryRepository;
 import com.gamezone.persistence.PersonRepository;
 import com.gamezone.persistence.ProductRepository;
@@ -54,6 +55,9 @@ public class Main {
             ConsoleMenu consoleMenu = new ConsoleMenu(productService, personService, saleService, accessoryService,
                     promotionService, warrantyService, returnService);
             consoleMenu.start();
+        } catch (PersistenceException e) {
+            System.out.println("Ocurrio un problema al acceder a los datos del sistema. Contacte al administrador.");
+            System.out.println("Detalle: " + e.getMessage());
         } catch (IllegalStateException e) {
             System.out.println("Error: " + e.getMessage());
         }
