@@ -516,8 +516,8 @@ public class ConsoleMenu {
         LocalDate start = readDate("Fecha de inicio (AAAA-MM-DD): ");
         LocalDate end = readDate("Fecha de fin (AAAA-MM-DD): ");
         double percentage = readDouble("Porcentaje de descuento: ");
-        int option = readInt("Categoria (1=Videojuegos, 2=Consolas): ");
-        String category = option == 1 ? "VIDEOGAME" : option == 2 ? "CONSOLE" : "";
+        int option = readInt("Categoria (1=Videojuegos, 2=Consolas, 3=Accesorios): ");
+        String category = option == 1 ? "VIDEOGAME" : option == 2 ? "CONSOLE" : option == 3 ? "ACCESSORY" : "";
         promotionService.registerCategoryDiscount(id, name, start, end, percentage, category);
         System.out.println("Promocion registrada correctamente.");
     }
