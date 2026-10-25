@@ -3,7 +3,6 @@ package com.gamezone.service;
 import com.gamezone.exceptions.BusinessRuleException;
 import com.gamezone.exceptions.InvalidDataException;
 import com.gamezone.exceptions.ResourceNotFoundException;
-import com.gamezone.model.Accessory;
 import com.gamezone.model.Console;
 import com.gamezone.model.Product;
 import com.gamezone.model.Return;
@@ -26,8 +25,7 @@ public class ReturnService {
 
     private final ReturnRepository returnRepository;
     private final SaleService saleService;
-    private final ProductService productService;
-    private final AccessoryService accessoryService;
+    private final List<InventoryService> inventories;
     private final WarrantyService warrantyService;
     private final List<Return> returns;
 
@@ -45,8 +43,7 @@ public class ReturnService {
                          WarrantyService warrantyService) {
         this.returnRepository = returnRepository;
         this.saleService = saleService;
-        this.productService = productService;
-        this.accessoryService = accessoryService;
+        this.inventories = List.of(productService, accessoryService);
         this.warrantyService = warrantyService;
         this.returns = returnRepository.loadAll(saleService.listAllSales());
     }
@@ -106,11 +103,7 @@ public class ReturnService {
         productReturn.setWarrantyRefundAmount(warrantyRefund);
         productReturn.calculateRefundAmount();
         for (Map.Entry<String, Integer> entry : quantities.entrySet()) {
-            if (sale.findProduct(entry.getKey()) instanceof Accessory) {
-                accessoryService.restoreStock(entry.getKey(), entry.getValue());
-            } else {
-                productService.restoreStock(entry.getKey(), entry.getValue());
-            }
+            inventoryOf(entry.getKey()).restoreStock(entry.getKey(), entry.getValue());
         }
         returns.add(productReturn);
         returnRepository.saveAll(returns);
@@ -206,6 +199,15 @@ public class ReturnService {
 
     private boolean isInMonth(LocalDate date, int month, int year) {
         return date.getMonthValue() == month && date.getYear() == year;
+    }
+
+    private InventoryService inventoryOf(String itemId) {
+        for (InventoryService inventory : inventories) {
+            if (inventory.findById(itemId) != null) {
+                return inventory;
+            }
+        }
+        throw new ResourceNotFoundException("producto", itemId);
     }
 
     private int countReturned(Sale sale, String productId) {
