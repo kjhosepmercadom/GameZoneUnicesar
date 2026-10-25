@@ -213,4 +213,18 @@ public class Sale {
         receipt.append("========================================");
         return receipt.toString();
     }
+
+    /**
+     * Calculates the share of the subtotal that was discounted by the
+     * applied promotion. It is used to refund returned items proportionally.
+     *
+     * @return the discount rate between 0 and 1, zero when the subtotal is zero
+     */
+    public double calculateDiscountRate() {
+        double subtotal = calculateTotal();
+        if (subtotal <= 0) {
+            return 0;
+        }
+        return discountAmount / subtotal;
+    }
 }
