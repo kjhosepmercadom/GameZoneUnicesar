@@ -213,4 +213,49 @@ public class Sale {
         receipt.append("========================================");
         return receipt.toString();
     }
+
+    /**
+     * Calculates the share of the subtotal that was discounted by the
+     * applied promotion. It is used to refund returned items proportionally.
+     *
+     * @return the discount rate between 0 and 1, zero when the subtotal is zero
+     */
+    public double calculateDiscountRate() {
+        double subtotal = calculateTotal();
+        if (subtotal <= 0) {
+            return 0;
+        }
+        return discountAmount / subtotal;
+    }
+
+    /**
+     * Finds a product of the sale by its identifier, ignoring letter case.
+     *
+     * @param productId identifier of the product
+     * @return the product bought in this sale, or {@code null} if it is not part of the sale
+     */
+    public Product findProduct(String productId) {
+        for (Product product : products) {
+            if (product.getId().equalsIgnoreCase(productId.trim())) {
+                return product;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Counts how many units of a product were bought in the sale.
+     *
+     * @param productId identifier of the product
+     * @return the number of units, zero if the product is not part of the sale
+     */
+    public int countUnitsOf(String productId) {
+        int count = 0;
+        for (Product product : products) {
+            if (product.getId().equals(productId)) {
+                count++;
+            }
+        }
+        return count;
+    }
 }

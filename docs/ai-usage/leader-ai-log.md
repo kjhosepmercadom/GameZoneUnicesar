@@ -113,3 +113,18 @@ member's account.
 | Response        | Found that `ConsoleMenu` concentrates every submenu, the input readers and the error messages (High Cohesion), and that `restoreStock` changes the stock outside `Product`. In the consolidation it merged the three reports of the stock problem and the three of the file handling into single violations. |
 | Decision        | Accepted. The `instanceof` checks of `SaleService` were kept as correct for GRASP, with the reason written in the report. The out of scope defects were registered and not fixed. |
 | Related commit  | `docs: consolidate GRASP audit findings from the three reports` |
+
+### Phase 2 - Correction
+
+#### Entry 9 - Preparation of the GRASP correction
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Requirement 7, Phase 2 - `feature/grasp-refactor` |
+| Objective       | Define the non-regression strategy and add the methods of `Sale` that the developers need. |
+| Query           | "Write a keyboard script that runs every menu operation, including the error cases, and add calculateDiscountRate, findProduct and countUnitsOf to Sale." |
+| Response        | Wrote `docs/regression/menu-operations-input.txt` and the three methods of `Sale`. |
+| Decision        | Accepted. The reference run was recorded before any correction (1376 lines of output). |
+| Related commit  | `docs: define the GRASP non-regression strategy and baseline` |
