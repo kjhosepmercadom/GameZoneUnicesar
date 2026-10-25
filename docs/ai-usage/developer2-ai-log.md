@@ -44,3 +44,16 @@ member's account.
 | Response        | Followed the specification: the repository receives `SaleService` and `ProductService` to resolve the identifiers. It warned that this creates the cycle `SaleService -> WarrantyService -> WarrantyRepository -> SaleService`. |
 | Decision        | Accepted as specified for this phase, knowing that adjustment A2 removes the cycle. The service lists warranties expiring soon as those active today whose end date is within the requested days. |
 | Related commit  | `feat: load warranties resolving sale and product references` |
+
+## Entry 4 - Circular dependency (A2)
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Phase 3 - `fix/warranty-circular-dependency` |
+| Objective       | Remove the dependency of `WarrantyRepository` on `SaleService`. |
+| Query           | "Apply adjustment A2 so every object can be built in Main with constructor injection." |
+| Response        | Proposed persisting only identifiers, resolving them from the sales passed to `loadAll(List<Sale>)`, adding `WarrantyService.loadWarranties(sales)` called by `SaleService` after loading its sales, and removing the setter used in `Main`. |
+| Decision        | Accepted. The requirement suggests injecting `SaleRepository` into `WarrantyService`; it was discarded because reading the sales file again would create a second copy of every `Sale` (and would need customers, sellers and products). Using the sales already loaded keeps a single object per sale. Documented in the integration analysis. |
+| Related commit  | `fix: load warranties from identifiers without depending on SaleService` |
