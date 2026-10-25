@@ -18,6 +18,7 @@ public class Return {
     private List<Product> returnedProducts;
     private String reason;
     private double refundAmount;
+    private double warrantyRefundAmount;
 
     /**
      * Creates a return. The refund amount starts at zero and is set by
@@ -92,9 +93,28 @@ public class Return {
     }
 
     /**
+     * Returns the part of the refund that corresponds to cancelled warranties.
+     *
+     * @return the warranty refund in Colombian pesos
+     */
+    public double getWarrantyRefundAmount() {
+        return warrantyRefundAmount;
+    }
+
+    /**
+     * Sets the amount refunded for the warranties cancelled by this return.
+     * It is added to the refund the next time it is calculated.
+     *
+     * @param warrantyRefundAmount the warranty refund in Colombian pesos
+     */
+    public void setWarrantyRefundAmount(double warrantyRefundAmount) {
+        this.warrantyRefundAmount = warrantyRefundAmount;
+    }
+
+    /**
      * Calculates the refund of every returned product proportionally to the
-     * discount of the original sale, so the customer gets back what was
-     * actually paid, and stores it in the return.
+     * discount of the original sale, adds the refund of the cancelled
+     * warranties, and stores the result in the return.
      *
      * @return the calculated refund amount
      */
@@ -103,7 +123,7 @@ public class Return {
         for (Product product : returnedProducts) {
             total += refundOf(product);
         }
-        refundAmount = total;
+        refundAmount = total + warrantyRefundAmount;
         return refundAmount;
     }
 
@@ -144,6 +164,9 @@ public class Return {
                     product.getTitle(), product.getPrice(), product.getPrice() - refund, refund));
         }
         receipt.append("----------------------------------------\n");
+        if (warrantyRefundAmount > 0) {
+            receipt.append(String.format("Reembolso garantias extendidas: $%,.0f%n", warrantyRefundAmount));
+        }
         receipt.append(String.format("MONTO REEMBOLSADO: $%,.0f%n", refundAmount));
         receipt.append("========================================");
         return receipt.toString();

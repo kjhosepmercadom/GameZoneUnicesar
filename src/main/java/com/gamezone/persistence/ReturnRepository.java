@@ -50,6 +50,7 @@ public class ReturnRepository {
             lines.add(productReturn.getId() + SEPARATOR + productReturn.getDate() + SEPARATOR
                     + productReturn.getSale().getId() + SEPARATOR + String.join(LIST_SEPARATOR, productIds)
                     + SEPARATOR + clean(productReturn.getReason()) + SEPARATOR + productReturn.getRefundAmount()
+                    + SEPARATOR + productReturn.getWarrantyRefundAmount()
             );
         }
         try {
@@ -86,6 +87,9 @@ public class ReturnRepository {
 
     private Return create(String[] fields, Sale sale, List<Product> returned) {
         Return productReturn = new Return(fields[0], LocalDate.parse(fields[1]), sale, returned, fields[4]);
+        if (fields.length > 6) {
+            productReturn.setWarrantyRefundAmount(Double.parseDouble(fields[6]));
+        }
         productReturn.calculateRefundAmount();
         return productReturn;
     }
