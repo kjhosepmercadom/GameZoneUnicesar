@@ -57,3 +57,16 @@ member's account.
 | Response        | Proposed calculating `endDate = startDate.plusMonths(getDurationInMonths())` in the constructor of `Warranty`, with constant durations in the subclasses and the 10% cost in `ExtendedWarranty`. |
 | Decision        | Accepted. Calling the abstract method from the constructor is safe here because the subclasses return constants and do not use their own fields; this was documented in the warranty analysis. |
 | Related commit  | `feat: add Warranty abstract class with product, sale and validity dates` |
+
+## Entry 5 - Return model
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Phase 4 - `feature/return-module` |
+| Objective       | Implement `Return` and `Sale.canBeReturned()` of Requirement 3. |
+| Query           | "Implement Return with calculateRefundAmount and generateReturnReceipt, and canBeReturned in Sale with the thirty day limit." |
+| Response        | Proposed `Return` with an immutable sale reference (no setter) and a list with one entry per returned unit; `canBeReturned()` compares today with `date.plusDays(30)`. |
+| Decision        | Accepted. The refund starts with list prices, as Requirement 3 defines it; the discount problem was left for adjustment A5. |
+| Related commit  | `feat: add Return class with sale reference and returned products` |
