@@ -135,4 +135,17 @@ public abstract class Product {
         }
         stock -= quantity;
     }
+
+    /**
+     * Adds returned units back to the inventory.
+     *
+     * @param quantity the quantity to add, must be positive
+     * @throws IllegalArgumentException if the quantity is not positive
+     */
+    public void increaseStock(int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("La cantidad a restaurar debe ser mayor que cero.");
+        }
+        stock += quantity;
+    }
 }
