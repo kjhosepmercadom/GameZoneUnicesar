@@ -18,6 +18,7 @@ import com.gamezone.service.WarrantyService;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Scanner;
 
@@ -298,16 +299,24 @@ public class ConsoleMenu {
         String customerId = readText("Identificacion del cliente: ");
         printSellers();
         String sellerCode = readText("Codigo del vendedor: ");
+        List<String> itemIds = readSaleItems();
+        List<String> extendedWarrantyIds = askExtendedWarranties(itemIds);
+        Sale sale = saleService.registerSale(customerId, sellerCode, itemIds, extendedWarrantyIds);
+        System.out.println("Venta registrada correctamente.");
+        System.out.println(sale.generateReceipt());
+    }
+
+    private List<String> readSaleItems() {
         printProducts();
         printAccessories(accessoryService.listAllAccessories(), "No hay accesorios registrados.");
-        List<String> productIds = new ArrayList<>();
+        List<String> itemIds = new ArrayList<>();
         while (true) {
-            String productId = readLine("Codigo del producto o accesorio (Enter para terminar): ");
-            if (productId.isEmpty()) {
-                break;
+            String itemId = readLine("Codigo del producto o accesorio (Enter para terminar): ");
+            if (itemId.isEmpty()) {
+                return itemIds;
             }
-            if (productService.findById(productId) == null && accessoryService.findById(productId) == null) {
-                System.out.println("No existe un producto o accesorio con codigo " + productId + ".");
+            if (productService.findById(itemId) == null && accessoryService.findById(itemId) == null) {
+                System.out.println("No existe un producto o accesorio con codigo " + itemId + ".");
                 continue;
             }
             int quantity = readInt("Cantidad: ");
@@ -316,11 +325,14 @@ public class ConsoleMenu {
                 continue;
             }
             for (int i = 0; i < quantity; i++) {
-                productIds.add(productId);
+                itemIds.add(itemId);
             }
         }
+    }
+
+    private List<String> askExtendedWarranties(List<String> itemIds) {
         List<String> extendedWarrantyIds = new ArrayList<>();
-        for (String itemId : productIds) {
+        for (String itemId : new LinkedHashSet<>(itemIds)) {
             Product product = productService.findById(itemId);
             if (product instanceof Console && !extendedWarrantyIds.contains(product.getId())) {
                 String answer = readLine("Desea garantia extendida (10% del precio) para "
@@ -330,9 +342,7 @@ public class ConsoleMenu {
                 }
             }
         }
-        Sale sale = saleService.registerSale(customerId, sellerCode, productIds, extendedWarrantyIds);
-        System.out.println("Venta registrada correctamente.");
-        System.out.println(sale.generateReceipt());
+        return extendedWarrantyIds;
     }
 
     private void printSales(List<Sale> sales, String emptyMessage) {
