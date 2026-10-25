@@ -309,6 +309,8 @@ public class ConsoleMenu {
         System.out.println("2. Registrar cable");
         System.out.println("3. Registrar memoria");
         System.out.println("4. Listar todos los accesorios");
+        System.out.println("5. Listar accesorios por tipo");
+        System.out.println("6. Consultar accesorios compatibles con una consola");
         System.out.println("0. Volver");
         int option = readInt("Seleccione una opcion: ");
         try {
@@ -324,6 +326,18 @@ public class ConsoleMenu {
                     break;
                 case 4:
                     printAccessories(accessoryService.listAllAccessories(), "No hay accesorios registrados.");
+                    break;
+                case 5:
+                    String type = readAccessoryType();
+                    if (type != null) {
+                        printAccessories(accessoryService.listAccessoriesByType(type), "No hay accesorios de ese tipo.");
+                    }
+                    break;
+                case 6:
+                    printConsoles();
+                    String consoleId = readText("Codigo de la consola: ");
+                    printAccessories(accessoryService.findAccessoriesCompatibleWith(consoleId),
+                            "No hay accesorios compatibles con la consola " + consoleId + ".");
                     break;
                 case 0:
                     break;
@@ -407,6 +421,21 @@ public class ConsoleMenu {
         }
         for (Accessory accessory : accessories) {
             System.out.println(accessory.getDescription());
+        }
+    }
+
+    private String readAccessoryType() {
+        int option = readInt("Tipo (1=Control, 2=Cable, 3=Memoria): ");
+        switch (option) {
+            case 1:
+                return "CONTROLLER";
+            case 2:
+                return "CABLE";
+            case 3:
+                return "MEMORY";
+            default:
+                System.out.println("Tipo no valido.");
+                return null;
         }
     }
 
