@@ -20,6 +20,21 @@ Minimum evidence: class, method and fragment for every violation; class and
 method for every correct verdict; a short justification for "not applicable".
 A verdict based only on opinion was not accepted.
 
+## 2. Boundary findings (Developer 2)
+
+Two violations involve more than one member:
+
+- **V-01 (OCP, DIP):** the Leader found it in `SaleService` and Developer 2 in
+  `ReturnService`; the fix touches `ProductService` (Developer 1). It is
+  registered once; the Leader creates `InventoryService` and each member makes
+  their class implement or use it.
+- **V-02 (OCP):** found by Developer 1 in `ProductRepository` and by
+  Developer 2 in three repositories. Developer 1 creates `RecordMapper`, and
+  Developer 2 reuses it.
+
+Each member reported to the Leader the parts that belong to someone else, and
+the consolidated audit assigns one responsible per part.
+
 ## 3. Relation with the GRASP audit (Developer 1)
 
 - **SOLID violation in code already corrected by GRASP:** `ReturnService` was
@@ -32,3 +47,13 @@ A verdict based only on opinion was not accepted.
   fulfilled in the promotion hierarchy; the split of `ConsoleMenu` (R7 V-01)
   fulfils SRP in the user interface; `CsvFile` (R7 V-07) took the file
   handling out of the repositories (SRP).
+
+## 4. How do we guarantee that every menu operation still works? (Developer 2)
+
+The same regression script of Requirement 7,
+`docs/regression/menu-operations-input.txt`, covers every operation of the
+seven submenus and every error message. It was executed on `develop` before
+the first correction (reference) and after every Pull Request of Phase 2, with
+the same initial data files. The output and the resulting `data/*.csv` files
+must be identical to the reference. The evidence is recorded in
+`docs/solid-refactor-log.md`.
