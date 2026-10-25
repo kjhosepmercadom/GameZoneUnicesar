@@ -80,7 +80,7 @@ public class ReturnService {
         List<Product> returned = new ArrayList<>();
         Map<String, Integer> quantities = new LinkedHashMap<>();
         for (String productId : productIds) {
-            Product product = findInSale(sale, productId);
+            Product product = sale.findProduct(productId);
             if (product == null) {
                 throw new BusinessRuleException("El producto " + productId + " no pertenece a la venta "
                         + sale.getId() + ".");
@@ -89,7 +89,7 @@ public class ReturnService {
             quantities.merge(product.getId(), 1, Integer::sum);
         }
         for (Map.Entry<String, Integer> entry : quantities.entrySet()) {
-            int available = countInSale(sale, entry.getKey()) - countReturned(sale, entry.getKey());
+            int available = sale.countUnitsOf(entry.getKey()) - countReturned(sale, entry.getKey());
             if (entry.getValue() > available) {
                 throw new BusinessRuleException("Solo se pueden devolver " + available + " unidades de "
                         + entry.getKey() + " en la venta " + sale.getId() + ".");
@@ -99,14 +99,14 @@ public class ReturnService {
         Return productReturn = new Return(nextReturnId(), LocalDate.now(), sale, returned, reason.trim());
         double warrantyRefund = 0;
         for (String productId : quantities.keySet()) {
-            if (findInSale(sale, productId) instanceof Console) {
+            if (sale.findProduct(productId) instanceof Console) {
                 warrantyRefund += warrantyService.cancelWarranties(productId, sale.getId());
             }
         }
         productReturn.setWarrantyRefundAmount(warrantyRefund);
         productReturn.calculateRefundAmount();
         for (Map.Entry<String, Integer> entry : quantities.entrySet()) {
-            if (findInSale(sale, entry.getKey()) instanceof Accessory) {
+            if (sale.findProduct(entry.getKey()) instanceof Accessory) {
                 accessoryService.restoreStock(entry.getKey(), entry.getValue());
             } else {
                 productService.restoreStock(entry.getKey(), entry.getValue());
@@ -206,25 +206,6 @@ public class ReturnService {
 
     private boolean isInMonth(LocalDate date, int month, int year) {
         return date.getMonthValue() == month && date.getYear() == year;
-    }
-
-    private Product findInSale(Sale sale, String productId) {
-        for (Product product : sale.getProducts()) {
-            if (product.getId().equalsIgnoreCase(productId.trim())) {
-                return product;
-            }
-        }
-        return null;
-    }
-
-    private int countInSale(Sale sale, String productId) {
-        int count = 0;
-        for (Product product : sale.getProducts()) {
-            if (product.getId().equals(productId)) {
-                count++;
-            }
-        }
-        return count;
     }
 
     private int countReturned(Sale sale, String productId) {
