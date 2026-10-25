@@ -8,6 +8,9 @@ import com.gamezone.model.Promotion;
 import com.gamezone.model.Sale;
 import com.gamezone.model.Seller;
 import com.gamezone.persistence.SaleRepository;
+import com.gamezone.validation.PersonValidator;
+import com.gamezone.validation.ProductValidator;
+import com.gamezone.validation.SaleValidator;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -75,20 +78,19 @@ public class SaleService {
      * @param itemIds             identifiers of the products or accessories bought, one entry per unit
      * @param extendedWarrantyIds identifiers of the consoles that get an extended warranty; may be empty
      * @return the registered sale
-     * @throws IllegalArgumentException if any business rule is violated
+     * @throws com.gamezone.exceptions.GameZoneException if any business rule or data validation fails
      */
     public Sale registerSale(String customerId, String sellerCode, List<String> itemIds,
                              List<String> extendedWarrantyIds) {
         // 1. at least one item
-        if (itemIds == null || itemIds.isEmpty()) {
-            throw new IllegalArgumentException("La venta debe contener al menos un producto.");
-        }
+        SaleValidator.validateHasItems(itemIds);
         Customer customer = findCustomer(customerId);
         Seller seller = findSeller(sellerCode);
         // 2. resolve items and validate stock
         List<Product> items = resolveItems(itemIds);
         Map<String, Integer> quantities = countQuantities(items);
         validateStock(items, quantities);
+        SaleValidator.validateSaleData(customer, seller, items);
         // 3. create the sale (its subtotal is calculated by Sale.calculateTotal)
         Sale sale = new Sale(nextSaleId(), LocalDate.now(), customer, seller, items);
         // 4. best promotion over the subtotal of the items
@@ -170,17 +172,13 @@ public class SaleService {
 
     private Customer findCustomer(String customerId) {
         Customer customer = personService.findCustomerById(customerId);
-        if (customer == null) {
-            throw new IllegalArgumentException("No existe un cliente con identificacion " + customerId + ".");
-        }
+        PersonValidator.validatePersonExists(customer, "cliente", customerId);
         return customer;
     }
 
     private Seller findSeller(String sellerCode) {
         Seller seller = personService.findSellerByEmployeeCode(sellerCode);
-        if (seller == null) {
-            throw new IllegalArgumentException("No existe un vendedor con codigo " + sellerCode + ".");
-        }
+        PersonValidator.validatePersonExists(seller, "vendedor", sellerCode);
         return seller;
     }
 
@@ -191,9 +189,7 @@ public class SaleService {
             if (item == null) {
                 item = accessoryService.findById(itemId);
             }
-            if (item == null) {
-                throw new IllegalArgumentException("No existe un producto con codigo " + itemId + ".");
-            }
+            ProductValidator.validateProductExists(item, itemId);
             items.add(item);
         }
         return items;
@@ -210,10 +206,7 @@ public class SaleService {
     private void validateStock(List<Product> items, Map<String, Integer> quantities) {
         for (Map.Entry<String, Integer> entry : quantities.entrySet()) {
             Product item = findItem(items, entry.getKey());
-            if (!item.hasEnoughStock(entry.getValue())) {
-                throw new IllegalArgumentException("Stock insuficiente para " + item.getTitle()
-                        + " (disponible: " + item.getStock() + ", solicitado: " + entry.getValue() + ").");
-            }
+            ProductValidator.validateStockAvailability(item, entry.getValue());
         }
     }
 

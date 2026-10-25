@@ -1,8 +1,11 @@
 package com.gamezone.service;
 
+import com.gamezone.exceptions.BusinessRuleException;
+import com.gamezone.exceptions.InvalidDataException;
 import com.gamezone.model.Customer;
 import com.gamezone.model.Seller;
 import com.gamezone.persistence.PersonRepository;
+import com.gamezone.validation.PersonValidator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,19 +40,12 @@ public class PersonService {
      * @param phone          contact phone number
      * @param email          email address
      * @return the registered customer
-     * @throws IllegalArgumentException if any data is invalid or the identification already exists
+     * @throws InvalidDataException  if any data is invalid
+     * @throws BusinessRuleException if the identification already exists
      */
     public Customer registerCustomer(String name, String identification, String phone, String email) {
-        requireText(name, "nombre");
-        requireText(identification, "identificacion");
-        requireText(phone, "telefono");
-        requireText(email, "correo");
-        if (findCustomerById(identification) != null) {
-            throw new IllegalArgumentException("Ya existe un cliente con identificacion " + identification.trim() + ".");
-        }
-        if (!isValidEmail(email.trim())) {
-            throw new IllegalArgumentException("El correo " + email.trim() + " no tiene un formato valido.");
-        }
+        PersonValidator.validatePersonData(identification, name, email, phone);
+        PersonValidator.validateUniquePerson(customers, identification);
         Customer customer = new Customer(name.trim(), identification.trim(), phone.trim(), email.trim());
         customers.add(customer);
         personRepository.saveCustomers(customers);
@@ -110,15 +106,4 @@ public class PersonService {
         return null;
     }
 
-    private boolean isValidEmail(String email) {
-        int at = email.indexOf('@');
-        return at > 0 && at == email.lastIndexOf('@') && email.indexOf('.', at) > at + 1
-                && !email.endsWith(".") && !email.contains(" ");
-    }
-
-    private void requireText(String value, String fieldName) {
-        if (value == null || value.trim().isEmpty()) {
-            throw new IllegalArgumentException("El campo " + fieldName + " es obligatorio.");
-        }
-    }
 }

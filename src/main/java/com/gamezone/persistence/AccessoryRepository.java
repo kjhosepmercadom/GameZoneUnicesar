@@ -1,5 +1,6 @@
 package com.gamezone.persistence;
 
+import com.gamezone.exceptions.PersistenceException;
 import com.gamezone.model.Accessory;
 import com.gamezone.model.Cable;
 import com.gamezone.model.Controller;
@@ -52,7 +53,7 @@ public class AccessoryRepository {
             }
             Files.write(filePath, lines, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new IllegalStateException("No se pudo guardar el archivo de accesorios: " + filePath, e);
+            throw new PersistenceException("No se pudo guardar el archivo de accesorios: " + filePath, e);
         }
     }
 
@@ -72,7 +73,7 @@ public class AccessoryRepository {
         try {
             lines = Files.readAllLines(filePath, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new IllegalStateException("No se pudo leer el archivo de accesorios: " + filePath, e);
+            throw new PersistenceException("No se pudo leer el archivo de accesorios: " + filePath, e);
         }
         for (int i = 0; i < lines.size(); i++) {
             String line = lines.get(i).trim();
@@ -82,7 +83,7 @@ public class AccessoryRepository {
             try {
                 accessories.add(fromLine(line));
             } catch (RuntimeException e) {
-                throw new IllegalStateException("Linea " + (i + 1) + " invalida en " + filePath + ": " + line, e);
+                throw new PersistenceException("Linea " + (i + 1) + " invalida en " + filePath + ": " + line, e);
             }
         }
         return accessories;

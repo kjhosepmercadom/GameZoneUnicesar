@@ -1,9 +1,12 @@
 package com.gamezone.service;
 
+import com.gamezone.exceptions.BusinessRuleException;
+import com.gamezone.exceptions.InvalidDataException;
 import com.gamezone.model.Console;
 import com.gamezone.model.Product;
 import com.gamezone.model.VideoGame;
 import com.gamezone.persistence.ProductRepository;
+import com.gamezone.validation.ProductValidator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,14 +42,16 @@ public class ProductService {
      * @param genre     genre of the game
      * @param ageRating recommended age rating
      * @return the registered video game
-     * @throws IllegalArgumentException if any data is invalid or the identifier already exists
+     * @throws InvalidDataException  if any data is invalid
+     * @throws BusinessRuleException if the identifier already exists
      */
     public VideoGame registerVideoGame(String id, String title, double price, int stock,
                                        String platform, String genre, String ageRating) {
-        validateCommonData(id, title, price, stock);
-        requireText(platform, "plataforma");
-        requireText(genre, "genero");
-        requireText(ageRating, "clasificacion de edad");
+        ProductValidator.validateProductData(id, title, price, stock);
+        ensureUniqueId(id);
+        ProductValidator.requireText(platform, "plataforma");
+        ProductValidator.requireText(genre, "genero");
+        ProductValidator.requireText(ageRating, "clasificacion de edad");
         VideoGame videoGame = new VideoGame(id.trim(), title.trim(), price, stock,
                 platform.trim(), genre.trim(), ageRating.trim());
         products.add(videoGame);
@@ -65,15 +70,17 @@ public class ProductService {
      * @param model      console model
      * @param generation console generation number
      * @return the registered console
-     * @throws IllegalArgumentException if any data is invalid or the identifier already exists
+     * @throws InvalidDataException  if any data is invalid
+     * @throws BusinessRuleException if the identifier already exists
      */
     public Console registerConsole(String id, String title, double price, int stock,
                                    String brand, String model, int generation) {
-        validateCommonData(id, title, price, stock);
-        requireText(brand, "marca");
-        requireText(model, "modelo");
+        ProductValidator.validateProductData(id, title, price, stock);
+        ensureUniqueId(id);
+        ProductValidator.requireText(brand, "marca");
+        ProductValidator.requireText(model, "modelo");
         if (generation <= 0) {
-            throw new IllegalArgumentException("La generacion debe ser mayor que cero.");
+            throw new InvalidDataException("generacion", "debe ser mayor que cero.");
         }
         Console console = new Console(id.trim(), title.trim(), price, stock,
                 brand.trim(), model.trim(), generation);
@@ -126,13 +133,13 @@ public class ProductService {
      *
      * @param productId the product identifier
      * @param quantity  the quantity sold
-     * @throws IllegalArgumentException if the product does not exist or the stock is insufficient
+     * @throws com.gamezone.exceptions.ResourceNotFoundException if the product does not exist
+     * @throws BusinessRuleException                             if the stock is insufficient
      */
     public void updateStock(String productId, int quantity) {
         Product product = findById(productId);
-        if (product == null) {
-            throw new IllegalArgumentException("No existe un producto con codigo " + productId + ".");
-        }
+        ProductValidator.validateProductExists(product, productId);
+        ProductValidator.validateStockAvailability(product, quantity);
         product.decreaseStock(quantity);
         productRepository.saveAll(products);
     }
@@ -142,37 +149,22 @@ public class ProductService {
      *
      * @param productId the product identifier
      * @param quantity  the quantity returned, must be positive
-     * @throws IllegalArgumentException if the product does not exist or the quantity is not positive
+     * @throws com.gamezone.exceptions.ResourceNotFoundException if the product does not exist
+     * @throws InvalidDataException                              if the quantity is not positive
      */
     public void restoreStock(String productId, int quantity) {
         Product product = findById(productId);
-        if (product == null) {
-            throw new IllegalArgumentException("No existe un producto con codigo " + productId + ".");
-        }
+        ProductValidator.validateProductExists(product, productId);
         if (quantity <= 0) {
-            throw new IllegalArgumentException("La cantidad a restaurar debe ser mayor que cero.");
+            throw new InvalidDataException("cantidad a restaurar", "debe ser mayor que cero.");
         }
         product.setStock(product.getStock() + quantity);
         productRepository.saveAll(products);
     }
 
-    private void validateCommonData(String id, String title, double price, int stock) {
-        requireText(id, "codigo");
-        requireText(title, "titulo");
+    private void ensureUniqueId(String id) {
         if (findById(id) != null) {
-            throw new IllegalArgumentException("Ya existe un producto con codigo " + id.trim() + ".");
-        }
-        if (price <= 0) {
-            throw new IllegalArgumentException("El precio debe ser mayor que cero.");
-        }
-        if (stock < 0) {
-            throw new IllegalArgumentException("La cantidad en inventario no puede ser negativa.");
-        }
-    }
-
-    private void requireText(String value, String fieldName) {
-        if (value == null || value.trim().isEmpty()) {
-            throw new IllegalArgumentException("El campo " + fieldName + " es obligatorio.");
+            throw new BusinessRuleException("Ya existe un producto con codigo " + id.trim() + ".");
         }
     }
 }

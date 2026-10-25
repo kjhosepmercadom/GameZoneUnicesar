@@ -109,3 +109,16 @@ member's account.
 | Response        | Added `WarrantyService.cancelWarranties(productId, saleId)`, the warranty refund in `Return` (calculation, receipt and file) and the call from `ReturnService` for every returned console. |
 | Decision        | Accepted as specified: all the warranties of the product in the sale are cancelled. A partial return of only one of several identical consoles also cancels the warranties of the others; this limitation is noted for a future requirement. |
 | Related commit  | `feat: cancel the warranties of returned consoles in ReturnService` |
+
+## Entry 9 - Validators and typed exceptions in services and repositories (Requirement 6)
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Requirement 6 - `feature/exception-handling` |
+| Objective       | Replace the generic exceptions of every service and repository without changing the behaviour. |
+| Query           | "Refactor the services to use the validators and typed exceptions, and the repositories to wrap file errors in PersistenceException." |
+| Response        | Replaced each `IllegalArgumentException` with the matching category (`ResourceNotFoundException`, `BusinessRuleException` or `InvalidDataException`) and each `IllegalStateException` of the repositories with `PersistenceException`, keeping the file name and the operation in the message. |
+| Decision        | Accepted. Searches such as `findById` still return `null` so the menu keeps its current messages; the validators are used when an operation requires the resource. Every condition that failed before still fails, now with a more precise type. |
+| Related commit  | `refactor: use ProductValidator and typed exceptions in ProductService` |

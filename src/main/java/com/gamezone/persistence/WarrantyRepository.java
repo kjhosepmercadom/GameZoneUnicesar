@@ -1,5 +1,6 @@
 package com.gamezone.persistence;
 
+import com.gamezone.exceptions.PersistenceException;
 import com.gamezone.model.BasicWarranty;
 import com.gamezone.model.ExtendedWarranty;
 import com.gamezone.model.Product;
@@ -54,7 +55,7 @@ public class WarrantyRepository {
             }
             Files.write(filePath, lines, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new IllegalStateException("No se pudo guardar el archivo de garantias: " + filePath, e);
+            throw new PersistenceException("No se pudo guardar el archivo de garantias: " + filePath, e);
         }
     }
 
@@ -73,7 +74,7 @@ public class WarrantyRepository {
             Sale sale = findSale(sales, fields[3]);
             Product product = sale == null ? null : findProduct(sale, fields[2]);
             if (sale == null || product == null) {
-                throw new IllegalStateException("Garantia " + fields[1] + " con referencias invalidas en " + filePath);
+                throw new PersistenceException("Garantia " + fields[1] + " con referencias invalidas en " + filePath, null);
             }
             warranties.add(create(fields, product, sale));
         }
@@ -115,7 +116,7 @@ public class WarrantyRepository {
         try {
             lines = Files.readAllLines(filePath, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new IllegalStateException("No se pudo leer el archivo de garantias: " + filePath, e);
+            throw new PersistenceException("No se pudo leer el archivo de garantias: " + filePath, e);
         }
         for (int i = 0; i < lines.size(); i++) {
             String line = lines.get(i).trim();
@@ -124,7 +125,7 @@ public class WarrantyRepository {
             }
             String[] fields = line.split(SEPARATOR, -1);
             if (fields.length != 5) {
-                throw new IllegalStateException("Linea " + (i + 1) + " invalida en " + filePath + ": " + line);
+                throw new PersistenceException("Linea " + (i + 1) + " invalida en " + filePath + ": " + line, null);
             }
             records.add(fields);
         }

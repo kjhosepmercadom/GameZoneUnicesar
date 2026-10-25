@@ -1,5 +1,7 @@
 package com.gamezone.service;
 
+import com.gamezone.exceptions.BusinessRuleException;
+import com.gamezone.exceptions.InvalidDataException;
 import com.gamezone.model.BulkPurchaseDiscount;
 import com.gamezone.model.CategoryDiscount;
 import com.gamezone.model.PercentageDiscount;
@@ -66,7 +68,7 @@ public class PromotionService {
         validateCommonData(id, name, startDate, endDate, percentage);
         String category = targetCategory == null ? "" : targetCategory.trim().toUpperCase();
         if (!category.equals("VIDEOGAME") && !category.equals("CONSOLE") && !category.equals("ACCESSORY")) {
-            throw new IllegalArgumentException("La categoria debe ser VIDEOGAME, CONSOLE o ACCESSORY.");
+            throw new InvalidDataException("categoria", "debe ser VIDEOGAME, CONSOLE o ACCESSORY.");
         }
         return save(new CategoryDiscount(id.trim(), name.trim(), startDate, endDate, percentage, category));
     }
@@ -89,7 +91,7 @@ public class PromotionService {
                                                              double percentage) {
         validateCommonData(id, name, startDate, endDate, percentage);
         if (minimumQuantity < 1) {
-            throw new IllegalArgumentException("La cantidad minima debe ser al menos 1.");
+            throw new InvalidDataException("cantidad minima", "debe ser al menos 1.");
         }
         return save(new BulkPurchaseDiscount(id.trim(), name.trim(), startDate, endDate, minimumQuantity, percentage));
     }
@@ -169,19 +171,19 @@ public class PromotionService {
     private void validateCommonData(String id, String name, LocalDate startDate, LocalDate endDate,
                                     double percentage) {
         if (id == null || id.trim().isEmpty()) {
-            throw new IllegalArgumentException("El campo codigo es obligatorio.");
+            throw new InvalidDataException("codigo", "es obligatorio.");
         }
         if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("El campo nombre es obligatorio.");
+            throw new InvalidDataException("nombre", "es obligatorio.");
         }
         if (findById(id) != null) {
-            throw new IllegalArgumentException("Ya existe una promocion con codigo " + id.trim() + ".");
+            throw new BusinessRuleException("Ya existe una promocion con codigo " + id.trim() + ".");
         }
         if (startDate == null || endDate == null || endDate.isBefore(startDate)) {
-            throw new IllegalArgumentException("La fecha de fin no puede ser anterior a la fecha de inicio.");
+            throw new InvalidDataException("fecha de fin", "no puede ser anterior a la fecha de inicio.");
         }
         if (percentage <= 0 || percentage > 100) {
-            throw new IllegalArgumentException("El porcentaje debe ser mayor que 0 y como maximo 100.");
+            throw new InvalidDataException("porcentaje", "debe ser mayor que 0 y como maximo 100.");
         }
     }
 }

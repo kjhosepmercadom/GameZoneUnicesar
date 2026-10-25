@@ -1,5 +1,6 @@
 package com.gamezone.persistence;
 
+import com.gamezone.exceptions.PersistenceException;
 import com.gamezone.model.Customer;
 import com.gamezone.model.Product;
 import com.gamezone.model.Sale;
@@ -63,7 +64,7 @@ public class SaleRepository {
             }
             Files.write(filePath, lines, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new IllegalStateException("No se pudo guardar el archivo de ventas: " + filePath, e);
+            throw new PersistenceException("No se pudo guardar el archivo de ventas: " + filePath, e);
         }
     }
 
@@ -87,7 +88,7 @@ public class SaleRepository {
         try {
             lines = Files.readAllLines(filePath, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new IllegalStateException("No se pudo leer el archivo de ventas: " + filePath, e);
+            throw new PersistenceException("No se pudo leer el archivo de ventas: " + filePath, e);
         }
         for (int i = 0; i < lines.size(); i++) {
             String line = lines.get(i).trim();
@@ -97,7 +98,7 @@ public class SaleRepository {
             try {
                 sales.add(fromLine(line, customers, sellers, products));
             } catch (RuntimeException e) {
-                throw new IllegalStateException("Linea " + (i + 1) + " invalida en " + filePath + ": "
+                throw new PersistenceException("Linea " + (i + 1) + " invalida en " + filePath + ": "
                         + e.getMessage(), e);
             }
         }
