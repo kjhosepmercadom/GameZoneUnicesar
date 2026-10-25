@@ -122,3 +122,20 @@ member's account.
 | Response        | Replaced each `IllegalArgumentException` with the matching category (`ResourceNotFoundException`, `BusinessRuleException` or `InvalidDataException`) and each `IllegalStateException` of the repositories with `PersistenceException`, keeping the file name and the operation in the message. |
 | Decision        | Accepted. Searches such as `findById` still return `null` so the menu keeps its current messages; the validators are used when an operation requires the resource. Every condition that failed before still fails, now with a more precise type. |
 | Related commit  | `refactor: use ProductValidator and typed exceptions in ProductService` |
+
+## Requirement 7 - GRASP audit and correction
+
+### Phase 1 - Audit
+
+#### Entry 10 - GRASP audit of the developer 2 code
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Requirement 7, Phase 1 - `feature/grasp-audit` |
+| Objective       | Review the person module and the repositories and services of accessories, promotions, returns and warranties against the nine GRASP patterns. |
+| Query           | "Audit the classes developed by Developer 2 against the nine GRASP patterns, with evidence from the code." |
+| Response        | Pointed out four findings: `WarrantyService` prefers the extended warranty with `instanceof`, `ReturnService` iterates the items of the sale, the file handling is duplicated in every repository, and `AccessoryService.restoreStock` changes the stock with the setter. |
+| Decision        | Accepted the four findings after checking the code. The `instanceof` in the `toLine` methods of the repositories was judged acceptable for GRASP, because the model must not know the file format. |
+| Related commit  | `docs: add repository findings to developer2 audit` |
