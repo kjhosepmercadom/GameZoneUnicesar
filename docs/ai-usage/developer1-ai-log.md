@@ -145,3 +145,18 @@ member's account.
 | Response        | Found that `ProductRepository` is not closed for new product types (OCP) and confirmed that the hierarchies satisfy LSP. It noted that `CategoryDiscount` is now closed for new categories thanks to R7. |
 | Decision        | Accepted the OCP finding. The use of `ProductService` as a concrete class by other services was reported to the Leader, because it is a dependency of their code. |
 | Related commit  | `docs: add product module findings to developer1 SOLID audit` |
+
+### Phase 2 - Correction
+
+#### Entry 11 - SOLID corrections V-01 and V-02
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Requirement 8, Phase 2 - `feature/solid-refactor` |
+| Objective       | Make `ProductService` implement `InventoryService` and replace the type checks of `ProductRepository` with mappers. |
+| Query           | "Create the RecordMapper abstraction and the video game and console mappers, producing exactly the same CSV lines." |
+| Response        | Proposed `RecordMapper<T>` with `getTypeCode`, `supports`, `toColumns` and `fromFields`, and one package-private mapper per product type. |
+| Decision        | Accepted. The interface is package-private because only the repositories use it. The regression run gave identical output and data. |
+| Related commit  | `refactor: add the RecordMapper abstraction for typed CSV lines (V-02)` |
