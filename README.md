@@ -106,3 +106,17 @@ Commit messages follow Conventional Commits (`feat:`, `fix:`, `docs:`,
 ## License
 
 [MIT](LICENSE)
+
+## Accessory module (Requirement 1)
+
+The store sells three types of accessories, all of them `Product`s:
+controllers (connection type), cables (length and connector) and memories
+(capacity and memory type). Every accessory keeps the identifiers of the
+consoles it is compatible with.
+
+Menu *4. Gestion de accesorios*: register a controller, a cable or a memory,
+list every accessory, list accessories by type and list the accessories
+compatible with a console. Sales can mix products and accessories; stock
+validation and inventory update work the same for both. Preloaded data:
+`data/accessories.csv`. Design: [analysis](docs/accessory-analysis.md) and
+[class diagram](docs/accessory-class-diagram.md).
