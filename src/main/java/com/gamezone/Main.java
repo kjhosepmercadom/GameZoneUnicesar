@@ -42,7 +42,8 @@ public class Main {
             SaleService saleService = new SaleService(saleRepository, productService, personService,
                     accessoryService, promotionService);
 
-            ConsoleMenu consoleMenu = new ConsoleMenu(productService, personService, saleService, accessoryService);
+            ConsoleMenu consoleMenu = new ConsoleMenu(productService, personService, saleService, accessoryService,
+                    promotionService);
             consoleMenu.start();
         } catch (IllegalStateException e) {
             System.out.println("Error: " + e.getMessage());
