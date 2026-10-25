@@ -29,3 +29,17 @@ Verdict legend: **violation**, **correct**, **not applicable**.
 | Pure Fabrication      | violation (boundary) | `SaleRepository.saveAll/loadAll` repeat the file handling of the other repositories (consolidated V-07). |
 | Indirection           | not applicable | - |
 | Protected Variations  | correct | Old sale lines (without promotion or warranty columns) are still loaded: the format change is hidden in `fromLine`. |
+
+## `SaleService` (with the accessory, promotion and warranty integrations)
+
+| Pattern               | Verdict | Evidence |
+|-----------------------|---------|----------|
+| Information Expert    | correct | The discount is asked to the promotion (`promotion.calculateDiscount(sale)`), the warranty cost to the warranty (`getAdditionalCost()`) and the stock check to the item (`item.hasEnoughStock`). |
+| Creator               | correct | `registerSale` creates the `Sale`: the service aggregates the sales and has every initializing datum (customer, seller, items, date). |
+| Controller            | correct | `registerSale` is the controller of the "register sale" use case; it follows the eight steps of adjustment A3 delegating each one. |
+| Low Coupling          | correct | It depends on six collaborators, all of them services or the sale repository; it never uses the repositories of other modules. This is the expected coupling of the controller of the main use case. |
+| High Cohesion         | correct | After A3 each step is a private method (`resolveItems`, `validateStock`, `applyBestPromotion`, `assignWarranties`, `updateInventory`). |
+| Polymorphism          | correct | `item instanceof Console` in `assignWarranties` applies the business rule "only consoles get a warranty", which Requirement 4 defines by product type. `instanceof Accessory` in `updateInventory` selects which service owns the item; it is not a behaviour of the item, so Polymorphism over `Product` does not apply (moving the stock update into the model would make the model call services). |
+| Pure Fabrication      | correct | The validators are used for the rules; no domain class does service work. |
+| Indirection           | correct | The service reaches the inventories through `ProductService` and `AccessoryService`, never through their repositories. |
+| Protected Variations  | correct | The promotion rules are hidden behind `PromotionService.findBestPromotionFor`; the warranty types behind `WarrantyService`. |
