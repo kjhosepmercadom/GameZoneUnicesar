@@ -89,4 +89,19 @@ public class Return {
     public double getRefundAmount() {
         return refundAmount;
     }
+
+    /**
+     * Calculates the refund as the sum of the prices of the returned products
+     * and stores it in the return.
+     *
+     * @return the calculated refund amount
+     */
+    public double calculateRefundAmount() {
+        double total = 0;
+        for (Product product : returnedProducts) {
+            total += product.getPrice();
+        }
+        refundAmount = total;
+        return refundAmount;
+    }
 }
