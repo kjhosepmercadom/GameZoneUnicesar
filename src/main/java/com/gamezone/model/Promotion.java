@@ -111,4 +111,29 @@ public abstract class Promotion {
     public boolean isActive(LocalDate date) {
         return date != null && !date.isBefore(startDate) && !date.isAfter(endDate);
     }
+
+    /**
+     * Calculates the discount, in Colombian pesos, that this promotion would
+     * grant to the given sale. Each promotion type implements its own rule.
+     *
+     * @param sale the sale to evaluate
+     * @return the discount amount, zero if the promotion does not apply
+     */
+    public abstract double calculateDiscount(Sale sale);
+
+    /**
+     * Builds a description of the promotion including its specific rule.
+     *
+     * @return the promotion description
+     */
+    public abstract String getDescription();
+
+    /**
+     * Builds the common part of the description shared by every promotion type.
+     *
+     * @return the identifier, name and validity period
+     */
+    protected String describePeriod() {
+        return String.format("%s - %s | Vigencia: %s a %s", id, name, startDate, endDate);
+    }
 }
