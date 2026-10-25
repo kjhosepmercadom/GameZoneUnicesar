@@ -31,3 +31,16 @@ member's account.
 | Response        | Proposed evaluating only the promotions active on the date of the sale and keeping the one with the biggest discount, starting from zero so a zero discount returns `null`. |
 | Decision        | Accepted. The preloaded promotions are valid from 2026-09-01 to 2026-12-31 so they apply while the requirements are being tested. |
 | Related commit  | `feat: select the best active promotion for a sale` |
+
+## Entry 3 - Warranty persistence and service
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Phase 3 - `feature/warranty-module` |
+| Objective       | Implement `WarrantyRepository` and `WarrantyService` of Requirement 4. |
+| Query           | "Implement WarrantyRepository with data/warranties.csv; its constructor injects what it needs to resolve the Sale and Product references while loading." |
+| Response        | Followed the specification: the repository receives `SaleService` and `ProductService` to resolve the identifiers. It warned that this creates the cycle `SaleService -> WarrantyService -> WarrantyRepository -> SaleService`. |
+| Decision        | Accepted as specified for this phase, knowing that adjustment A2 removes the cycle. The service lists warranties expiring soon as those active today whose end date is within the requested days. |
+| Related commit  | `feat: load warranties resolving sale and product references` |
