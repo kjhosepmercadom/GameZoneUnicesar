@@ -41,3 +41,17 @@ Verdict legend: **violation**, **correct**, **not applicable**.
 | Consequence | A new rule about stock (for example, a maximum stock) would have to be written in `Product` and in two services; the services can leave a product in an inconsistent state. |
 | Proposed solution | Add `Product.increaseStock(int)` (Information Expert) and make both services call it. |
 | Code of another member | Yes: `ProductService.restoreStock` (Leader) and `AccessoryService.restoreStock` (Developer 2). Reported to the Leader. |
+
+## Accessory hierarchy
+
+| Pattern               | Verdict | Evidence |
+|-----------------------|---------|----------|
+| Information Expert    | correct | `Accessory.isCompatibleWith`, `addCompatibleConsole` and `removeCompatibleConsole` work with the `compatibleConsoleIds` list of the accessory. |
+| Creator               | not applicable | The accessory classes do not create other objects (they only copy the identifier list they receive). |
+| Controller            | not applicable | Model classes do not receive system events. |
+| Low Coupling          | correct | The hierarchy depends only on `Product`; compatibility is kept by console identifier, so `Accessory` does not depend on `Console`. |
+| High Cohesion         | correct | Each subclass only adds its own attributes and description. |
+| Polymorphism          | correct | `getAccessoryType()` is abstract and implemented by each subclass, so `AccessoryService.listAccessoriesByType` filters without `instanceof`; `getDescription()` is extended with `super.getDescription()`. |
+| Pure Fabrication      | not applicable | No responsibility outside the domain is placed in these classes. |
+| Indirection           | not applicable | There are no two components that need a mediator inside the hierarchy. |
+| Protected Variations  | correct | A new accessory type only needs a new subclass of `Accessory`; the services work with `Accessory`. |
