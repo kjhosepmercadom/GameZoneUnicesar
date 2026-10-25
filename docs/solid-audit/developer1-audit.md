@@ -16,3 +16,25 @@ had when Requirement 8 started (GRASP correction of Requirement 7 included).
 
 The responsibility of the GRASP changes is taken from `docs/grasp-refactor-log.md`.
 Verdict legend: **violation**, **correct**, **not applicable**.
+
+## Product module
+
+| Principle | Verdict | Evidence |
+|-----------|---------|----------|
+| SRP | correct | `Product` keeps data and stock rules; `ProductRepository` only converts lines (file access is in `CsvFile`); `ProductService` only applies rules. Each class has one reason to change. |
+| OCP | **violation** | `ProductRepository.fromLine` and `toLine` (see V-01). The model is open: a new product type is a new subclass of `Product`. |
+| LSP | correct | `VideoGame` and `Console` can replace `Product` everywhere: they inherit stock behaviour unchanged and implement `getDescription()` and `getCategory()` without preconditions. |
+| ISP | not applicable | The module declares no interface; `Product` only declares abstract methods that every subclass needs. |
+| DIP | correct in this code | `ProductService` receives `ProductRepository` through its constructor. The service itself is used as a concrete class by `SaleService` and `ReturnService` to update stock; that dependency belongs to the code of those clients and was reported to the Leader. |
+
+### V-01 - Product types decided inside the repository (boundary)
+
+| Field | Content |
+|-------|---------|
+| Principle | OCP |
+| Module | Products (Taller 1) - `ProductRepository` |
+| Evidence | `fromLine`: `if (VIDEO_GAME_TYPE.equals(type)) { return new VideoGame(...); } if (CONSOLE_TYPE.equals(type)) { return new Console(...); }`; `toLine`: `if (product instanceof VideoGame) { ... } if (product instanceof Console) { ... }` |
+| Explanation | The repository is not closed for modification: supporting a new product type means editing both methods. |
+| Consequence | Adding a new product (for example, a collector edition with extra columns) changes and risks the loading of the existing products. The same pattern exists in the accessory, promotion and warranty repositories (Developer 2). |
+| Proposed solution | A `RecordMapper<T>` abstraction with one mapper per type; the repository keeps a list of mappers and only iterates it. |
+| Code of another member | The same violation exists in code of Developer 2; reported to the Leader as a boundary finding. |
