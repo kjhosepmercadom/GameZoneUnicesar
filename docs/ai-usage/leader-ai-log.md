@@ -83,3 +83,16 @@ member's account.
 | Response        | Drafted the cause and solution of every adjustment, a single Mermaid diagram by layer and the updated README with the demonstration scenario. |
 | Decision        | Accepted after checking every number of the demonstration scenario against the program. The diagrams were rendered to confirm the Mermaid syntax. |
 | Related commit  | `docs: describe the integration adjustments A1 to A7 in integration-analysis.md` |
+
+## Entry 7 - Exception handling in the menu (Requirement 6)
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Requirement 6 - `feature/exception-handling` |
+| Objective       | Show a different message for every exception type. |
+| Query           | "Refactor ConsoleMenu to catch the custom exceptions by type, with the messages of Requirement 6." |
+| Response        | Proposed one `try` per submenu delegating to `showError`, which has one catch block per exception type, and handling `PersistenceException` at startup in `Main`. |
+| Decision        | Accepted, and merged before the service refactor so the menu already understands the new exceptions when the services start throwing them. `IllegalArgumentException` is still handled because the model keeps some rules (for example, a sale without products). |
+| Related commit  | `refactor: show differentiated messages by exception type in ConsoleMenu` |
