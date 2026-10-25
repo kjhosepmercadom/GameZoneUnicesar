@@ -63,22 +63,21 @@ public class ReturnRepository {
     }
 
     /**
-     * Reads every return stored in the file, resolving the original sale and
-     * the returned products against the given lists.
+     * Reads every return stored in the file. The returned items, products or
+     * accessories, are resolved from the items of the original sale.
      *
-     * @param sales    the sales already loaded by the system
-     * @param products the products of the inventory
+     * @param sales the sales already loaded by the system
      * @return the stored returns, or an empty list if the file does not exist
      * @throws IllegalStateException if the file cannot be read, has an invalid line
-     *                               or references an unknown sale or product
+     *                               or references an unknown sale or item
      */
-    public List<Return> loadAll(List<Sale> sales, List<Product> products) {
+    public List<Return> loadAll(List<Sale> sales) {
         List<Return> returns = new ArrayList<>();
         for (String[] fields : readRecords()) {
             Sale sale = findSale(sales, fields[2]);
             List<Product> returned = new ArrayList<>();
             for (String productId : fields[3].split(LIST_SEPARATOR)) {
-                returned.add(findProduct(products, productId));
+                returned.add(findProduct(sale.getProducts(), productId));
             }
             returns.add(create(fields, sale, returned));
         }

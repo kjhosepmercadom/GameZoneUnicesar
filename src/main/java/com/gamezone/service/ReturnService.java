@@ -40,7 +40,7 @@ public class ReturnService {
         this.saleService = saleService;
         this.productService = productService;
         this.accessoryService = accessoryService;
-        this.returns = returnRepository.loadAll(saleService.listAllSales(), productService.listAllProducts());
+        this.returns = returnRepository.loadAll(saleService.listAllSales());
     }
 
     /**
