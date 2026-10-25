@@ -19,6 +19,7 @@ public class Sale {
     private List<Product> products;
     private String appliedPromotionName;
     private double discountAmount;
+    private double extendedWarrantyCost;
 
     /**
      * Creates a sale with all its information.
@@ -139,12 +140,31 @@ public class Sale {
     }
 
     /**
-     * Calculates the final total of the sale: subtotal minus the discount.
+     * Returns the cost of the extended warranties bought in the sale.
+     *
+     * @return the extended warranty cost in Colombian pesos
+     */
+    public double getExtendedWarrantyCost() {
+        return extendedWarrantyCost;
+    }
+
+    /**
+     * Sets the cost of the extended warranties bought in the sale.
+     *
+     * @param extendedWarrantyCost the extended warranty cost in Colombian pesos
+     */
+    public void setExtendedWarrantyCost(double extendedWarrantyCost) {
+        this.extendedWarrantyCost = extendedWarrantyCost;
+    }
+
+    /**
+     * Calculates the final total of the sale: subtotal minus the discount plus
+     * the cost of the extended warranties.
      *
      * @return the final total in Colombian pesos
      */
     public double calculateFinalTotal() {
-        return calculateTotal() - discountAmount;
+        return calculateTotal() - discountAmount + extendedWarrantyCost;
     }
 
     /**
