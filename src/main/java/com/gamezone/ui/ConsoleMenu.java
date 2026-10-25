@@ -39,6 +39,7 @@ public class ConsoleMenu {
     private final ErrorPrinter errorPrinter;
     private final ProductMenu productMenu;
     private final PersonMenu personMenu;
+    private final AccessoryMenu accessoryMenu;
 
     /**
      * Creates the menu with the services it uses.
@@ -65,6 +66,7 @@ public class ConsoleMenu {
         this.errorPrinter = new ErrorPrinter();
         this.productMenu = new ProductMenu(productService, input, errorPrinter);
         this.personMenu = new PersonMenu(personService, input, errorPrinter);
+        this.accessoryMenu = new AccessoryMenu(accessoryService, productService, input, errorPrinter);
     }
 
     /**
@@ -95,7 +97,7 @@ public class ConsoleMenu {
                     showSaleMenu();
                     break;
                 case 4:
-                    showAccessoryMenu();
+                    accessoryMenu.show();
                     break;
                 case 5:
                     showPromotionMenu();
@@ -126,6 +128,10 @@ public class ConsoleMenu {
 
     private void printSellers() {
         personMenu.printSellers();
+    }
+
+    private void printAccessories(List<Accessory> accessories, String emptyMessage) {
+        accessoryMenu.printAccessories(accessories, emptyMessage);
     }
 
     private String readLine(String prompt) {
@@ -270,143 +276,6 @@ public class ConsoleMenu {
         }
         for (Sale sale : sales) {
             System.out.println(sale.generateReceipt());
-        }
-    }
-
-    private void showAccessoryMenu() {
-        System.out.println();
-        System.out.println("--- Gestion de accesorios ---");
-        System.out.println("1. Registrar control");
-        System.out.println("2. Registrar cable");
-        System.out.println("3. Registrar memoria");
-        System.out.println("4. Listar todos los accesorios");
-        System.out.println("5. Listar accesorios por tipo");
-        System.out.println("6. Consultar accesorios compatibles con una consola");
-        System.out.println("0. Volver");
-        int option = readInt("Seleccione una opcion: ");
-        try {
-            switch (option) {
-                case 1:
-                    registerController();
-                    break;
-                case 2:
-                    registerCable();
-                    break;
-                case 3:
-                    registerMemory();
-                    break;
-                case 4:
-                    printAccessories(accessoryService.listAllAccessories(), "No hay accesorios registrados.");
-                    break;
-                case 5:
-                    String type = readAccessoryType();
-                    if (type != null) {
-                        printAccessories(accessoryService.listAccessoriesByType(type), "No hay accesorios de ese tipo.");
-                    }
-                    break;
-                case 6:
-                    printConsoles();
-                    String consoleId = readText("Codigo de la consola: ");
-                    printAccessories(accessoryService.findAccessoriesCompatibleWith(consoleId),
-                            "No hay accesorios compatibles con la consola " + consoleId + ".");
-                    break;
-                case 0:
-                    break;
-                default:
-                    System.out.println("Opcion no valida.");
-            }
-        } catch (RuntimeException e) {
-            showError(e);
-        }
-    }
-
-    private void registerController() {
-        System.out.println("-- Registrar control --");
-        String id = readText("Codigo: ");
-        String title = readText("Titulo: ");
-        double price = readDouble("Precio: ");
-        int stock = readInt("Cantidad en inventario: ");
-        List<String> consoles = readCompatibleConsoles();
-        String connection = readText("Tipo de conexion (Inalambrico/Alambrico): ");
-        accessoryService.registerController(id, title, price, stock, consoles, connection);
-        System.out.println("Control registrado correctamente.");
-    }
-
-    private void registerCable() {
-        System.out.println("-- Registrar cable --");
-        String id = readText("Codigo: ");
-        String title = readText("Titulo: ");
-        double price = readDouble("Precio: ");
-        int stock = readInt("Cantidad en inventario: ");
-        List<String> consoles = readCompatibleConsoles();
-        double length = readDouble("Longitud en metros: ");
-        String connector = readText("Tipo de conector (HDMI, USB, Optico...): ");
-        accessoryService.registerCable(id, title, price, stock, consoles, length, connector);
-        System.out.println("Cable registrado correctamente.");
-    }
-
-    private void registerMemory() {
-        System.out.println("-- Registrar memoria --");
-        String id = readText("Codigo: ");
-        String title = readText("Titulo: ");
-        double price = readDouble("Precio: ");
-        int stock = readInt("Cantidad en inventario: ");
-        List<String> consoles = readCompatibleConsoles();
-        int capacity = readInt("Capacidad en GB: ");
-        String memoryType = readText("Tipo de memoria (SD, microSD, Tarjeta interna): ");
-        accessoryService.registerMemory(id, title, price, stock, consoles, capacity, memoryType);
-        System.out.println("Memoria registrada correctamente.");
-    }
-
-    private List<String> readCompatibleConsoles() {
-        printConsoles();
-        String line = readLine("Codigos de consolas compatibles separados por coma (Enter si ninguna): ");
-        List<String> ids = new ArrayList<>();
-        for (String id : line.split(",")) {
-            if (!id.trim().isEmpty()) {
-                ids.add(id.trim());
-            }
-        }
-        return ids;
-    }
-
-    private void printConsoles() {
-        System.out.println("-- Consolas del inventario --");
-        boolean found = false;
-        for (Product product : productService.listAllProducts()) {
-            if (product instanceof Console) {
-                System.out.println(product.getDescription());
-                found = true;
-            }
-        }
-        if (!found) {
-            System.out.println("No hay consolas registradas.");
-        }
-    }
-
-    private void printAccessories(List<Accessory> accessories, String emptyMessage) {
-        System.out.println("-- Accesorios --");
-        if (accessories.isEmpty()) {
-            System.out.println(emptyMessage);
-            return;
-        }
-        for (Accessory accessory : accessories) {
-            System.out.println(accessory.getDescription());
-        }
-    }
-
-    private String readAccessoryType() {
-        int option = readInt("Tipo (1=Control, 2=Cable, 3=Memoria): ");
-        switch (option) {
-            case 1:
-                return "CONTROLLER";
-            case 2:
-                return "CABLE";
-            case 3:
-                return "MEMORY";
-            default:
-                System.out.println("Tipo no valido.");
-                return null;
         }
     }
 
