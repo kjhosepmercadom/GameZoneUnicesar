@@ -21,3 +21,7 @@ the same values of the final run of Requirement 7.
 | Class | Change | Violation | Principle applied | Commit / PR | Responsible |
 |-------|--------|-----------|-------------------|-------------|-------------|
 | `InventoryService` | New interface with `findById`, `updateStock`, `restoreStock` | V-01 | DIP, OCP | `refactor: add the InventoryService abstraction (V-01)` / PR "prepare the SOLID corrections" | Leader |
+| `ProductService` | Implements `InventoryService` (`@Override` on the three methods) | V-01 | DIP, LSP | `refactor: implement InventoryService in ProductService (V-01)` / PR "apply developer 1 SOLID corrections" | Developer 1 |
+| `RecordMapper` | New interface: type code, `supports`, `toColumns`, `fromFields` | V-02 | OCP | `refactor: add the RecordMapper abstraction for typed CSV lines (V-02)` / same PR | Developer 1 |
+| `VideoGameRecordMapper`, `ConsoleRecordMapper` | One mapper per product type, same columns as before | V-02 | OCP, SRP | `refactor: add video game and console record mappers (V-02)` / same PR | Developer 1 |
+| `ProductRepository` | Iterates its mappers; the `if` / `instanceof` chains were removed | V-02 | OCP | `refactor: use record mappers in ProductRepository (V-02)` / same PR | Developer 1 |
