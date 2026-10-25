@@ -1,5 +1,6 @@
 package com.gamezone.service;
 
+import com.gamezone.model.Accessory;
 import com.gamezone.model.Customer;
 import com.gamezone.model.Product;
 import com.gamezone.model.Sale;
@@ -45,52 +46,30 @@ public class SaleService {
     }
 
     /**
-     * Registers a new sale. The rules applied are: the sale must contain at
-     * least one product, the customer and the seller must exist, every product
-     * must exist and have enough stock. If all rules pass, the stock of every
-     * product is deducted and the sale is stored.
+     * Registers a new sale of products and accessories. The rules applied are:
+     * the sale must contain at least one item, the customer and the seller must
+     * exist, every item must exist and have enough stock. If all rules pass, the
+     * stock of every item is deducted through the service of its type and the
+     * sale is stored.
      *
-     * @param customerId       identification of the customer
-     * @param sellerCode       employee code of the seller
-     * @param productIds       identifiers of the products bought, one entry per unit
+     * @param customerId identification of the customer
+     * @param sellerCode employee code of the seller
+     * @param itemIds    identifiers of the products or accessories bought, one entry per unit
      * @return the registered sale
      * @throws IllegalArgumentException if any business rule is violated
      */
-    public Sale registerSale(String customerId, String sellerCode, List<String> productIds) {
-        if (productIds == null || productIds.isEmpty()) {
+    public Sale registerSale(String customerId, String sellerCode, List<String> itemIds) {
+        if (itemIds == null || itemIds.isEmpty()) {
             throw new IllegalArgumentException("La venta debe contener al menos un producto.");
         }
-        Customer customer = personService.findCustomerById(customerId);
-        if (customer == null) {
-            throw new IllegalArgumentException("No existe un cliente con identificacion " + customerId + ".");
-        }
-        Seller seller = personService.findSellerByEmployeeCode(sellerCode);
-        if (seller == null) {
-            throw new IllegalArgumentException("No existe un vendedor con codigo " + sellerCode + ".");
-        }
+        Customer customer = findCustomer(customerId);
+        Seller seller = findSeller(sellerCode);
+        List<Product> items = resolveItems(itemIds);
+        Map<String, Integer> quantities = countQuantities(items);
+        validateStock(items, quantities);
 
-        List<Product> products = new ArrayList<>();
-        Map<String, Integer> quantities = new LinkedHashMap<>();
-        for (String productId : productIds) {
-            Product product = productService.findById(productId);
-            if (product == null) {
-                throw new IllegalArgumentException("No existe un producto con codigo " + productId + ".");
-            }
-            products.add(product);
-            quantities.merge(product.getId(), 1, Integer::sum);
-        }
-        for (Map.Entry<String, Integer> entry : quantities.entrySet()) {
-            if (!productService.hasEnoughStock(entry.getKey(), entry.getValue())) {
-                Product product = productService.findById(entry.getKey());
-                throw new IllegalArgumentException("Stock insuficiente para " + product.getTitle()
-                        + " (disponible: " + product.getStock() + ", solicitado: " + entry.getValue() + ").");
-            }
-        }
-
-        Sale sale = new Sale(nextSaleId(), LocalDate.now(), customer, seller, products);
-        for (Map.Entry<String, Integer> entry : quantities.entrySet()) {
-            productService.updateStock(entry.getKey(), entry.getValue());
-        }
+        Sale sale = new Sale(nextSaleId(), LocalDate.now(), customer, seller, items);
+        updateInventory(items, quantities);
         sales.add(sale);
         saleRepository.saveAll(sales);
         return sale;
@@ -141,6 +120,74 @@ public class SaleService {
         List<Product> items = new ArrayList<>(productService.listAllProducts());
         items.addAll(accessoryService.listAllAccessories());
         return items;
+    }
+
+    private Customer findCustomer(String customerId) {
+        Customer customer = personService.findCustomerById(customerId);
+        if (customer == null) {
+            throw new IllegalArgumentException("No existe un cliente con identificacion " + customerId + ".");
+        }
+        return customer;
+    }
+
+    private Seller findSeller(String sellerCode) {
+        Seller seller = personService.findSellerByEmployeeCode(sellerCode);
+        if (seller == null) {
+            throw new IllegalArgumentException("No existe un vendedor con codigo " + sellerCode + ".");
+        }
+        return seller;
+    }
+
+    private List<Product> resolveItems(List<String> itemIds) {
+        List<Product> items = new ArrayList<>();
+        for (String itemId : itemIds) {
+            Product item = productService.findById(itemId);
+            if (item == null) {
+                item = accessoryService.findById(itemId);
+            }
+            if (item == null) {
+                throw new IllegalArgumentException("No existe un producto con codigo " + itemId + ".");
+            }
+            items.add(item);
+        }
+        return items;
+    }
+
+    private Map<String, Integer> countQuantities(List<Product> items) {
+        Map<String, Integer> quantities = new LinkedHashMap<>();
+        for (Product item : items) {
+            quantities.merge(item.getId(), 1, Integer::sum);
+        }
+        return quantities;
+    }
+
+    private void validateStock(List<Product> items, Map<String, Integer> quantities) {
+        for (Map.Entry<String, Integer> entry : quantities.entrySet()) {
+            Product item = findItem(items, entry.getKey());
+            if (!item.hasEnoughStock(entry.getValue())) {
+                throw new IllegalArgumentException("Stock insuficiente para " + item.getTitle()
+                        + " (disponible: " + item.getStock() + ", solicitado: " + entry.getValue() + ").");
+            }
+        }
+    }
+
+    private void updateInventory(List<Product> items, Map<String, Integer> quantities) {
+        for (Map.Entry<String, Integer> entry : quantities.entrySet()) {
+            if (findItem(items, entry.getKey()) instanceof Accessory) {
+                accessoryService.updateStock(entry.getKey(), entry.getValue());
+            } else {
+                productService.updateStock(entry.getKey(), entry.getValue());
+            }
+        }
+    }
+
+    private Product findItem(List<Product> items, String itemId) {
+        for (Product item : items) {
+            if (item.getId().equals(itemId)) {
+                return item;
+            }
+        }
+        return null;
     }
 
     private String nextSaleId() {
