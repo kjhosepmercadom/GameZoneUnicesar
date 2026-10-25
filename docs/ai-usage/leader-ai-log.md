@@ -96,3 +96,20 @@ member's account.
 | Response        | Proposed one `try` per submenu delegating to `showError`, which has one catch block per exception type, and handling `PersistenceException` at startup in `Main`. |
 | Decision        | Accepted, and merged before the service refactor so the menu already understands the new exceptions when the services start throwing them. `IllegalArgumentException` is still handled because the model keeps some rules (for example, a sale without products). |
 | Related commit  | `refactor: show differentiated messages by exception type in ConsoleMenu` |
+
+## Requirement 7 - GRASP audit and correction
+
+### Phase 1 - Audit
+
+#### Entry 8 - GRASP audit of the leader code and consolidation
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Requirement 7, Phase 1 - `feature/grasp-audit` |
+| Objective       | Audit `Sale`, `SaleRepository`, `SaleService`, `ConsoleMenu`, `Main` and `restoreStock`, and consolidate the three reports. |
+| Query           | "Audit the leader code against the nine GRASP patterns and consolidate the three reports with unique identifiers and responsible members." |
+| Response        | Found that `ConsoleMenu` concentrates every submenu, the input readers and the error messages (High Cohesion), and that `restoreStock` changes the stock outside `Product`. In the consolidation it merged the three reports of the stock problem and the three of the file handling into single violations. |
+| Decision        | Accepted. The `instanceof` checks of `SaleService` were kept as correct for GRASP, with the reason written in the report. The out of scope defects were registered and not fixed. |
+| Related commit  | `docs: consolidate GRASP audit findings from the three reports` |
