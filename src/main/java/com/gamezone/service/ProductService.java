@@ -16,7 +16,7 @@ import java.util.List;
  * games and consoles, inventory queries and stock updates. Every change is
  * persisted immediately through the {@link ProductRepository}.
  */
-public class ProductService {
+public class ProductService implements InventoryService {
 
     private final ProductRepository productRepository;
     private final List<Product> products;
@@ -104,6 +104,7 @@ public class ProductService {
      * @param id the product identifier
      * @return the product found, or {@code null} if it does not exist
      */
+    @Override
     public Product findById(String id) {
         if (id == null) {
             return null;
@@ -136,6 +137,7 @@ public class ProductService {
      * @throws com.gamezone.exceptions.ResourceNotFoundException if the product does not exist
      * @throws BusinessRuleException                             if the stock is insufficient
      */
+    @Override
     public void updateStock(String productId, int quantity) {
         Product product = findById(productId);
         ProductValidator.validateProductExists(product, productId);
@@ -152,6 +154,7 @@ public class ProductService {
      * @throws com.gamezone.exceptions.ResourceNotFoundException if the product does not exist
      * @throws InvalidDataException                              if the quantity is not positive
      */
+    @Override
     public void restoreStock(String productId, int quantity) {
         Product product = findById(productId);
         ProductValidator.validateProductExists(product, productId);
