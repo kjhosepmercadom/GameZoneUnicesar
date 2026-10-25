@@ -173,3 +173,16 @@ member's account.
 | Response        | Proposed `findById`, `updateStock` and `restoreStock`, which `ProductService` and `AccessoryService` already have with compatible signatures. |
 | Decision        | Accepted. Delivered alone in the first Pull Request so the developers can implement it. |
 | Related commit  | `refactor: add the InventoryService abstraction (V-01)` |
+
+#### Entry 13 - Sale items through InventoryService
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Requirement 8, Phase 2 - `feature/solid-refactor` |
+| Objective       | Finish V-01 in `SaleService` and close the requirement. |
+| Query           | "Make SaleService resolve and update the items through a list of InventoryService without changing its constructor." |
+| Response        | The list is built in the constructor (`List.of(productService, accessoryService)`), keeping the order in which items were resolved before (products first). |
+| Decision        | Accepted. `Main` did not change. The final regression run is identical to the reference. |
+| Related commit  | `refactor: resolve and update sale items through InventoryService (V-01)` |
