@@ -55,3 +55,29 @@ Verdict legend: **violation**, **correct**, **not applicable**.
 | Pure Fabrication      | not applicable | No responsibility outside the domain is placed in these classes. |
 | Indirection           | not applicable | There are no two components that need a mediator inside the hierarchy. |
 | Protected Variations  | correct | A new accessory type only needs a new subclass of `Accessory`; the services work with `Accessory`. |
+
+## Promotion hierarchy
+
+| Pattern               | Verdict | Evidence |
+|-----------------------|---------|----------|
+| Information Expert    | correct | `Promotion.isActive(LocalDate)` uses its own `startDate` and `endDate`. |
+| Creator               | not applicable | The promotions do not create other objects. |
+| Controller            | not applicable | Model classes do not receive system events. |
+| Low Coupling          | correct | The promotions depend on `Sale` and `Product` only to read the items; `Sale` does not depend on `Promotion`. |
+| High Cohesion         | correct | Each class contains only its calculation rule and its description. |
+| Polymorphism          | **violation** | `CategoryDiscount.belongsToTargetCategory` (see V-02). |
+| Pure Fabrication      | not applicable | No artificial class is needed in the hierarchy. |
+| Indirection           | not applicable | No mediator is needed. |
+| Protected Variations  | violation (same point) | A new product category forces a change in `CategoryDiscount` (see V-02). |
+
+### V-02 - Category decided with a chain of type checks
+
+| Field | Content |
+|-------|---------|
+| Pattern | Polymorphism (also Protected Variations) |
+| Module | Promotions (R2) and adjustment A1 - `CategoryDiscount` |
+| Evidence | `CategoryDiscount.belongsToTargetCategory(Product product)`: `if ("VIDEOGAME"...) return product instanceof VideoGame; if ("CONSOLE"...) return product instanceof Console; if ("ACCESSORY"...) return product instanceof Accessory; return false;` |
+| Explanation | The behaviour "which category does this product belong to" varies with the product type, but it is resolved with conditionals on the type instead of letting each type answer. |
+| Consequence | Adjustment A1 already had to modify this method to add accessories; every new product type will modify it again and the promotion depends on every concrete product class. |
+| Proposed solution | Declare `getCategory()` abstract in `Product` and implement it in `VideoGame`, `Console` and `Accessory`; `CategoryDiscount` compares `product.getCategory()` with its target category (Polymorphism). |
+| Code of another member | No. |
