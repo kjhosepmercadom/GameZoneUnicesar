@@ -148,4 +148,12 @@ public abstract class Product {
         }
         stock += quantity;
     }
+
+    /**
+     * Returns the category of the product, used by the category promotions.
+     * Every concrete product type defines its own category.
+     *
+     * @return the category code: VIDEOGAME, CONSOLE or ACCESSORY
+     */
+    public abstract String getCategory();
 }
