@@ -171,3 +171,18 @@ member's account.
 | Response        | Found that `ReturnService` also calculates the monthly report (SRP), that the accessory, promotion and warranty repositories use type switches (OCP), and that `ReturnService` depends on the concrete product and accessory services (DIP). |
 | Decision        | Accepted the three findings; the DIP finding was reported to the Leader because `SaleService` has the same problem. |
 | Related commit  | `docs: add return and warranty findings to developer2 SOLID audit` |
+
+### Phase 2 - Correction
+
+#### Entry 13 - SOLID corrections V-01, V-02 and V-03
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Requirement 8, Phase 2 - `feature/solid-refactor` |
+| Objective       | Implement `InventoryService` in `AccessoryService`, use it in `ReturnService`, add the mappers and extract the monthly report. |
+| Query           | "Apply V-01, V-02 and V-03 keeping the public methods of ReturnService and the CSV format." |
+| Response        | Proposed an abstract `AccessoryRecordMapper` with the common accessory columns, mappers for promotions, a `WarrantyRecordMapper` that creates warranties from the resolved product and sale, and `MonthlyBalanceCalculator`. |
+| Decision        | Accepted. `ReturnService` keeps `calculateMonthlySales`, `calculateMonthlyReturns` and `generateMonthlyBalance` so the menu does not change. Identical output and data in the regression run. |
+| Related commit  | `refactor: extract MonthlyBalanceCalculator from ReturnService (V-03)` |
