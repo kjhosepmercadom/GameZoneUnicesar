@@ -60,6 +60,30 @@ public class WarrantyService {
         return warranty;
     }
 
+    /**
+     * Finds the warranty of a product within a specific sale. When the product
+     * has several warranties in the sale, the extended one is preferred.
+     *
+     * @param productId identifier of the product
+     * @param saleId    identifier of the sale
+     * @return the warranty found, or {@code null} if it does not exist
+     */
+    public Warranty findWarrantyByProduct(String productId, String saleId) {
+        Warranty found = null;
+        for (Warranty warranty : warranties) {
+            if (warranty.getProduct().getId().equalsIgnoreCase(productId.trim())
+                    && warranty.getSale().getId().equalsIgnoreCase(saleId.trim())) {
+                if (warranty instanceof ExtendedWarranty) {
+                    return warranty;
+                }
+                if (found == null) {
+                    found = warranty;
+                }
+            }
+        }
+        return found;
+    }
+
     private String nextWarrantyId() {
         int max = 0;
         for (Warranty warranty : warranties) {
