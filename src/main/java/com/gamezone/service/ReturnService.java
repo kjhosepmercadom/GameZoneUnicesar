@@ -127,6 +127,34 @@ public class ReturnService {
         return result;
     }
 
+    /**
+     * Calculates the net balance of a month: the total of the sales minus the
+     * total refunded in the returns of the same month.
+     *
+     * @param month month number, from 1 to 12
+     * @param year  four digit year
+     * @return the net balance in Colombian pesos
+     */
+    public double generateMonthlyBalance(int month, int year) {
+        double salesTotal = 0;
+        for (Sale sale : saleService.listAllSales()) {
+            if (isInMonth(sale.getDate(), month, year)) {
+                salesTotal += sale.calculateTotal();
+            }
+        }
+        double returnsTotal = 0;
+        for (Return productReturn : returns) {
+            if (isInMonth(productReturn.getDate(), month, year)) {
+                returnsTotal += productReturn.getRefundAmount();
+            }
+        }
+        return salesTotal - returnsTotal;
+    }
+
+    private boolean isInMonth(LocalDate date, int month, int year) {
+        return date.getMonthValue() == month && date.getYear() == year;
+    }
+
     private Product findInSale(Sale sale, String productId) {
         for (Product product : sale.getProducts()) {
             if (product.getId().equalsIgnoreCase(productId.trim())) {
