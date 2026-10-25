@@ -70,3 +70,16 @@ member's account.
 | Response        | `restoreStock` increases the stock and saves through the repository; the submenu shows the original sale before asking which items are returned. |
 | Decision        | Accepted. `restoreStock` was delivered in its own Pull Request before the return service, because `ReturnService` depends on it. |
 | Related commit  | `feat: add restoreStock to ProductService` |
+
+## Entry 6 - Integration documentation (A8)
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Phase 5 - `docs/integration-documentation` |
+| Objective       | Document the adjustments A1 to A7 and the integrated design. |
+| Query           | "Write integration-analysis.md, the integrated class diagram, and update the layers diagram, README and TEAM.md." |
+| Response        | Drafted the cause and solution of every adjustment, a single Mermaid diagram by layer and the updated README with the demonstration scenario. |
+| Decision        | Accepted after checking every number of the demonstration scenario against the program. The diagrams were rendered to confirm the Mermaid syntax. |
+| Related commit  | `docs: describe the integration adjustments A1 to A7 in integration-analysis.md` |
