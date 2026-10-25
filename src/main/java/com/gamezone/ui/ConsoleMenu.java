@@ -738,7 +738,9 @@ public class ConsoleMenu {
             return;
         }
         System.out.println("-- Balance mensual " + month + "/" + year + " --");
-        System.out.println(String.format("Balance neto: $%,.0f", returnService.generateMonthlyBalance(month, year)));
+        System.out.println(String.format("Total de ventas:       $%,.0f", returnService.calculateMonthlySales(month, year)));
+        System.out.println(String.format("Total de devoluciones: $%,.0f", returnService.calculateMonthlyReturns(month, year)));
+        System.out.println(String.format("Balance neto:          $%,.0f", returnService.generateMonthlyBalance(month, year)));
     }
 
     private String readLine(String prompt) {

@@ -83,3 +83,16 @@ member's account.
 | Response        | Added `AccessoryService.restoreStock`, the delegation by item type in `ReturnService` and the resolution of returned items from the items of the original sale. |
 | Decision        | Accepted. Resolving from the sale also guarantees that a loaded return can only reference items that were really sold. |
 | Related commit  | `fix: delegate stock restoration by item type in ReturnService` |
+
+## Entry 7 - Monthly balance report (A6)
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Phase 4 - `fix/monthly-balance-report` |
+| Objective       | Show sales, returns and net balance using the final total of each sale. |
+| Query           | "Apply adjustment A6 keeping the signature of generateMonthlyBalance." |
+| Response        | Added `calculateMonthlySales` (with `calculateFinalTotal()`) and `calculateMonthlyReturns`; `generateMonthlyBalance` returns their difference and the menu prints the three values. |
+| Decision        | Accepted. Verified: sales $3.264.735, returns $3.052.320, net balance $212.415 in the demonstration scenario. |
+| Related commit  | `fix: calculate monthly sales with the final total of each sale` |

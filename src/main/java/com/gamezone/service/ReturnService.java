@@ -144,27 +144,49 @@ public class ReturnService {
     }
 
     /**
-     * Calculates the net balance of a month: the total of the sales minus the
-     * total refunded in the returns of the same month.
+     * Calculates the total sold in a month, using the final total of each
+     * sale (with discounts and extended warranties).
      *
      * @param month month number, from 1 to 12
      * @param year  four digit year
-     * @return the net balance in Colombian pesos
+     * @return the sales total in Colombian pesos
      */
-    public double generateMonthlyBalance(int month, int year) {
+    public double calculateMonthlySales(int month, int year) {
         double salesTotal = 0;
         for (Sale sale : saleService.listAllSales()) {
             if (isInMonth(sale.getDate(), month, year)) {
-                salesTotal += sale.calculateTotal();
+                salesTotal += sale.calculateFinalTotal();
             }
         }
+        return salesTotal;
+    }
+
+    /**
+     * Calculates the total refunded in the returns of a month.
+     *
+     * @param month month number, from 1 to 12
+     * @param year  four digit year
+     * @return the returns total in Colombian pesos
+     */
+    public double calculateMonthlyReturns(int month, int year) {
         double returnsTotal = 0;
         for (Return productReturn : returns) {
             if (isInMonth(productReturn.getDate(), month, year)) {
                 returnsTotal += productReturn.getRefundAmount();
             }
         }
-        return salesTotal - returnsTotal;
+        return returnsTotal;
+    }
+
+    /**
+     * Calculates the net balance of a month: sales minus returns.
+     *
+     * @param month month number, from 1 to 12
+     * @param year  four digit year
+     * @return the net balance in Colombian pesos
+     */
+    public double generateMonthlyBalance(int month, int year) {
+        return calculateMonthlySales(month, year) - calculateMonthlyReturns(month, year);
     }
 
     private boolean isInMonth(LocalDate date, int month, int year) {
