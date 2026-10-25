@@ -92,18 +92,31 @@ public class Return {
     }
 
     /**
-     * Calculates the refund as the sum of the prices of the returned products
-     * and stores it in the return.
+     * Calculates the refund of every returned product proportionally to the
+     * discount of the original sale, so the customer gets back what was
+     * actually paid, and stores it in the return.
      *
      * @return the calculated refund amount
      */
     public double calculateRefundAmount() {
         double total = 0;
         for (Product product : returnedProducts) {
-            total += product.getPrice();
+            total += refundOf(product);
         }
         refundAmount = total;
         return refundAmount;
+    }
+
+    private double discountRate() {
+        double subtotal = sale.calculateTotal();
+        if (subtotal <= 0) {
+            return 0;
+        }
+        return sale.getDiscountAmount() / subtotal;
+    }
+
+    private double refundOf(Product product) {
+        return product.getPrice() * (1 - discountRate());
     }
 
     /**
