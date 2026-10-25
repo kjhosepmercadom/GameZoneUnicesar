@@ -2,12 +2,10 @@ package com.gamezone.ui;
 
 import com.gamezone.model.Accessory;
 import com.gamezone.model.Console;
-import com.gamezone.model.Customer;
 import com.gamezone.model.Product;
 import com.gamezone.model.Promotion;
 import com.gamezone.model.Return;
 import com.gamezone.model.Sale;
-import com.gamezone.model.Seller;
 import com.gamezone.model.Warranty;
 import com.gamezone.service.AccessoryService;
 import com.gamezone.service.PersonService;
@@ -40,6 +38,7 @@ public class ConsoleMenu {
     private final ConsoleInput input;
     private final ErrorPrinter errorPrinter;
     private final ProductMenu productMenu;
+    private final PersonMenu personMenu;
 
     /**
      * Creates the menu with the services it uses.
@@ -65,6 +64,7 @@ public class ConsoleMenu {
         this.input = new ConsoleInput(new Scanner(System.in));
         this.errorPrinter = new ErrorPrinter();
         this.productMenu = new ProductMenu(productService, input, errorPrinter);
+        this.personMenu = new PersonMenu(personService, input, errorPrinter);
     }
 
     /**
@@ -89,7 +89,7 @@ public class ConsoleMenu {
                     productMenu.show();
                     break;
                 case 2:
-                    showPersonMenu();
+                    personMenu.show();
                     break;
                 case 3:
                     showSaleMenu();
@@ -120,6 +120,14 @@ public class ConsoleMenu {
         productMenu.printProducts();
     }
 
+    private void printCustomers() {
+        personMenu.printCustomers();
+    }
+
+    private void printSellers() {
+        personMenu.printSellers();
+    }
+
     private String readLine(String prompt) {
         return input.readLine(prompt);
     }
@@ -142,69 +150,6 @@ public class ConsoleMenu {
 
     private LocalDate readDate(String prompt) {
         return input.readDate(prompt);
-    }
-
-    private void showPersonMenu() {
-        System.out.println();
-        System.out.println("--- Gestion de personas ---");
-        System.out.println("1. Registrar cliente");
-        System.out.println("2. Listar clientes");
-        System.out.println("3. Listar vendedores");
-        System.out.println("0. Volver");
-        int option = readInt("Seleccione una opcion: ");
-        try {
-            switch (option) {
-                case 1:
-                    registerCustomer();
-                    break;
-                case 2:
-                    printCustomers();
-                    break;
-                case 3:
-                    printSellers();
-                    break;
-                case 0:
-                    break;
-                default:
-                    System.out.println("Opcion no valida.");
-            }
-        } catch (RuntimeException e) {
-            showError(e);
-        }
-    }
-
-    private void registerCustomer() {
-        System.out.println("-- Registrar cliente --");
-        String name = readText("Nombre completo: ");
-        String identification = readText("Identificacion: ");
-        String phone = readText("Telefono: ");
-        String email = readText("Correo electronico: ");
-        personService.registerCustomer(name, identification, phone, email);
-        System.out.println("Cliente registrado correctamente.");
-    }
-
-    private void printCustomers() {
-        List<Customer> customers = personService.listCustomers();
-        System.out.println("-- Clientes registrados --");
-        if (customers.isEmpty()) {
-            System.out.println("No hay clientes registrados.");
-            return;
-        }
-        for (Customer customer : customers) {
-            System.out.println(customer.getDescription());
-        }
-    }
-
-    private void printSellers() {
-        List<Seller> sellers = personService.listSellers();
-        System.out.println("-- Vendedores --");
-        if (sellers.isEmpty()) {
-            System.out.println("No hay vendedores registrados.");
-            return;
-        }
-        for (Seller seller : sellers) {
-            System.out.println(seller.getDescription());
-        }
     }
 
     private void showSaleMenu() {
