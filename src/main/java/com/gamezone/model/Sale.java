@@ -196,6 +196,9 @@ public class Sale {
         } else {
             receipt.append("Descuento: no aplica\n");
         }
+        if (extendedWarrantyCost > 0) {
+            receipt.append(String.format("Garantias extendidas: +$%,.0f%n", extendedWarrantyCost));
+        }
         receipt.append(String.format("TOTAL: $%,.0f%n", calculateFinalTotal()));
         receipt.append("========================================");
         return receipt.toString();
