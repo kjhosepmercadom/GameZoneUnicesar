@@ -38,3 +38,23 @@ Verdict legend: **violation**, **correct**, **not applicable**.
 
 `ProductService.restoreStock` (Leader since R3): **correct** for the five
 principles; since R7 it delegates to `Product.increaseStock`.
+
+## User interface and `Main`
+
+| Principle | Verdict | Evidence |
+|-----------|---------|----------|
+| SRP | correct | Since R7 each submenu has one module; `ConsoleInput` only reads input; `ErrorPrinter` only prints error messages; `ConsoleMenu` only shows the main menu. `Main` only builds and connects the objects. |
+| OCP | correct | A new module is a new submenu class and one option in `ConsoleMenu.start`; the existing submenus do not change. |
+| LSP | not applicable | The user interface classes have no subclasses. |
+| ISP | correct | Each submenu receives only the services it uses (for example, `PromotionMenu` only receives `PromotionService`). |
+| DIP | correct | The submenus depend on the services, which are injected through the constructors; only `Main` knows the concrete repositories. |
+
+## Summary
+
+| Principle | Verdict of this report |
+|-----------|------------------------|
+| SRP | correct |
+| OCP | violation (V-01) |
+| LSP | correct |
+| ISP | correct |
+| DIP | violation (V-01) |
