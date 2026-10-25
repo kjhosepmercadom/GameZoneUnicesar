@@ -127,16 +127,8 @@ public class Return {
         return refundAmount;
     }
 
-    private double discountRate() {
-        double subtotal = sale.calculateTotal();
-        if (subtotal <= 0) {
-            return 0;
-        }
-        return sale.getDiscountAmount() / subtotal;
-    }
-
     private double refundOf(Product product) {
-        return product.getPrice() * (1 - discountRate());
+        return product.getPrice() * (1 - sale.calculateDiscountRate());
     }
 
     /**

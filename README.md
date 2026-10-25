@@ -122,6 +122,27 @@ branches created from `develop` with the prefixes `feature/`, `fix/`,
 `refactor/` and `docs/`, integrated through reviewed Pull Requests and deleted
 after merging. Commits follow Conventional Commits. Team: [TEAM.md](TEAM.md).
 
+## Design review: GRASP (Requirement 7)
+
+The code was audited against the nine GRASP patterns by the member
+responsible for each part (`docs/grasp-audit/`), and the seven violations of
+the [consolidated audit](docs/grasp-audit/consolidated-audit.md) were fixed
+without changing the behaviour:
+
+| ID   | Change |
+|------|--------|
+| V-01 | `ConsoleMenu` split into `ConsoleInput`, `ErrorPrinter` and one submenu per module (`ProductMenu`, `PersonMenu`, `SaleMenu`, `AccessoryMenu`, `PromotionMenu`, `WarrantyMenu`, `ReturnMenu`) |
+| V-02 | `Product.increaseStock` used by `ProductService` and `AccessoryService` |
+| V-03 | `Sale.calculateDiscountRate` used by `Return` |
+| V-04 | `Sale.findProduct` and `Sale.countUnitsOf` used by `ReturnService` |
+| V-05 | `Product.getCategory` replaces the `instanceof` chain of `CategoryDiscount` |
+| V-06 | `WarrantyService` prefers the warranty with the longest coverage |
+| V-07 | `CsvFile` concentrates the file handling of the seven repositories |
+
+Documents: [analysis](docs/grasp-analysis.md), [before/after diagram](docs/grasp-class-diagram.md),
+[refactor log and non-regression evidence](docs/grasp-refactor-log.md). The
+regression script is `docs/regression/menu-operations-input.txt`.
+
 ## License
 
 [MIT](LICENSE)

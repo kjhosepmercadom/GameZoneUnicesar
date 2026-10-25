@@ -94,4 +94,14 @@ public class Console extends Product {
                         + " | Precio: $%,.0f | Stock: %d",
                 getId(), getTitle(), brand, model, generation, getPrice(), getStock());
     }
+
+    /**
+     * Returns the category of this product type.
+     *
+     * @return {@code "CONSOLE"}
+     */
+    @Override
+    public String getCategory() {
+        return "CONSOLE";
+    }
 }

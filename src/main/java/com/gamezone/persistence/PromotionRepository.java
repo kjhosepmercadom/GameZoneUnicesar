@@ -6,11 +6,6 @@ import com.gamezone.model.CategoryDiscount;
 import com.gamezone.model.PercentageDiscount;
 import com.gamezone.model.Promotion;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +19,7 @@ public class PromotionRepository {
 
     private static final String SEPARATOR = ";";
 
-    private final Path filePath;
+    private final CsvFile file;
 
     /**
      * Creates a repository that works over the given file.
@@ -32,7 +27,7 @@ public class PromotionRepository {
      * @param filePath path of the CSV file that stores the promotions
      */
     public PromotionRepository(String filePath) {
-        this.filePath = Paths.get(filePath);
+        this.file = new CsvFile(filePath);
     }
 
     /**
@@ -46,14 +41,7 @@ public class PromotionRepository {
         for (Promotion promotion : promotions) {
             lines.add(toLine(promotion));
         }
-        try {
-            if (filePath.getParent() != null) {
-                Files.createDirectories(filePath.getParent());
-            }
-            Files.write(filePath, lines, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new PersistenceException("No se pudo guardar el archivo de promociones: " + filePath, e);
-        }
+        file.writeLines(lines, "No se pudo guardar el archivo de promociones: ");
     }
 
     /**
@@ -65,15 +53,7 @@ public class PromotionRepository {
      */
     public List<Promotion> loadAll() {
         List<Promotion> promotions = new ArrayList<>();
-        if (!Files.exists(filePath)) {
-            return promotions;
-        }
-        List<String> lines;
-        try {
-            lines = Files.readAllLines(filePath, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new PersistenceException("No se pudo leer el archivo de promociones: " + filePath, e);
-        }
+        List<String> lines = file.readLines("No se pudo leer el archivo de promociones: ");
         for (int i = 0; i < lines.size(); i++) {
             String line = lines.get(i).trim();
             if (line.isEmpty()) {
@@ -82,7 +62,7 @@ public class PromotionRepository {
             try {
                 promotions.add(fromLine(line));
             } catch (RuntimeException e) {
-                throw new PersistenceException("Linea " + (i + 1) + " invalida en " + filePath + ": " + line, e);
+                throw new PersistenceException("Linea " + (i + 1) + " invalida en " + file.getPath() + ": " + line, e);
             }
         }
         return promotions;
@@ -128,6 +108,6 @@ public class PromotionRepository {
     }
 
     private String clean(String value) {
-        return value == null ? "" : value.replace(SEPARATOR, ",").replace("\n", " ").replace("\r", " ");
+        return CsvFile.clean(value);
     }
 }
