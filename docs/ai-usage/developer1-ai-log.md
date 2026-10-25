@@ -70,3 +70,16 @@ member's account.
 | Response        | Proposed `Return` with an immutable sale reference (no setter) and a list with one entry per returned unit; `canBeReturned()` compares today with `date.plusDays(30)`. |
 | Decision        | Accepted. The refund starts with list prices, as Requirement 3 defines it; the discount problem was left for adjustment A5. |
 | Related commit  | `feat: add Return class with sale reference and returned products` |
+
+## Entry 6 - Refund of discounted sales (A5)
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Phase 4 - `fix/return-discounted-refund` |
+| Objective       | Refund what the customer actually paid when the sale had a promotion. |
+| Query           | "Apply adjustment A5: refund each item with price x (1 - discount / subtotal) and show the breakdown in the return receipt." |
+| Response        | Added the private helpers `discountRate()` and `refundOf(product)` and a receipt table with list price, proportional discount and refund. |
+| Decision        | Accepted. Checked with a sale of $3.499.700 with a $524.955 discount: the console is refunded $2.464.915 instead of $2.899.900. |
+| Related commit  | `fix: refund returned items proportionally to the sale discount` |

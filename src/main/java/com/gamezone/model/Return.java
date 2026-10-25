@@ -92,18 +92,31 @@ public class Return {
     }
 
     /**
-     * Calculates the refund as the sum of the prices of the returned products
-     * and stores it in the return.
+     * Calculates the refund of every returned product proportionally to the
+     * discount of the original sale, so the customer gets back what was
+     * actually paid, and stores it in the return.
      *
      * @return the calculated refund amount
      */
     public double calculateRefundAmount() {
         double total = 0;
         for (Product product : returnedProducts) {
-            total += product.getPrice();
+            total += refundOf(product);
         }
         refundAmount = total;
         return refundAmount;
+    }
+
+    private double discountRate() {
+        double subtotal = sale.calculateTotal();
+        if (subtotal <= 0) {
+            return 0;
+        }
+        return sale.getDiscountAmount() / subtotal;
+    }
+
+    private double refundOf(Product product) {
+        return product.getPrice() * (1 - discountRate());
     }
 
     /**
@@ -124,8 +137,11 @@ public class Return {
         receipt.append("Cliente: ").append(sale.getCustomer().getName()).append('\n');
         receipt.append("Motivo: ").append(reason).append('\n');
         receipt.append("----------------------------------------\n");
+        receipt.append(String.format("%-8s %-16s %12s %12s %12s%n", "Codigo", "Producto", "Precio", "Descuento", "Reembolso"));
         for (Product product : returnedProducts) {
-            receipt.append(String.format("%-8s %-20s $%,12.0f%n", product.getId(), product.getTitle(), product.getPrice()));
+            double refund = refundOf(product);
+            receipt.append(String.format("%-8s %-16s $%,11.0f $%,11.0f $%,11.0f%n", product.getId(),
+                    product.getTitle(), product.getPrice(), product.getPrice() - refund, refund));
         }
         receipt.append("----------------------------------------\n");
         receipt.append(String.format("MONTO REEMBOLSADO: $%,.0f%n", refundAmount));
