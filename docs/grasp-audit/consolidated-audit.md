@@ -61,3 +61,25 @@ its author.
 | V-05 | Polymorphism (Protected Variations) | `CategoryDiscount.belongsToTargetCategory`: chain of `instanceof` by category | The category varies with the product type | Each new product type modifies the promotion | `Product.getCategory()` abstract, implemented by `VideoGame`, `Console` and `Accessory` | developer1-audit V-02 | Developer 1 |
 | V-06 | Polymorphism | `WarrantyService.findWarrantyByProduct`: `instanceof ExtendedWarranty` | The preference depends on the coverage, which each warranty knows | A new warranty type would not be preferred | Keep the warranty with the longest `getDurationInMonths()` | developer2-audit V-01 | Developer 2 |
 | V-07 | Pure Fabrication (High Cohesion) | File handling (`Files.exists`, `readAllLines`, `createDirectories`, `write`, `IOException` wrapping, `clean`) copied in the seven repositories | A technical responsibility copied instead of being assigned to one class | Seven places to change for any file handling change | Package-private helper `CsvFile`; every repository uses it | developer2-audit V-03, developer1-audit (Pure Fabrication), leader-audit V-03 | Developer 2 (`CsvFile` and five repositories), Developer 1 (`ProductRepository`), Leader (`SaleRepository`) |
+
+## Boundary findings
+
+- **V-02** was reported from three sides. Developer 1 adds `Product.increaseStock`
+  first; then Developer 2 and the Leader change their `restoreStock` methods.
+- **V-03** and **V-04** need new methods in `Sale` (Leader). The Leader adds
+  them in the first Pull Request of Phase 2, and the developers use them in
+  their own Pull Requests.
+- **V-07** is one finding for the seven repositories. Developer 2 creates
+  `CsvFile` because that member owns five of them; Developer 1 and the Leader migrate
+  `ProductRepository` and `SaleRepository` after `CsvFile` is merged.
+
+## Out of scope findings
+
+These are functional defects. Fixing them would change what the user sees, so
+they are not corrected in this requirement.
+
+| ID    | Evidence | Defect |
+|-------|----------|--------|
+| OS-01 | `WarrantyService.cancelWarranties(productId, saleId)` removes every warranty of the product in the sale | If a sale has two units of the same console and only one is returned, the warranties of both units are cancelled and refunded. |
+| OS-02 | `SaleService.resolveItems` looks for an identifier first among products and then among accessories; no service checks identifiers across both inventories | An accessory registered with the identifier of an existing product can never be sold. |
+| OS-03 | `WarrantyService.nextWarrantyId` uses the biggest current number plus one | After cancelling the newest warranty, its identifier is reused by the next warranty. |
