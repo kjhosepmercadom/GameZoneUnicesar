@@ -38,3 +38,11 @@ audited by the member who created them, as recorded in
 | LSP | correct | correct | correct | **correct** |
 | ISP | correct | correct | correct | **correct** |
 | DIP | violation | correct | violation | **violation** (V-01) |
+
+## Violations
+
+| ID   | Principle | Evidence | Explanation | Consequence | Agreed solution | Origin | Responsible |
+|------|-----------|----------|-------------|-------------|-----------------|--------|-------------|
+| V-01 | OCP, DIP | `SaleService.resolveItems/updateInventory` and `ReturnService.registerReturn` use the concrete `ProductService` and `AccessoryService` and `instanceof Accessory` | The sale and return policies depend on concrete inventories and on item types | A new kind of item modifies two services | `InventoryService` interface implemented by `ProductService` and `AccessoryService`; both services iterate a list of inventories | leader-audit V-01, developer2-audit V-03 | Leader (`InventoryService`, `SaleService`), Developer 1 (`ProductService`), Developer 2 (`AccessoryService`, `ReturnService`) |
+| V-02 | OCP | `switch` / `instanceof` chains in `ProductRepository`, `AccessoryRepository`, `PromotionRepository` and `WarrantyRepository` | The repositories are not closed for new subtypes | Every new subtype modifies the loading of the existing ones | `RecordMapper<T>` (and `WarrantyRecordMapper`) with one mapper per subtype | developer1-audit V-01, developer2-audit V-02 | Developer 1 (`RecordMapper`, `ProductRepository`), Developer 2 (the other three repositories) |
+| V-03 | SRP | `ReturnService` registers returns and calculates the monthly report | Two reasons to change | A new report figure modifies the return rules class | `MonthlyBalanceCalculator`; `ReturnService` delegates and keeps its methods | developer2-audit V-01 | Developer 2 |
