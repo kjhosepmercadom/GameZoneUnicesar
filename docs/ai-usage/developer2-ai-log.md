@@ -154,3 +154,20 @@ member's account.
 | Response        | Proposed `CsvFile` receiving the beginning of each error message, so every message stays exactly the same, and the use of `Sale.findProduct`, `Sale.countUnitsOf`, `Product.increaseStock` and `getDurationInMonths()`. |
 | Decision        | Accepted. `CsvFile` is package-private because only the repositories use it. Verified with the regression script: identical output and data. |
 | Related commit  | `refactor: add CsvFile helper for the repositories (V-07)` |
+
+## Requirement 8 - SOLID audit and correction
+
+### Phase 1 - Audit
+
+#### Entry 12 - SOLID audit of the developer 2 code
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Requirement 8, Phase 1 - `feature/solid-audit` |
+| Objective       | Review the code of Developer 2, including `CsvFile` and the R7 changes, against the five SOLID principles. |
+| Query           | "Audit the classes of Developer 2 against SRP, OCP, LSP, ISP and DIP." |
+| Response        | Found that `ReturnService` also calculates the monthly report (SRP), that the accessory, promotion and warranty repositories use type switches (OCP), and that `ReturnService` depends on the concrete product and accessory services (DIP). |
+| Decision        | Accepted the three findings; the DIP finding was reported to the Leader because `SaleService` has the same problem. |
+| Related commit  | `docs: add return and warranty findings to developer2 SOLID audit` |
