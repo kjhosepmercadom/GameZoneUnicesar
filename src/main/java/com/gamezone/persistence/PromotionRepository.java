@@ -1,5 +1,6 @@
 package com.gamezone.persistence;
 
+import com.gamezone.exceptions.PersistenceException;
 import com.gamezone.model.BulkPurchaseDiscount;
 import com.gamezone.model.CategoryDiscount;
 import com.gamezone.model.PercentageDiscount;
@@ -51,7 +52,7 @@ public class PromotionRepository {
             }
             Files.write(filePath, lines, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new IllegalStateException("No se pudo guardar el archivo de promociones: " + filePath, e);
+            throw new PersistenceException("No se pudo guardar el archivo de promociones: " + filePath, e);
         }
     }
 
@@ -71,7 +72,7 @@ public class PromotionRepository {
         try {
             lines = Files.readAllLines(filePath, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new IllegalStateException("No se pudo leer el archivo de promociones: " + filePath, e);
+            throw new PersistenceException("No se pudo leer el archivo de promociones: " + filePath, e);
         }
         for (int i = 0; i < lines.size(); i++) {
             String line = lines.get(i).trim();
@@ -81,7 +82,7 @@ public class PromotionRepository {
             try {
                 promotions.add(fromLine(line));
             } catch (RuntimeException e) {
-                throw new IllegalStateException("Linea " + (i + 1) + " invalida en " + filePath + ": " + line, e);
+                throw new PersistenceException("Linea " + (i + 1) + " invalida en " + filePath + ": " + line, e);
             }
         }
         return promotions;
