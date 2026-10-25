@@ -9,6 +9,7 @@ import com.gamezone.persistence.WarrantyRepository;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -141,6 +142,29 @@ public class WarrantyService {
             }
         }
         return expiring;
+    }
+
+    /**
+     * Removes the warranties of a product in a sale, for example when the
+     * product is returned, and returns the amount that must be refunded for them.
+     *
+     * @param productId identifier of the returned product
+     * @param saleId    identifier of the sale
+     * @return the refundable cost: zero for basic warranties, the additional cost for extended ones
+     */
+    public double cancelWarranties(String productId, String saleId) {
+        double refundable = 0;
+        Iterator<Warranty> iterator = warranties.iterator();
+        while (iterator.hasNext()) {
+            Warranty warranty = iterator.next();
+            if (warranty.getProduct().getId().equalsIgnoreCase(productId)
+                    && warranty.getSale().getId().equalsIgnoreCase(saleId)) {
+                refundable += warranty.getAdditionalCost();
+                iterator.remove();
+            }
+        }
+        warrantyRepository.saveAll(warranties);
+        return refundable;
     }
 
     private String nextWarrantyId() {
