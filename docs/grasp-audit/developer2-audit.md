@@ -15,3 +15,17 @@ had when Requirement 7 started.
 | Exceptions and validation (R6) | use of validators and typed exceptions in every service and repository |
 
 Verdict legend: **violation**, **correct**, **not applicable**.
+
+## Person module
+
+| Pattern               | Verdict | Evidence |
+|-----------------------|---------|----------|
+| Information Expert    | correct | `Customer.getDescription()` and `Seller.getDescription()` describe their own data; `PersonService.findCustomerById` searches the list the service owns. |
+| Creator               | correct | `PersonService.registerCustomer` creates the `Customer`: it aggregates the customer list and has the initializing data. |
+| Controller            | correct | `PersonService` receives the person operations from the menu. |
+| Low Coupling          | correct | `PersonService` depends on `PersonRepository`, `PersonValidator` and the model only. |
+| High Cohesion         | correct | Model, persistence and rules are separated in three classes. |
+| Polymorphism          | correct | `Person.getDescription()` is abstract; customers and sellers are printed without type checks. |
+| Pure Fabrication      | violation (boundary) | `PersonRepository.writeLines/readRecords` repeat the file handling of the other repositories (see V-03). |
+| Indirection           | correct | `PersonService` isolates the menu from the CSV files. |
+| Protected Variations  | correct | The two files (customers and sellers) are hidden behind the repository methods. |
