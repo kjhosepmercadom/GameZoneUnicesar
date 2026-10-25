@@ -41,3 +41,5 @@ Executed on `develop` before the first commit of `feature/grasp-refactor`:
 
 | Class | Change | Violation | Pattern applied | Commit / PR | Responsible |
 |-------|--------|-----------|-----------------|-------------|-------------|
+| `Sale` | New `calculateDiscountRate()` | V-03 | Information Expert | `refactor: add calculateDiscountRate to Sale (V-03)` / PR "prepare the GRASP corrections" | Leader |
+| `Sale` | New `findProduct(String)` and `countUnitsOf(String)` | V-04 | Information Expert | `refactor: add findProduct and countUnitsOf to Sale (V-04)` / PR "prepare the GRASP corrections" | Leader |
