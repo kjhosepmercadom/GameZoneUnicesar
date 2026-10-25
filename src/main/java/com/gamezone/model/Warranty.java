@@ -83,4 +83,18 @@ public abstract class Warranty {
      * @return the duration in months
      */
     public abstract int getDurationInMonths();
+
+    /**
+     * Returns the name of the warranty type shown to the user.
+     *
+     * @return the warranty type name
+     */
+    public abstract String getWarrantyType();
+
+    /**
+     * Returns the additional cost this warranty adds to the sale.
+     *
+     * @return the additional cost in Colombian pesos
+     */
+    public abstract double getAdditionalCost();
 }
