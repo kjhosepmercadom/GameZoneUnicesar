@@ -81,3 +81,43 @@ Verdict legend: **violation**, **correct**, **not applicable**.
 | Consequence | Adjustment A1 already had to modify this method to add accessories; every new product type will modify it again and the promotion depends on every concrete product class. |
 | Proposed solution | Declare `getCategory()` abstract in `Product` and implement it in `VideoGame`, `Console` and `Accessory`; `CategoryDiscount` compares `product.getCategory()` with its target category (Polymorphism). |
 | Code of another member | No. |
+
+## Return model and `Sale.canBeReturned`
+
+| Pattern               | Verdict | Evidence |
+|-----------------------|---------|----------|
+| Information Expert    | **violation** | `Return.discountRate()` (see V-03). `Sale.canBeReturned()` is correct: the sale owns its date. |
+| Creator               | not applicable | `Return` only copies the list it receives. |
+| Controller            | not applicable | Model classes. |
+| Low Coupling          | correct | `Return` depends only on `Sale` and `Product`. |
+| High Cohesion         | correct | `Return` holds the data of a return, its refund and its receipt. |
+| Polymorphism          | not applicable | There are no type variants in this module. |
+| Pure Fabrication      | not applicable | - |
+| Indirection           | not applicable | - |
+| Protected Variations  | correct | The refund rule is encapsulated in `calculateRefundAmount()`; adjustments A5 and A7 changed it without touching the callers. |
+
+### V-03 - The return calculates information that belongs to the sale (boundary)
+
+| Field | Content |
+|-------|---------|
+| Pattern | Information Expert |
+| Module | Returns (R3, A5) - `Return`; uses `Sale` (Leader) |
+| Evidence | `Return.discountRate()`: `double subtotal = sale.calculateTotal(); if (subtotal <= 0) return 0; return sale.getDiscountAmount() / subtotal;` |
+| Explanation | The discount rate is derived only from data of the sale (subtotal and discount); the return reads both values to calculate it. |
+| Consequence | If the way the discount is applied changes (for example, a discount over part of the items), the change must be made in `Return`, far from the class that owns the discount. |
+| Proposed solution | `Sale.calculateDiscountRate()` (Leader) and `Return.refundOf` uses it (Developer 1). |
+| Code of another member | Yes: a new method in `Sale` (Leader). Reported to the Leader. |
+
+## Warranty hierarchy
+
+| Pattern               | Verdict | Evidence |
+|-----------------------|---------|----------|
+| Information Expert    | correct | `Warranty.isActive` uses its own dates; `ExtendedWarranty.getAdditionalCost` uses the price of its product. |
+| Creator               | not applicable | - |
+| Controller            | not applicable | - |
+| Low Coupling          | correct | Depends on `Product` and `Sale` only. |
+| High Cohesion         | correct | Data, validity and certificate of one warranty. |
+| Polymorphism          | correct | `getDurationInMonths`, `getWarrantyType` and `getAdditionalCost` are abstract; the end date is calculated once in the constructor with the duration of the subclass. |
+| Pure Fabrication      | not applicable | - |
+| Indirection           | not applicable | - |
+| Protected Variations  | correct | A new warranty type is a new subclass; the calculation of dates does not change. |
