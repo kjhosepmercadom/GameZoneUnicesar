@@ -84,6 +84,52 @@ public class PromotionService {
         return save(new BulkPurchaseDiscount(id.trim(), name.trim(), startDate, endDate, minimumQuantity, percentage));
     }
 
+    /**
+     * Returns every registered promotion, active or not.
+     *
+     * @return a copy of the promotion list
+     */
+    public List<Promotion> listAllPromotions() {
+        return new ArrayList<>(promotions);
+    }
+
+    /**
+     * Returns the promotions that are valid on the current date.
+     *
+     * @return the active promotions, possibly empty
+     */
+    public List<Promotion> listActivePromotions() {
+        return listActivePromotions(LocalDate.now());
+    }
+
+    /**
+     * Finds a promotion by its identifier, ignoring letter case.
+     *
+     * @param id the promotion identifier
+     * @return the promotion found, or {@code null} if it does not exist
+     */
+    public Promotion findById(String id) {
+        if (id == null) {
+            return null;
+        }
+        for (Promotion promotion : promotions) {
+            if (promotion.getId().equalsIgnoreCase(id.trim())) {
+                return promotion;
+            }
+        }
+        return null;
+    }
+
+    private List<Promotion> listActivePromotions(LocalDate date) {
+        List<Promotion> active = new ArrayList<>();
+        for (Promotion promotion : promotions) {
+            if (promotion.isActive(date)) {
+                active.add(promotion);
+            }
+        }
+        return active;
+    }
+
     private <T extends Promotion> T save(T promotion) {
         promotions.add(promotion);
         promotionRepository.saveAll(promotions);
