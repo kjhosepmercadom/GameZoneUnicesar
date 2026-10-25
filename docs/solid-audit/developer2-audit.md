@@ -82,3 +82,23 @@ Verdict legend: **violation**, **correct**, **not applicable**.
 | Consequence | A new kind of item modifies `ReturnService`; the same code exists in `SaleService` (Leader). |
 | Proposed solution | An inventory abstraction implemented by `ProductService` and `AccessoryService`; `ReturnService` asks the inventory that owns the item. |
 | Code of another member | Yes: `SaleService` (Leader) and `ProductService` (Developer 1). Reported to the Leader. |
+
+## `CsvFile`, exceptions and validators
+
+| Principle | Verdict | Evidence |
+|-----------|---------|----------|
+| SRP | correct | `CsvFile` only reads and writes one file. The validators only validate. |
+| OCP | correct | The repositories use `CsvFile` without knowing how the file is written. |
+| LSP | not applicable | `CsvFile` has no subclasses. |
+| ISP | correct | `CsvFile` exposes three operations, all used by the repositories. |
+| DIP | correct | The repositories depend on `CsvFile`, a package-private stable helper; the services never see it. |
+
+## Summary
+
+| Principle | Verdict of this report |
+|-----------|------------------------|
+| SRP | violation (V-01) |
+| OCP | violation (V-02, V-03) |
+| LSP | correct |
+| ISP | correct |
+| DIP | violation (V-03) |
