@@ -54,3 +54,4 @@ Executed on `develop` before the first commit of `feature/grasp-refactor`:
 | `AccessoryService` | `restoreStock` calls `accessory.increaseStock(quantity)` | V-02 | Information Expert | `refactor: use Product.increaseStock in AccessoryService (V-02)` / same PR | Developer 2 |
 | `ReturnService` | Uses `sale.findProduct` and `sale.countUnitsOf`; `findInSale` and `countInSale` were removed | V-04 | Information Expert | `refactor: ask the sale for its products in ReturnService (V-04)` / same PR | Developer 2 |
 | `WarrantyService` | `findWarrantyByProduct` keeps the warranty with the longest `getDurationInMonths()` | V-06 | Polymorphism | `refactor: choose the warranty with the longest coverage without type checks (V-06)` / same PR | Developer 2 |
+| `ProductRepository` | Uses `CsvFile` | V-07 | Pure Fabrication, High Cohesion | `refactor: use CsvFile in ProductRepository (V-07)` / PR "use CsvFile in ProductRepository" | Developer 1 |
