@@ -1,5 +1,6 @@
 package com.gamezone.persistence;
 
+import com.gamezone.exceptions.PersistenceException;
 import com.gamezone.model.Customer;
 import com.gamezone.model.Seller;
 
@@ -100,7 +101,7 @@ public class PersonRepository {
             }
             Files.write(file, lines, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new IllegalStateException("No se pudo guardar el archivo: " + file, e);
+            throw new PersistenceException("No se pudo guardar el archivo: " + file, e);
         }
     }
 
@@ -113,7 +114,7 @@ public class PersonRepository {
         try {
             lines = Files.readAllLines(file, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new IllegalStateException("No se pudo leer el archivo: " + file, e);
+            throw new PersistenceException("No se pudo leer el archivo: " + file, e);
         }
         for (int i = 0; i < lines.size(); i++) {
             String line = lines.get(i).trim();
@@ -122,7 +123,7 @@ public class PersonRepository {
             }
             String[] fields = line.split(SEPARATOR, -1);
             if (fields.length != expectedFields) {
-                throw new IllegalStateException("Linea " + (i + 1) + " invalida en " + file + ": " + line);
+                throw new PersistenceException("Linea " + (i + 1) + " invalida en " + file + ": " + line, null);
             }
             records.add(fields);
         }
