@@ -120,3 +120,16 @@ compatible with a console. Sales can mix products and accessories; stock
 validation and inventory update work the same for both. Preloaded data:
 `data/accessories.csv`. Design: [analysis](docs/accessory-analysis.md) and
 [class diagram](docs/accessory-class-diagram.md).
+
+## Promotion module (Requirement 2)
+
+Three promotion types with a validity period: percentage over the subtotal,
+percentage over one category, and percentage when the sale reaches a minimum
+number of products. When a sale is registered the system applies the active
+promotion that gives the biggest discount (promotions are not cumulative), and
+the receipt shows subtotal, discount and final total.
+
+Menu *5. Gestion de promociones*: register each promotion type, list every
+promotion and list the active ones. Menu *3. Gestion de ventas* adds the sale
+detail query. Preloaded data: `data/promotions.csv`. Design:
+[analysis](docs/promotion-analysis.md) and [class diagram](docs/promotion-class-diagram.md).
