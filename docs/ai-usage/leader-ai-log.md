@@ -158,3 +158,18 @@ member's account.
 | Response        | Found that `SaleService` depends on the concrete product and accessory services and on item types (OCP, DIP), the same problem reported by Developer 2 in `ReturnService`. It related the findings with R7: the split of the menu and `CsvFile` solved SRP problems. |
 | Decision        | Accepted. The two reports of the inventory problem were merged into one violation with three responsible members. |
 | Related commit  | `docs: consolidate SOLID audit findings from the three reports` |
+
+### Phase 2 - Correction
+
+#### Entry 12 - Inventory abstraction
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Requirement 8, Phase 2 - `feature/solid-refactor` |
+| Objective       | Create the abstraction that the three members need for V-01. |
+| Query           | "Create an InventoryService interface with the operations that SaleService and ReturnService use." |
+| Response        | Proposed `findById`, `updateStock` and `restoreStock`, which `ProductService` and `AccessoryService` already have with compatible signatures. |
+| Decision        | Accepted. Delivered alone in the first Pull Request so the developers can implement it. |
+| Related commit  | `refactor: add the InventoryService abstraction (V-01)` |
