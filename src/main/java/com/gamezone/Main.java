@@ -37,7 +37,7 @@ public class Main {
             AccessoryService accessoryService = new AccessoryService(accessoryRepository);
             SaleService saleService = new SaleService(saleRepository, productService, personService, accessoryService);
 
-            ConsoleMenu consoleMenu = new ConsoleMenu(productService, personService, saleService);
+            ConsoleMenu consoleMenu = new ConsoleMenu(productService, personService, saleService, accessoryService);
             consoleMenu.start();
         } catch (IllegalStateException e) {
             System.out.println("Error: " + e.getMessage());
