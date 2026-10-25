@@ -109,6 +109,28 @@ public class WarrantyService {
         return active;
     }
 
+    /**
+     * Returns the active warranties that end within the next days.
+     *
+     * @param daysAhead number of days to look ahead, zero or positive
+     * @return the warranties about to expire, possibly empty
+     * @throws IllegalArgumentException if the number of days is negative
+     */
+    public List<Warranty> listWarrantiesExpiringSoon(int daysAhead) {
+        if (daysAhead < 0) {
+            throw new IllegalArgumentException("Los dias de anticipacion no pueden ser negativos.");
+        }
+        LocalDate today = LocalDate.now();
+        LocalDate limit = today.plusDays(daysAhead);
+        List<Warranty> expiring = new ArrayList<>();
+        for (Warranty warranty : warranties) {
+            if (warranty.isActive(today) && !warranty.getEndDate().isAfter(limit)) {
+                expiring.add(warranty);
+            }
+        }
+        return expiring;
+    }
+
     private String nextWarrantyId() {
         int max = 0;
         for (Warranty warranty : warranties) {
