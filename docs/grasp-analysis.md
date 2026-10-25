@@ -75,3 +75,25 @@ The strategy is a **scripted regression run** of the whole menu:
 
 Evidence shown at the end: the comparison of the reference run with the final
 run, recorded in `docs/grasp-refactor-log.md`.
+
+## 5. Order of the corrections and coordination (Leader)
+
+The corrections were ordered by dependency, so every Pull Request compiles and
+keeps the behaviour:
+
+1. **Leader**: the new methods of `Sale` (`calculateDiscountRate`,
+   `findProduct`, `countUnitsOf`), because V-03 and V-04 of the developers need
+   them. The before diagram and the regression baseline go in the same PR.
+2. **Developer 1**: `Product.increaseStock` and `Product.getCategory` (V-02,
+   V-05) and the change in `Return` (V-03).
+3. **Developer 2**: `CsvFile` and five repositories (V-07), and the changes in
+   `AccessoryService`, `ReturnService` and `WarrantyService` (V-02, V-04, V-06).
+4. **Developer 1**: `ProductRepository` on `CsvFile` (V-07).
+5. **Leader**: the split of `ConsoleMenu` (V-01), `ProductService.restoreStock`
+   (V-02), `SaleRepository` on `CsvFile` (V-07), the after diagram and the
+   final regression run.
+
+All the work happened in `feature/grasp-refactor`, one member at a time: a
+member starts only after the previous Pull Request is merged and the branch is
+recreated from `develop`. No two members edit the same file in parallel, so
+there are no conflicts.
