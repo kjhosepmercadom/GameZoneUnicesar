@@ -230,6 +230,7 @@ public class ConsoleMenu {
         System.out.println("2. Historial completo de ventas");
         System.out.println("3. Historial de compras de un cliente");
         System.out.println("4. Ventas atendidas por un vendedor");
+        System.out.println("5. Consultar detalle de una venta");
         System.out.println("0. Volver");
         int option = readInt("Seleccione una opcion: ");
         try {
@@ -256,6 +257,15 @@ public class ConsoleMenu {
                         System.out.println("No existe un vendedor con codigo " + sellerCode + ".");
                     } else {
                         printSales(saleService.findSalesBySeller(sellerCode), "El vendedor no tiene ventas registradas.");
+                    }
+                    break;
+                case 5:
+                    String saleId = readText("Codigo de la venta: ");
+                    Sale sale = saleService.findSaleById(saleId);
+                    if (sale == null) {
+                        System.out.println("No existe una venta con codigo " + saleId + ".");
+                    } else {
+                        System.out.println(sale.generateReceipt());
                     }
                     break;
                 case 0:
