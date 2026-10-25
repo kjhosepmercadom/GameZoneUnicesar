@@ -16,6 +16,7 @@ import com.gamezone.service.SaleService;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 
@@ -309,7 +310,7 @@ public class ConsoleMenu {
                 productIds.add(productId);
             }
         }
-        Sale sale = saleService.registerSale(customerId, sellerCode, productIds);
+        Sale sale = saleService.registerSale(customerId, sellerCode, productIds, Collections.emptyList());
         System.out.println("Venta registrada correctamente.");
         System.out.println(sale.generateReceipt());
     }

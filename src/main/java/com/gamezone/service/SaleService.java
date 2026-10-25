@@ -1,6 +1,7 @@
 package com.gamezone.service;
 
 import com.gamezone.model.Accessory;
+import com.gamezone.model.Console;
 import com.gamezone.model.Customer;
 import com.gamezone.model.Product;
 import com.gamezone.model.Promotion;
@@ -10,6 +11,7 @@ import com.gamezone.persistence.SaleRepository;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +29,7 @@ public class SaleService {
     private final PersonService personService;
     private final AccessoryService accessoryService;
     private final PromotionService promotionService;
+    private WarrantyService warrantyService;
     private final List<Sale> sales;
 
     /**
@@ -50,19 +53,32 @@ public class SaleService {
     }
 
     /**
+     * Connects the warranty service. It cannot be received in the constructor
+     * because the warranty repository needs this service to load its data.
+     *
+     * @param warrantyService service that assigns the warranties of the products sold
+     */
+    public void setWarrantyService(WarrantyService warrantyService) {
+        this.warrantyService = warrantyService;
+    }
+
+    /**
      * Registers a new sale of products and accessories. The rules applied are:
      * the sale must contain at least one item, the customer and the seller must
-     * exist, every item must exist and have enough stock. The best active
-     * promotion is applied, the stock of every item is deducted through the
-     * service of its type and the sale is stored.
+     * exist, every item must exist and have enough stock. Every console receives
+     * a basic warranty and, if requested, an extended warranty whose cost is
+     * added to the sale. The best active promotion is applied, the stock is
+     * deducted and the sale is stored.
      *
-     * @param customerId identification of the customer
-     * @param sellerCode employee code of the seller
-     * @param itemIds    identifiers of the products or accessories bought, one entry per unit
+     * @param customerId          identification of the customer
+     * @param sellerCode          employee code of the seller
+     * @param itemIds             identifiers of the products or accessories bought, one entry per unit
+     * @param extendedWarrantyIds identifiers of the consoles that get an extended warranty; may be empty
      * @return the registered sale
      * @throws IllegalArgumentException if any business rule is violated
      */
-    public Sale registerSale(String customerId, String sellerCode, List<String> itemIds) {
+    public Sale registerSale(String customerId, String sellerCode, List<String> itemIds,
+                             List<String> extendedWarrantyIds) {
         if (itemIds == null || itemIds.isEmpty()) {
             throw new IllegalArgumentException("La venta debe contener al menos un producto.");
         }
@@ -73,12 +89,23 @@ public class SaleService {
         validateStock(items, quantities);
 
         Sale sale = new Sale(nextSaleId(), LocalDate.now(), customer, seller, items);
+        updateInventory(items, quantities);
+        List<String> extended = extendedWarrantyIds == null ? Collections.emptyList() : extendedWarrantyIds;
+        double warrantyCost = 0;
+        for (Product item : items) {
+            if (item instanceof Console) {
+                warrantyService.assignBasicWarranty(item, sale, sale.getDate());
+                if (containsIgnoreCase(extended, item.getId())) {
+                    warrantyCost += warrantyService.assignExtendedWarranty(item, sale, sale.getDate()).getAdditionalCost();
+                }
+            }
+        }
+        sale.setExtendedWarrantyCost(warrantyCost);
         Promotion promotion = promotionService.findBestPromotionFor(sale);
         if (promotion != null) {
             sale.setAppliedPromotionName(promotion.getName());
             sale.setDiscountAmount(promotion.calculateDiscount(sale));
         }
-        updateInventory(items, quantities);
         sales.add(sale);
         saleRepository.saveAll(sales);
         return sale;
@@ -215,6 +242,15 @@ public class SaleService {
             }
         }
         return null;
+    }
+
+    private boolean containsIgnoreCase(List<String> values, String value) {
+        for (String candidate : values) {
+            if (candidate.equalsIgnoreCase(value)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private String nextSaleId() {

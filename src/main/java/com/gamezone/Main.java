@@ -5,11 +5,13 @@ import com.gamezone.persistence.PersonRepository;
 import com.gamezone.persistence.ProductRepository;
 import com.gamezone.persistence.PromotionRepository;
 import com.gamezone.persistence.SaleRepository;
+import com.gamezone.persistence.WarrantyRepository;
 import com.gamezone.service.AccessoryService;
 import com.gamezone.service.PersonService;
 import com.gamezone.service.ProductService;
 import com.gamezone.service.PromotionService;
 import com.gamezone.service.SaleService;
+import com.gamezone.service.WarrantyService;
 import com.gamezone.ui.ConsoleMenu;
 
 /**
@@ -41,6 +43,12 @@ public class Main {
             PromotionService promotionService = new PromotionService(promotionRepository);
             SaleService saleService = new SaleService(saleRepository, productService, personService,
                     accessoryService, promotionService);
+            // The warranty repository needs the sale service to load its data, so the
+            // warranty service cannot be injected into SaleService through its constructor.
+            WarrantyRepository warrantyRepository = new WarrantyRepository(DATA_DIRECTORY + "warranties.csv",
+                    saleService, productService);
+            WarrantyService warrantyService = new WarrantyService(warrantyRepository);
+            saleService.setWarrantyService(warrantyService);
 
             ConsoleMenu consoleMenu = new ConsoleMenu(productService, personService, saleService, accessoryService,
                     promotionService);
