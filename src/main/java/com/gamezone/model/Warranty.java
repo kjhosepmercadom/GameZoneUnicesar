@@ -1,6 +1,7 @@
 package com.gamezone.model;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Abstract base class for the warranties granted on the products sold. Every
@@ -97,4 +98,37 @@ public abstract class Warranty {
      * @return the additional cost in Colombian pesos
      */
     public abstract double getAdditionalCost();
+
+    /**
+     * Checks whether the warranty covers the given date.
+     *
+     * @param date the date to check
+     * @return {@code true} if the date is between the start and end dates, both included
+     */
+    public boolean isActive(LocalDate date) {
+        return date != null && !date.isBefore(startDate) && !date.isAfter(endDate);
+    }
+
+    /**
+     * Builds a certificate in Spanish with the warranty details.
+     *
+     * @return the formatted warranty certificate
+     */
+    public String generateWarrantyCertificate() {
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        StringBuilder certificate = new StringBuilder();
+        certificate.append("----------------------------------------\n");
+        certificate.append("CERTIFICADO DE GARANTIA ").append(id).append('\n');
+        certificate.append("Tipo: ").append(getWarrantyType()).append('\n');
+        certificate.append("Producto: ").append(product.getId()).append(" - ").append(product.getTitle()).append('\n');
+        certificate.append("Venta: ").append(sale.getId())
+                .append(" | Cliente: ").append(sale.getCustomer().getName()).append('\n');
+        certificate.append("Vigencia: ").append(startDate.format(format))
+                .append(" a ").append(endDate.format(format))
+                .append(" (").append(getDurationInMonths()).append(" meses)\n");
+        certificate.append(String.format("Costo adicional: $%,.0f%n", getAdditionalCost()));
+        certificate.append("Estado: ").append(isActive(LocalDate.now()) ? "VIGENTE" : "VENCIDA").append('\n');
+        certificate.append("----------------------------------------");
+        return certificate.toString();
+    }
 }
