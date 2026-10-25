@@ -1,9 +1,5 @@
 package com.gamezone.ui;
 
-import com.gamezone.exceptions.BusinessRuleException;
-import com.gamezone.exceptions.InvalidDataException;
-import com.gamezone.exceptions.PersistenceException;
-import com.gamezone.exceptions.ResourceNotFoundException;
 import com.gamezone.model.Accessory;
 import com.gamezone.model.Console;
 import com.gamezone.model.Customer;
@@ -22,7 +18,6 @@ import com.gamezone.service.SaleService;
 import com.gamezone.service.WarrantyService;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -42,7 +37,8 @@ public class ConsoleMenu {
     private final PromotionService promotionService;
     private final WarrantyService warrantyService;
     private final ReturnService returnService;
-    private final Scanner scanner;
+    private final ConsoleInput input;
+    private final ErrorPrinter errorPrinter;
 
     /**
      * Creates the menu with the services it uses.
@@ -65,7 +61,8 @@ public class ConsoleMenu {
         this.promotionService = promotionService;
         this.warrantyService = warrantyService;
         this.returnService = returnService;
-        this.scanner = new Scanner(System.in);
+        this.input = new ConsoleInput(new Scanner(System.in));
+        this.errorPrinter = new ErrorPrinter();
     }
 
     /**
@@ -115,6 +112,30 @@ public class ConsoleMenu {
                     System.out.println("Opcion no valida.");
             }
         }
+    }
+
+    private String readLine(String prompt) {
+        return input.readLine(prompt);
+    }
+
+    private String readText(String prompt) {
+        return input.readText(prompt);
+    }
+
+    private int readInt(String prompt) {
+        return input.readInt(prompt);
+    }
+
+    private double readDouble(String prompt) {
+        return input.readDouble(prompt);
+    }
+
+    private void showError(RuntimeException error) {
+        errorPrinter.print(error);
+    }
+
+    private LocalDate readDate(String prompt) {
+        return input.readDate(prompt);
     }
 
     private void showProductMenu() {
@@ -589,16 +610,6 @@ public class ConsoleMenu {
         }
     }
 
-    private LocalDate readDate(String prompt) {
-        while (true) {
-            String value = readLine(prompt);
-            try {
-                return LocalDate.parse(value);
-            } catch (DateTimeParseException e) {
-                System.out.println("Debe ingresar una fecha valida con el formato AAAA-MM-DD.");
-            }
-        }
-    }
 
     private void showWarrantyMenu() {
         System.out.println();
@@ -745,67 +756,5 @@ public class ConsoleMenu {
         System.out.println(String.format("Total de ventas:       $%,.0f", returnService.calculateMonthlySales(month, year)));
         System.out.println(String.format("Total de devoluciones: $%,.0f", returnService.calculateMonthlyReturns(month, year)));
         System.out.println(String.format("Balance neto:          $%,.0f", returnService.generateMonthlyBalance(month, year)));
-    }
-
-    private void showError(RuntimeException error) {
-        try {
-            throw error;
-        } catch (ResourceNotFoundException e) {
-            System.out.println("No se encontro el recurso solicitado: " + e.getMessage());
-        } catch (BusinessRuleException e) {
-            System.out.println("No se puede completar la operacion: " + e.getMessage());
-        } catch (InvalidDataException e) {
-            System.out.println("Los datos ingresados no son validos: " + e.getMessage());
-        } catch (PersistenceException e) {
-            System.out.println("Ocurrio un problema al acceder a los datos del sistema. Contacte al administrador.");
-        } catch (IllegalArgumentException e) {
-            System.out.println("No se puede completar la operacion: " + e.getMessage());
-        } catch (RuntimeException e) {
-            System.out.println("Ocurrio un error inesperado. Intente de nuevo.");
-        }
-    }
-
-    private String readLine(String prompt) {
-        System.out.print(prompt);
-        if (!scanner.hasNextLine()) {
-            throw new IllegalStateException("No hay mas datos de entrada.");
-        }
-        return scanner.nextLine().trim();
-    }
-
-    private String readText(String prompt) {
-        while (true) {
-            String value = readLine(prompt);
-            if (!value.isEmpty()) {
-                return value;
-            }
-            System.out.println("Este campo es obligatorio.");
-        }
-    }
-
-    private int readInt(String prompt) {
-        while (true) {
-            String value = readLine(prompt);
-            try {
-                return Integer.parseInt(value);
-            } catch (NumberFormatException e) {
-                System.out.println("Debe ingresar un numero entero.");
-            }
-        }
-    }
-
-    private double readDouble(String prompt) {
-        while (true) {
-            String value = readLine(prompt).replace("$", "").replace(" ", "");
-            if (value.matches("\\d{1,3}(\\.\\d{3})+")) {
-                value = value.replace(".", "");
-            }
-            value = value.replace(",", ".");
-            try {
-                return Double.parseDouble(value);
-            } catch (NumberFormatException e) {
-                System.out.println("Debe ingresar un numero valido.");
-            }
-        }
     }
 }
