@@ -268,14 +268,15 @@ public class ConsoleMenu {
         printSellers();
         String sellerCode = readText("Codigo del vendedor: ");
         printProducts();
+        printAccessories(accessoryService.listAllAccessories(), "No hay accesorios registrados.");
         List<String> productIds = new ArrayList<>();
         while (true) {
-            String productId = readLine("Codigo del producto (Enter para terminar): ");
+            String productId = readLine("Codigo del producto o accesorio (Enter para terminar): ");
             if (productId.isEmpty()) {
                 break;
             }
-            if (productService.findById(productId) == null) {
-                System.out.println("No existe un producto con codigo " + productId + ".");
+            if (productService.findById(productId) == null && accessoryService.findById(productId) == null) {
+                System.out.println("No existe un producto o accesorio con codigo " + productId + ".");
                 continue;
             }
             int quantity = readInt("Cantidad: ");
