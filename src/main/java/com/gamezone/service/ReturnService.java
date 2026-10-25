@@ -86,6 +86,47 @@ public class ReturnService {
         return productReturn;
     }
 
+    /**
+     * Returns every registered return.
+     *
+     * @return a copy of the return list
+     */
+    public List<Return> viewAllReturns() {
+        return new ArrayList<>(returns);
+    }
+
+    /**
+     * Returns the returns whose original sale belongs to a customer.
+     *
+     * @param customerId identification of the customer
+     * @return the returns of the customer, possibly empty
+     */
+    public List<Return> viewReturnsByCustomer(String customerId) {
+        List<Return> result = new ArrayList<>();
+        for (Return productReturn : returns) {
+            if (productReturn.getSale().getCustomer().getIdentification().equals(customerId.trim())) {
+                result.add(productReturn);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns the returns associated with a sale.
+     *
+     * @param saleId identifier of the sale
+     * @return the returns of the sale, possibly empty
+     */
+    public List<Return> viewReturnsBySale(String saleId) {
+        List<Return> result = new ArrayList<>();
+        for (Return productReturn : returns) {
+            if (productReturn.getSale().getId().equalsIgnoreCase(saleId.trim())) {
+                result.add(productReturn);
+            }
+        }
+        return result;
+    }
+
     private Product findInSale(Sale sale, String productId) {
         for (Product product : sale.getProducts()) {
             if (product.getId().equalsIgnoreCase(productId.trim())) {
