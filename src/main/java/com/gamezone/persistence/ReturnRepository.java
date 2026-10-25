@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,6 +60,73 @@ public class ReturnRepository {
         } catch (IOException e) {
             throw new IllegalStateException("No se pudo guardar el archivo de devoluciones: " + filePath, e);
         }
+    }
+
+    /**
+     * Reads every return stored in the file, resolving the original sale and
+     * the returned products against the given lists.
+     *
+     * @param sales    the sales already loaded by the system
+     * @param products the products of the inventory
+     * @return the stored returns, or an empty list if the file does not exist
+     * @throws IllegalStateException if the file cannot be read, has an invalid line
+     *                               or references an unknown sale or product
+     */
+    public List<Return> loadAll(List<Sale> sales, List<Product> products) {
+        List<Return> returns = new ArrayList<>();
+        for (String[] fields : readRecords()) {
+            Sale sale = findSale(sales, fields[2]);
+            List<Product> returned = new ArrayList<>();
+            for (String productId : fields[3].split(LIST_SEPARATOR)) {
+                returned.add(findProduct(products, productId));
+            }
+            returns.add(create(fields, sale, returned));
+        }
+        return returns;
+    }
+
+    private Return create(String[] fields, Sale sale, List<Product> returned) {
+        Return productReturn = new Return(fields[0], LocalDate.parse(fields[1]), sale, returned, fields[4]);
+        productReturn.calculateRefundAmount();
+        return productReturn;
+    }
+
+    private List<String[]> readRecords() {
+        List<String[]> records = new ArrayList<>();
+        if (!Files.exists(filePath)) {
+            return records;
+        }
+        List<String> lines;
+        try {
+            lines = Files.readAllLines(filePath, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new IllegalStateException("No se pudo leer el archivo de devoluciones: " + filePath, e);
+        }
+        for (int i = 0; i < lines.size(); i++) {
+            String line = lines.get(i).trim();
+            if (!line.isEmpty()) {
+                records.add(line.split(SEPARATOR, -1));
+            }
+        }
+        return records;
+    }
+
+    private Sale findSale(List<Sale> sales, String saleId) {
+        for (Sale sale : sales) {
+            if (sale.getId().equals(saleId)) {
+                return sale;
+            }
+        }
+        throw new IllegalStateException("Devolucion con venta desconocida " + saleId + " en " + filePath);
+    }
+
+    private Product findProduct(List<Product> products, String productId) {
+        for (Product product : products) {
+            if (product.getId().equals(productId)) {
+                return product;
+            }
+        }
+        throw new IllegalStateException("Devolucion con producto desconocido " + productId + " en " + filePath);
     }
 
     private String clean(String value) {
