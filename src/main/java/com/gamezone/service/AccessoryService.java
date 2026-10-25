@@ -43,6 +43,8 @@ public class AccessoryService {
      */
     public Controller registerController(String id, String title, double price, int stock,
                                          List<String> compatibleConsoleIds, String connectionType) {
+        validateCommonData(id, title, price, stock);
+        requireText(connectionType, "tipo de conexion");
         Controller controller = new Controller(id.trim(), title.trim(), price, stock,
                 cleanIds(compatibleConsoleIds), connectionType.trim());
         return save(controller);
@@ -63,6 +65,11 @@ public class AccessoryService {
      */
     public Cable registerCable(String id, String title, double price, int stock,
                                List<String> compatibleConsoleIds, double lengthInMeters, String connectorType) {
+        validateCommonData(id, title, price, stock);
+        requireText(connectorType, "tipo de conector");
+        if (lengthInMeters <= 0) {
+            throw new IllegalArgumentException("La longitud debe ser mayor que cero.");
+        }
         Cable cable = new Cable(id.trim(), title.trim(), price, stock,
                 cleanIds(compatibleConsoleIds), lengthInMeters, connectorType.trim());
         return save(cable);
@@ -83,6 +90,11 @@ public class AccessoryService {
      */
     public Memory registerMemory(String id, String title, double price, int stock,
                                  List<String> compatibleConsoleIds, int capacityInGb, String memoryType) {
+        validateCommonData(id, title, price, stock);
+        requireText(memoryType, "tipo de memoria");
+        if (capacityInGb <= 0) {
+            throw new IllegalArgumentException("La capacidad debe ser mayor que cero.");
+        }
         Memory memory = new Memory(id.trim(), title.trim(), price, stock,
                 cleanIds(compatibleConsoleIds), capacityInGb, memoryType.trim());
         return save(memory);
@@ -179,5 +191,25 @@ public class AccessoryService {
             }
         }
         return result;
+    }
+
+    private void validateCommonData(String id, String title, double price, int stock) {
+        requireText(id, "codigo");
+        requireText(title, "titulo");
+        if (findById(id) != null) {
+            throw new IllegalArgumentException("Ya existe un accesorio con codigo " + id.trim() + ".");
+        }
+        if (price <= 0) {
+            throw new IllegalArgumentException("El precio debe ser mayor que cero.");
+        }
+        if (stock < 0) {
+            throw new IllegalArgumentException("La cantidad en inventario no puede ser negativa.");
+        }
+    }
+
+    private void requireText(String value, String fieldName) {
+        if (value == null || value.trim().isEmpty()) {
+            throw new IllegalArgumentException("El campo " + fieldName + " es obligatorio.");
+        }
     }
 }
