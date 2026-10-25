@@ -16,3 +16,13 @@ had when Requirement 8 started (GRASP correction of Requirement 7 included).
 | GRASP correction (R7)       | `CsvFile`, and the changes in `AccessoryService`, `ReturnService` and `WarrantyService` |
 
 Verdict legend: **violation**, **correct**, **not applicable**.
+
+## Person module
+
+| Principle | Verdict | Evidence |
+|-----------|---------|----------|
+| SRP | correct | `PersonService` only applies the person rules; `PersonRepository` only converts lines; file access is in `CsvFile`. |
+| OCP | correct | Customers and sellers are kept in two files with a fixed layout each; no type switch exists. |
+| LSP | correct | `Customer` and `Seller` can replace `Person`: both implement `getDescription()` and keep the common data. |
+| ISP | not applicable | No interfaces. |
+| DIP | correct | The repository is injected through the constructor of `PersonService`. |
