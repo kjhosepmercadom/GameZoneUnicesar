@@ -36,3 +36,49 @@ Verdict legend: **violation**, **correct**, **not applicable**.
 | LSP | correct | The services work with `Accessory` and `Promotion` without assumptions about the subtype. |
 | ISP | correct | `AccessoryService` and `PromotionService` expose only the operations their submenus use. |
 | DIP | correct | Repositories are injected through the constructors. |
+
+## Return and warranty persistence and services
+
+| Principle | Verdict | Evidence |
+|-----------|---------|----------|
+| SRP | **violation** | `ReturnService` (see V-01). |
+| OCP | **violation** | `ReturnService.registerReturn`: `if (sale.findProduct(id) instanceof Accessory) { accessoryService.restoreStock(...); } else { productService.restoreStock(...); }`; `WarrantyRepository.saveAll` (`instanceof ExtendedWarranty ? "EXTENDED" : "BASIC"`) and `create` (`if ("EXTENDED".equals(fields[0]))`). |
+| LSP | correct | `WarrantyService` works with any `Warranty` since R7 (coverage compared by duration). |
+| ISP | correct | - |
+| DIP | **violation** | `ReturnService` depends on the concrete `ProductService` and `AccessoryService` to restore stock (see V-03). |
+
+### V-01 - The return service also builds the monthly report
+
+| Field | Content |
+|-------|---------|
+| Principle | SRP |
+| Module | Returns (R3, A6) - `ReturnService` |
+| Evidence | Besides `registerReturn` and the return queries, the class contains the report arithmetic: `calculateMonthlySales`, `calculateMonthlyReturns`, `generateMonthlyBalance` and the helper `isInMonth`. |
+| Explanation | The class has two reasons to change: the rules of a return, and the way the monthly report is calculated (A6 already changed the report alone). |
+| Consequence | A new report figure (for example, warranties sold in the month) would modify the class that registers returns. |
+| Proposed solution | Move the arithmetic to a `MonthlyBalanceCalculator` in the service package; `ReturnService` keeps its public methods and delegates (the menu does not change). |
+| Code of another member | No. |
+
+### V-02 - Type switches in the repositories (boundary)
+
+| Field | Content |
+|-------|---------|
+| Principle | OCP |
+| Module | `AccessoryRepository`, `PromotionRepository`, `WarrantyRepository` |
+| Evidence | The switches and `instanceof` chains listed above. |
+| Explanation | Supporting a new subtype requires modifying the repository. |
+| Consequence | Each new accessory, promotion or warranty type modifies the code that loads all the existing ones. |
+| Proposed solution | The same mapper abstraction proposed by Developer 1: one mapper per subtype. |
+| Code of another member | Yes: same finding as Developer 1 V-01 (`ProductRepository`). |
+
+### V-03 - Stock restoration depends on concrete services (boundary)
+
+| Field | Content |
+|-------|---------|
+| Principle | DIP (also OCP) |
+| Module | Returns (R3, A4) - `ReturnService.registerReturn` |
+| Evidence | Fields `productService` and `accessoryService` used only to restore stock, chosen with `instanceof Accessory`. |
+| Explanation | The high level rule (restore the stock of the returned items) depends on two concrete low level services and on the item types. |
+| Consequence | A new kind of item modifies `ReturnService`; the same code exists in `SaleService` (Leader). |
+| Proposed solution | An inventory abstraction implemented by `ProductService` and `AccessoryService`; `ReturnService` asks the inventory that owns the item. |
+| Code of another member | Yes: `SaleService` (Leader) and `ProductService` (Developer 1). Reported to the Leader. |
