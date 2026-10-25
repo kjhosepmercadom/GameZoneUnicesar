@@ -175,6 +175,25 @@ public class AccessoryService {
         accessoryRepository.saveAll(accessories);
     }
 
+    /**
+     * Adds returned units back to the stock of an accessory and persists the change.
+     *
+     * @param accessoryId the accessory identifier
+     * @param quantity    the quantity returned, must be positive
+     * @throws IllegalArgumentException if the accessory does not exist or the quantity is not positive
+     */
+    public void restoreStock(String accessoryId, int quantity) {
+        Accessory accessory = findById(accessoryId);
+        if (accessory == null) {
+            throw new IllegalArgumentException("No existe un accesorio con codigo " + accessoryId + ".");
+        }
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("La cantidad a restaurar debe ser mayor que cero.");
+        }
+        accessory.setStock(accessory.getStock() + quantity);
+        accessoryRepository.saveAll(accessories);
+    }
+
     private <T extends Accessory> T save(T accessory) {
         accessories.add(accessory);
         accessoryRepository.saveAll(accessories);
