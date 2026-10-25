@@ -1,0 +1,22 @@
+# SOLID Refactor Log - Requirement 8
+
+## Non-regression strategy
+
+The same strategy of Requirement 7: the keyboard script
+`docs/regression/menu-operations-input.txt` runs every operation of the seven
+submenus, including every error case, with the versioned data files. The
+console output and the resulting `data/*.csv` files of each run are compared
+with the reference run. The commands are described in
+`docs/grasp-refactor-log.md`.
+
+## Reference run (before the first correction)
+
+Executed on `develop` (with the GRASP correction already merged) before the
+first commit of `feature/solid-refactor`: 1376 lines of output, no exception
+trace, sale `S0001` total $2.739.780, refund $2.564.850, net balance $174.930,
+the same values of the final run of Requirement 7.
+
+## Changes
+
+| Class | Change | Violation | Principle applied | Commit / PR | Responsible |
+|-------|--------|-----------|-------------------|-------------|-------------|
