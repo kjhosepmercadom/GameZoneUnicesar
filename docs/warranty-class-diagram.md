@@ -45,15 +45,14 @@ classDiagram
     }
     class WarrantyRepository {
         -Path filePath
-        -SaleService saleService
-        -ProductService productService
-        +WarrantyRepository(String filePath, SaleService saleService, ProductService productService)
-        +loadAll() List~Warranty~
+        +WarrantyRepository(String filePath)
+        +loadAll(List~Sale~ sales) List~Warranty~
         +saveAll(List~Warranty~ warranties) void
     }
     class WarrantyService {
         -WarrantyRepository warrantyRepository
         -List~Warranty~ warranties
+        +loadWarranties(List~Sale~ sales) void
         +assignBasicWarranty(Product product, Sale sale, LocalDate startDate) BasicWarranty
         +assignExtendedWarranty(Product product, Sale sale, LocalDate startDate) ExtendedWarranty
         +findWarrantyByProduct(String productId, String saleId) Warranty
@@ -83,10 +82,22 @@ classDiagram
     WarrantyService "1" o-- "0..*" Warranty : manages
     SaleService "1" --> "1" WarrantyService : assigns warranties
     ConsoleMenu "1" --> "1" WarrantyService : uses
-    WarrantyRepository --> SaleService : resolves sales while loading
-    WarrantyRepository --> ProductService : resolves products while loading
+    WarrantyRepository ..> Sale : resolves references from the loaded sales
 ```
 
-With this design `WarrantyRepository` needs `SaleService` to load its data,
-while `SaleService` needs `WarrantyService` to assign warranties. This
-circular dependency is resolved in the integration adjustment A2.
+## Adjustment A2 - dependencies after removing the cycle
+
+The repository stores only the identifiers of the sale and of the product and
+resolves them from the sales passed to `loadAll(List<Sale>)`; it no longer
+depends on any service. `SaleService` receives `WarrantyService` through its
+constructor and, after loading the sales, calls
+`warrantyService.loadWarranties(sales)`. The dependency graph is now acyclic:
+
+```mermaid
+flowchart LR
+    Main --> SaleService
+    Main --> WarrantyService
+    SaleService --> WarrantyService
+    WarrantyService --> WarrantyRepository
+    WarrantyRepository --> Model[(Sale, Product, Warranty)]
+```
