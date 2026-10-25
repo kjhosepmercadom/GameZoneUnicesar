@@ -44,6 +44,7 @@ public class PromotionService {
      */
     public PercentageDiscount registerPercentageDiscount(String id, String name, LocalDate startDate,
                                                          LocalDate endDate, double percentage) {
+        validateCommonData(id, name, startDate, endDate, percentage);
         return save(new PercentageDiscount(id.trim(), name.trim(), startDate, endDate, percentage));
     }
 
@@ -62,7 +63,11 @@ public class PromotionService {
      */
     public CategoryDiscount registerCategoryDiscount(String id, String name, LocalDate startDate,
                                                      LocalDate endDate, double percentage, String targetCategory) {
-        String category = targetCategory.trim().toUpperCase();
+        validateCommonData(id, name, startDate, endDate, percentage);
+        String category = targetCategory == null ? "" : targetCategory.trim().toUpperCase();
+        if (!category.equals("VIDEOGAME") && !category.equals("CONSOLE")) {
+            throw new IllegalArgumentException("La categoria debe ser VIDEOGAME o CONSOLE.");
+        }
         return save(new CategoryDiscount(id.trim(), name.trim(), startDate, endDate, percentage, category));
     }
 
@@ -82,6 +87,10 @@ public class PromotionService {
     public BulkPurchaseDiscount registerBulkPurchaseDiscount(String id, String name, LocalDate startDate,
                                                              LocalDate endDate, int minimumQuantity,
                                                              double percentage) {
+        validateCommonData(id, name, startDate, endDate, percentage);
+        if (minimumQuantity < 1) {
+            throw new IllegalArgumentException("La cantidad minima debe ser al menos 1.");
+        }
         return save(new BulkPurchaseDiscount(id.trim(), name.trim(), startDate, endDate, minimumQuantity, percentage));
     }
 
@@ -155,5 +164,24 @@ public class PromotionService {
         promotions.add(promotion);
         promotionRepository.saveAll(promotions);
         return promotion;
+    }
+
+    private void validateCommonData(String id, String name, LocalDate startDate, LocalDate endDate,
+                                    double percentage) {
+        if (id == null || id.trim().isEmpty()) {
+            throw new IllegalArgumentException("El campo codigo es obligatorio.");
+        }
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("El campo nombre es obligatorio.");
+        }
+        if (findById(id) != null) {
+            throw new IllegalArgumentException("Ya existe una promocion con codigo " + id.trim() + ".");
+        }
+        if (startDate == null || endDate == null || endDate.isBefore(startDate)) {
+            throw new IllegalArgumentException("La fecha de fin no puede ser anterior a la fecha de inicio.");
+        }
+        if (percentage <= 0 || percentage > 100) {
+            throw new IllegalArgumentException("El porcentaje debe ser mayor que 0 y como maximo 100.");
+        }
     }
 }
