@@ -1,8 +1,5 @@
 package com.gamezone.ui;
 
-import com.gamezone.model.Accessory;
-import com.gamezone.model.Console;
-import com.gamezone.model.Product;
 import com.gamezone.model.Promotion;
 import com.gamezone.model.Return;
 import com.gamezone.model.Sale;
@@ -17,7 +14,6 @@ import com.gamezone.service.WarrantyService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Scanner;
 
@@ -40,6 +36,7 @@ public class ConsoleMenu {
     private final ProductMenu productMenu;
     private final PersonMenu personMenu;
     private final AccessoryMenu accessoryMenu;
+    private final SaleMenu saleMenu;
 
     /**
      * Creates the menu with the services it uses.
@@ -67,6 +64,8 @@ public class ConsoleMenu {
         this.productMenu = new ProductMenu(productService, input, errorPrinter);
         this.personMenu = new PersonMenu(personService, input, errorPrinter);
         this.accessoryMenu = new AccessoryMenu(accessoryService, productService, input, errorPrinter);
+        this.saleMenu = new SaleMenu(saleService, personService, productService, accessoryService,
+                personMenu, productMenu, accessoryMenu, input, errorPrinter);
     }
 
     /**
@@ -94,7 +93,7 @@ public class ConsoleMenu {
                     personMenu.show();
                     break;
                 case 3:
-                    showSaleMenu();
+                    saleMenu.show();
                     break;
                 case 4:
                     accessoryMenu.show();
@@ -118,20 +117,8 @@ public class ConsoleMenu {
         }
     }
 
-    private void printProducts() {
-        productMenu.printProducts();
-    }
-
     private void printCustomers() {
         personMenu.printCustomers();
-    }
-
-    private void printSellers() {
-        personMenu.printSellers();
-    }
-
-    private void printAccessories(List<Accessory> accessories, String emptyMessage) {
-        accessoryMenu.printAccessories(accessories, emptyMessage);
     }
 
     private String readLine(String prompt) {
@@ -156,127 +143,6 @@ public class ConsoleMenu {
 
     private LocalDate readDate(String prompt) {
         return input.readDate(prompt);
-    }
-
-    private void showSaleMenu() {
-        System.out.println();
-        System.out.println("--- Gestion de ventas ---");
-        System.out.println("1. Registrar venta");
-        System.out.println("2. Historial completo de ventas");
-        System.out.println("3. Historial de compras de un cliente");
-        System.out.println("4. Ventas atendidas por un vendedor");
-        System.out.println("5. Consultar detalle de una venta");
-        System.out.println("0. Volver");
-        int option = readInt("Seleccione una opcion: ");
-        try {
-            switch (option) {
-                case 1:
-                    registerSale();
-                    break;
-                case 2:
-                    printSales(saleService.listAllSales(), "No hay ventas registradas.");
-                    break;
-                case 3:
-                    printCustomers();
-                    String customerId = readText("Identificacion del cliente: ");
-                    if (personService.findCustomerById(customerId) == null) {
-                        System.out.println("No existe un cliente con identificacion " + customerId + ".");
-                    } else {
-                        printSales(saleService.findSalesByCustomer(customerId), "El cliente no tiene compras registradas.");
-                    }
-                    break;
-                case 4:
-                    printSellers();
-                    String sellerCode = readText("Codigo del vendedor: ");
-                    if (personService.findSellerByEmployeeCode(sellerCode) == null) {
-                        System.out.println("No existe un vendedor con codigo " + sellerCode + ".");
-                    } else {
-                        printSales(saleService.findSalesBySeller(sellerCode), "El vendedor no tiene ventas registradas.");
-                    }
-                    break;
-                case 5:
-                    String saleId = readText("Codigo de la venta: ");
-                    Sale sale = saleService.findSaleById(saleId);
-                    if (sale == null) {
-                        System.out.println("No existe una venta con codigo " + saleId + ".");
-                    } else {
-                        System.out.println(sale.generateReceipt());
-                    }
-                    break;
-                case 0:
-                    break;
-                default:
-                    System.out.println("Opcion no valida.");
-            }
-        } catch (RuntimeException e) {
-            showError(e);
-        }
-    }
-
-    private void registerSale() {
-        System.out.println("-- Registrar venta --");
-        if (personService.listCustomers().isEmpty()) {
-            System.out.println("Primero debe registrar al menos un cliente.");
-            return;
-        }
-        printCustomers();
-        String customerId = readText("Identificacion del cliente: ");
-        printSellers();
-        String sellerCode = readText("Codigo del vendedor: ");
-        List<String> itemIds = readSaleItems();
-        List<String> extendedWarrantyIds = askExtendedWarranties(itemIds);
-        Sale sale = saleService.registerSale(customerId, sellerCode, itemIds, extendedWarrantyIds);
-        System.out.println("Venta registrada correctamente.");
-        System.out.println(sale.generateReceipt());
-    }
-
-    private List<String> readSaleItems() {
-        printProducts();
-        printAccessories(accessoryService.listAllAccessories(), "No hay accesorios registrados.");
-        List<String> itemIds = new ArrayList<>();
-        while (true) {
-            String itemId = readLine("Codigo del producto o accesorio (Enter para terminar): ");
-            if (itemId.isEmpty()) {
-                return itemIds;
-            }
-            if (productService.findById(itemId) == null && accessoryService.findById(itemId) == null) {
-                System.out.println("No existe un producto o accesorio con codigo " + itemId + ".");
-                continue;
-            }
-            int quantity = readInt("Cantidad: ");
-            if (quantity <= 0) {
-                System.out.println("La cantidad debe ser mayor que cero.");
-                continue;
-            }
-            for (int i = 0; i < quantity; i++) {
-                itemIds.add(itemId);
-            }
-        }
-    }
-
-    private List<String> askExtendedWarranties(List<String> itemIds) {
-        List<String> extendedWarrantyIds = new ArrayList<>();
-        for (String itemId : new LinkedHashSet<>(itemIds)) {
-            Product product = productService.findById(itemId);
-            if (product instanceof Console && !extendedWarrantyIds.contains(product.getId())) {
-                String answer = readLine("Desea garantia extendida (10% del precio) para "
-                        + product.getTitle() + "? (s/n): ");
-                if (answer.equalsIgnoreCase("s")) {
-                    extendedWarrantyIds.add(product.getId());
-                }
-            }
-        }
-        return extendedWarrantyIds;
-    }
-
-    private void printSales(List<Sale> sales, String emptyMessage) {
-        if (sales.isEmpty()) {
-            System.out.println(emptyMessage);
-            return;
-        }
-        for (Sale sale : sales) {
-            System.out.println(sale.generateReceipt());
-        }
     }
 
     private void showPromotionMenu() {
