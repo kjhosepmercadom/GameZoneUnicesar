@@ -17,6 +17,8 @@ public class Sale {
     private Customer customer;
     private Seller seller;
     private List<Product> products;
+    private String appliedPromotionName;
+    private double discountAmount;
 
     /**
      * Creates a sale with all its information.
@@ -101,6 +103,51 @@ public class Sale {
     }
 
     /**
+     * Returns the name of the promotion applied to the sale.
+     *
+     * @return the promotion name, or {@code null} if no promotion was applied
+     */
+    public String getAppliedPromotionName() {
+        return appliedPromotionName;
+    }
+
+    /**
+     * Sets the name of the promotion applied to the sale.
+     *
+     * @param appliedPromotionName the promotion name, or {@code null} if none
+     */
+    public void setAppliedPromotionName(String appliedPromotionName) {
+        this.appliedPromotionName = appliedPromotionName;
+    }
+
+    /**
+     * Returns the discount granted by the applied promotion.
+     *
+     * @return the discount amount in Colombian pesos
+     */
+    public double getDiscountAmount() {
+        return discountAmount;
+    }
+
+    /**
+     * Sets the discount granted by the applied promotion.
+     *
+     * @param discountAmount the discount amount in Colombian pesos
+     */
+    public void setDiscountAmount(double discountAmount) {
+        this.discountAmount = discountAmount;
+    }
+
+    /**
+     * Calculates the final total of the sale: subtotal minus the discount.
+     *
+     * @return the final total in Colombian pesos
+     */
+    public double calculateFinalTotal() {
+        return calculateTotal() - discountAmount;
+    }
+
+    /**
      * Builds a receipt in Spanish with the sale details: identifier, date,
      * customer, seller, products bought and total.
      *
@@ -123,7 +170,13 @@ public class Sale {
         }
         receipt.append("----------------------------------------\n");
         receipt.append(String.format("Productos: %d%n", products.size()));
-        receipt.append(String.format("TOTAL: $%,.0f%n", calculateTotal()));
+        receipt.append(String.format("Subtotal: $%,.0f%n", calculateTotal()));
+        if (appliedPromotionName != null && discountAmount > 0) {
+            receipt.append(String.format("Descuento (%s): -$%,.0f%n", appliedPromotionName, discountAmount));
+        } else {
+            receipt.append("Descuento: no aplica\n");
+        }
+        receipt.append(String.format("TOTAL: $%,.0f%n", calculateFinalTotal()));
         receipt.append("========================================");
         return receipt.toString();
     }

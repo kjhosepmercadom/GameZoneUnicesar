@@ -3,6 +3,7 @@ package com.gamezone.service;
 import com.gamezone.model.Accessory;
 import com.gamezone.model.Customer;
 import com.gamezone.model.Product;
+import com.gamezone.model.Promotion;
 import com.gamezone.model.Sale;
 import com.gamezone.model.Seller;
 import com.gamezone.persistence.SaleRepository;
@@ -25,6 +26,7 @@ public class SaleService {
     private final ProductService productService;
     private final PersonService personService;
     private final AccessoryService accessoryService;
+    private final PromotionService promotionService;
     private final List<Sale> sales;
 
     /**
@@ -35,22 +37,24 @@ public class SaleService {
      * @param productService   service that manages the product inventory
      * @param personService    service that manages customers and sellers
      * @param accessoryService service that manages the accessory inventory
+     * @param promotionService service that selects the best promotion of each sale
      */
     public SaleService(SaleRepository saleRepository, ProductService productService, PersonService personService,
-                       AccessoryService accessoryService) {
+                       AccessoryService accessoryService, PromotionService promotionService) {
         this.saleRepository = saleRepository;
         this.productService = productService;
         this.personService = personService;
         this.accessoryService = accessoryService;
+        this.promotionService = promotionService;
         this.sales = saleRepository.loadAll(personService.listCustomers(), personService.listSellers(), allItems());
     }
 
     /**
      * Registers a new sale of products and accessories. The rules applied are:
      * the sale must contain at least one item, the customer and the seller must
-     * exist, every item must exist and have enough stock. If all rules pass, the
-     * stock of every item is deducted through the service of its type and the
-     * sale is stored.
+     * exist, every item must exist and have enough stock. The best active
+     * promotion is applied, the stock of every item is deducted through the
+     * service of its type and the sale is stored.
      *
      * @param customerId identification of the customer
      * @param sellerCode employee code of the seller
@@ -69,10 +73,33 @@ public class SaleService {
         validateStock(items, quantities);
 
         Sale sale = new Sale(nextSaleId(), LocalDate.now(), customer, seller, items);
+        Promotion promotion = promotionService.findBestPromotionFor(sale);
+        if (promotion != null) {
+            sale.setAppliedPromotionName(promotion.getName());
+            sale.setDiscountAmount(promotion.calculateDiscount(sale));
+        }
         updateInventory(items, quantities);
         sales.add(sale);
         saleRepository.saveAll(sales);
         return sale;
+    }
+
+    /**
+     * Finds a sale by its identifier, ignoring letter case.
+     *
+     * @param saleId the sale identifier
+     * @return the sale found, or {@code null} if it does not exist
+     */
+    public Sale findSaleById(String saleId) {
+        if (saleId == null) {
+            return null;
+        }
+        for (Sale sale : sales) {
+            if (sale.getId().equalsIgnoreCase(saleId.trim())) {
+                return sale;
+            }
+        }
+        return null;
     }
 
     /**
