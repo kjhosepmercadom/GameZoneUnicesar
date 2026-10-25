@@ -54,6 +54,7 @@ public class SaleRepository {
                     + sale.getSeller().getEmployeeCode() + SEPARATOR
                     + String.join(PRODUCT_SEPARATOR, productIds)
                     + SEPARATOR + clean(sale.getAppliedPromotionName()) + SEPARATOR + sale.getDiscountAmount()
+                    + SEPARATOR + sale.getExtendedWarrantyCost()
             );
         }
         try {
@@ -115,6 +116,9 @@ public class SaleRepository {
         if (fields.length > 6) {
             sale.setAppliedPromotionName(fields[5].isEmpty() ? null : fields[5]);
             sale.setDiscountAmount(Double.parseDouble(fields[6]));
+        }
+        if (fields.length > 7) {
+            sale.setExtendedWarrantyCost(Double.parseDouble(fields[7]));
         }
         return sale;
     }
