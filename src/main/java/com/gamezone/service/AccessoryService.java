@@ -147,6 +147,22 @@ public class AccessoryService {
         return null;
     }
 
+    /**
+     * Deducts a sold quantity from the stock of an accessory and persists the change.
+     *
+     * @param accessoryId the accessory identifier
+     * @param quantity    the quantity sold
+     * @throws IllegalArgumentException if the accessory does not exist or the stock is insufficient
+     */
+    public void updateStock(String accessoryId, int quantity) {
+        Accessory accessory = findById(accessoryId);
+        if (accessory == null) {
+            throw new IllegalArgumentException("No existe un accesorio con codigo " + accessoryId + ".");
+        }
+        accessory.decreaseStock(quantity);
+        accessoryRepository.saveAll(accessories);
+    }
+
     private <T extends Accessory> T save(T accessory) {
         accessories.add(accessory);
         accessoryRepository.saveAll(accessories);
