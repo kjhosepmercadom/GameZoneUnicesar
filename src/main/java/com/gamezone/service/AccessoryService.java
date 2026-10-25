@@ -88,6 +88,31 @@ public class AccessoryService {
         return save(memory);
     }
 
+    /**
+     * Returns every accessory registered in the inventory.
+     *
+     * @return a copy of the accessory list
+     */
+    public List<Accessory> listAllAccessories() {
+        return new ArrayList<>(accessories);
+    }
+
+    /**
+     * Returns the accessories of a given type.
+     *
+     * @param type accessory type code: CONTROLLER, CABLE or MEMORY
+     * @return the accessories of that type, possibly empty
+     */
+    public List<Accessory> listAccessoriesByType(String type) {
+        List<Accessory> result = new ArrayList<>();
+        for (Accessory accessory : accessories) {
+            if (accessory.getAccessoryType().equalsIgnoreCase(type)) {
+                result.add(accessory);
+            }
+        }
+        return result;
+    }
+
     private <T extends Accessory> T save(T accessory) {
         accessories.add(accessory);
         accessoryRepository.saveAll(accessories);
