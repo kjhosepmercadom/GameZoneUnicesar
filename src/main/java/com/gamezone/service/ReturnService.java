@@ -27,6 +27,7 @@ public class ReturnService {
     private final SaleService saleService;
     private final List<InventoryService> inventories;
     private final WarrantyService warrantyService;
+    private final MonthlyBalanceCalculator balanceCalculator;
     private final List<Return> returns;
 
     /**
@@ -45,6 +46,7 @@ public class ReturnService {
         this.saleService = saleService;
         this.inventories = List.of(productService, accessoryService);
         this.warrantyService = warrantyService;
+        this.balanceCalculator = new MonthlyBalanceCalculator();
         this.returns = returnRepository.loadAll(saleService.listAllSales());
     }
 
@@ -160,13 +162,7 @@ public class ReturnService {
      * @return the sales total in Colombian pesos
      */
     public double calculateMonthlySales(int month, int year) {
-        double salesTotal = 0;
-        for (Sale sale : saleService.listAllSales()) {
-            if (isInMonth(sale.getDate(), month, year)) {
-                salesTotal += sale.calculateFinalTotal();
-            }
-        }
-        return salesTotal;
+        return balanceCalculator.calculateSales(saleService.listAllSales(), month, year);
     }
 
     /**
@@ -177,13 +173,7 @@ public class ReturnService {
      * @return the returns total in Colombian pesos
      */
     public double calculateMonthlyReturns(int month, int year) {
-        double returnsTotal = 0;
-        for (Return productReturn : returns) {
-            if (isInMonth(productReturn.getDate(), month, year)) {
-                returnsTotal += productReturn.getRefundAmount();
-            }
-        }
-        return returnsTotal;
+        return balanceCalculator.calculateReturns(returns, month, year);
     }
 
     /**
@@ -195,10 +185,6 @@ public class ReturnService {
      */
     public double generateMonthlyBalance(int month, int year) {
         return calculateMonthlySales(month, year) - calculateMonthlyReturns(month, year);
-    }
-
-    private boolean isInMonth(LocalDate date, int month, int year) {
-        return date.getMonthValue() == month && date.getYear() == year;
     }
 
     private InventoryService inventoryOf(String itemId) {
