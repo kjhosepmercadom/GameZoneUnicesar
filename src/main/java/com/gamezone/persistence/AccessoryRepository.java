@@ -6,11 +6,6 @@ import com.gamezone.model.Cable;
 import com.gamezone.model.Controller;
 import com.gamezone.model.Memory;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,7 +20,7 @@ public class AccessoryRepository {
     private static final String SEPARATOR = ";";
     private static final String LIST_SEPARATOR = ",";
 
-    private final Path filePath;
+    private final CsvFile file;
 
     /**
      * Creates a repository that works over the given file.
@@ -33,7 +28,7 @@ public class AccessoryRepository {
      * @param filePath path of the CSV file that stores the accessories
      */
     public AccessoryRepository(String filePath) {
-        this.filePath = Paths.get(filePath);
+        this.file = new CsvFile(filePath);
     }
 
     /**
@@ -47,14 +42,7 @@ public class AccessoryRepository {
         for (Accessory accessory : accessories) {
             lines.add(toLine(accessory));
         }
-        try {
-            if (filePath.getParent() != null) {
-                Files.createDirectories(filePath.getParent());
-            }
-            Files.write(filePath, lines, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new PersistenceException("No se pudo guardar el archivo de accesorios: " + filePath, e);
-        }
+        file.writeLines(lines, "No se pudo guardar el archivo de accesorios: ");
     }
 
     /**
@@ -66,15 +54,7 @@ public class AccessoryRepository {
      */
     public List<Accessory> loadAll() {
         List<Accessory> accessories = new ArrayList<>();
-        if (!Files.exists(filePath)) {
-            return accessories;
-        }
-        List<String> lines;
-        try {
-            lines = Files.readAllLines(filePath, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new PersistenceException("No se pudo leer el archivo de accesorios: " + filePath, e);
-        }
+        List<String> lines = file.readLines("No se pudo leer el archivo de accesorios: ");
         for (int i = 0; i < lines.size(); i++) {
             String line = lines.get(i).trim();
             if (line.isEmpty()) {
@@ -83,7 +63,7 @@ public class AccessoryRepository {
             try {
                 accessories.add(fromLine(line));
             } catch (RuntimeException e) {
-                throw new PersistenceException("Linea " + (i + 1) + " invalida en " + filePath + ": " + line, e);
+                throw new PersistenceException("Linea " + (i + 1) + " invalida en " + file.getPath() + ": " + line, e);
             }
         }
         return accessories;
@@ -130,6 +110,6 @@ public class AccessoryRepository {
     }
 
     private String clean(String value) {
-        return value == null ? "" : value.replace(SEPARATOR, ",").replace("\n", " ").replace("\r", " ");
+        return CsvFile.clean(value);
     }
 }

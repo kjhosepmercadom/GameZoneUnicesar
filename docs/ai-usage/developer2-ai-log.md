@@ -139,3 +139,18 @@ member's account.
 | Response        | Pointed out four findings: `WarrantyService` prefers the extended warranty with `instanceof`, `ReturnService` iterates the items of the sale, the file handling is duplicated in every repository, and `AccessoryService.restoreStock` changes the stock with the setter. |
 | Decision        | Accepted the four findings after checking the code. The `instanceof` in the `toLine` methods of the repositories was judged acceptable for GRASP, because the model must not know the file format. |
 | Related commit  | `docs: add repository findings to developer2 audit` |
+
+### Phase 2 - Correction
+
+#### Entry 11 - GRASP corrections V-02, V-04, V-06 and V-07
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Requirement 7, Phase 2 - `feature/grasp-refactor` |
+| Objective       | Create `CsvFile`, migrate five repositories and correct the services without changing the behaviour. |
+| Query           | "Create a CsvFile helper with readLines, writeLines and clean, use it in the repositories keeping every error message, and apply V-02, V-04 and V-06." |
+| Response        | Proposed `CsvFile` receiving the beginning of each error message, so every message stays exactly the same, and the use of `Sale.findProduct`, `Sale.countUnitsOf`, `Product.increaseStock` and `getDurationInMonths()`. |
+| Decision        | Accepted. `CsvFile` is package-private because only the repositories use it. Verified with the regression script: identical output and data. |
+| Related commit  | `refactor: add CsvFile helper for the repositories (V-07)` |

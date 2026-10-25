@@ -4,11 +4,6 @@ import com.gamezone.exceptions.PersistenceException;
 import com.gamezone.model.Customer;
 import com.gamezone.model.Seller;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,8 +16,8 @@ public class PersonRepository {
 
     private static final String SEPARATOR = ";";
 
-    private final Path customersFile;
-    private final Path sellersFile;
+    private final CsvFile customersFile;
+    private final CsvFile sellersFile;
 
     /**
      * Creates a repository that works over the given files.
@@ -31,8 +26,8 @@ public class PersonRepository {
      * @param sellersFile   path of the CSV file that stores the sellers
      */
     public PersonRepository(String customersFile, String sellersFile) {
-        this.customersFile = Paths.get(customersFile);
-        this.sellersFile = Paths.get(sellersFile);
+        this.customersFile = new CsvFile(customersFile);
+        this.sellersFile = new CsvFile(sellersFile);
     }
 
     /**
@@ -94,28 +89,13 @@ public class PersonRepository {
         return sellers;
     }
 
-    private void writeLines(Path file, List<String> lines) {
-        try {
-            if (file.getParent() != null) {
-                Files.createDirectories(file.getParent());
-            }
-            Files.write(file, lines, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new PersistenceException("No se pudo guardar el archivo: " + file, e);
-        }
+    private void writeLines(CsvFile file, List<String> lines) {
+        file.writeLines(lines, "No se pudo guardar el archivo: ");
     }
 
-    private List<String[]> readRecords(Path file, int expectedFields) {
+    private List<String[]> readRecords(CsvFile file, int expectedFields) {
         List<String[]> records = new ArrayList<>();
-        if (!Files.exists(file)) {
-            return records;
-        }
-        List<String> lines;
-        try {
-            lines = Files.readAllLines(file, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new PersistenceException("No se pudo leer el archivo: " + file, e);
-        }
+        List<String> lines = file.readLines("No se pudo leer el archivo: ");
         for (int i = 0; i < lines.size(); i++) {
             String line = lines.get(i).trim();
             if (line.isEmpty()) {
@@ -123,7 +103,7 @@ public class PersonRepository {
             }
             String[] fields = line.split(SEPARATOR, -1);
             if (fields.length != expectedFields) {
-                throw new PersistenceException("Linea " + (i + 1) + " invalida en " + file + ": " + line, null);
+                throw new PersistenceException("Linea " + (i + 1) + " invalida en " + file.getPath() + ": " + line, null);
             }
             records.add(fields);
         }
@@ -131,6 +111,6 @@ public class PersonRepository {
     }
 
     private String clean(String value) {
-        return value == null ? "" : value.replace(SEPARATOR, ",").replace("\n", " ").replace("\r", " ");
+        return CsvFile.clean(value);
     }
 }

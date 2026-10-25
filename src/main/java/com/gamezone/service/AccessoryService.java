@@ -193,7 +193,7 @@ public class AccessoryService {
         if (quantity <= 0) {
             throw new InvalidDataException("cantidad a restaurar", "debe ser mayor que cero.");
         }
-        accessory.setStock(accessory.getStock() + quantity);
+        accessory.increaseStock(quantity);
         accessoryRepository.saveAll(accessories);
     }
 
