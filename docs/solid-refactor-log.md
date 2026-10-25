@@ -31,3 +31,28 @@ the same values of the final run of Requirement 7.
 | `PercentageDiscountRecordMapper`, `CategoryDiscountRecordMapper`, `BulkPurchaseDiscountRecordMapper`, `PromotionRepository` | Mappers per promotion type | V-02 | OCP | `refactor: use record mappers in PromotionRepository (V-02)` / same PR | Developer 2 |
 | `WarrantyRecordMapper`, `BasicWarrantyRecordMapper`, `ExtendedWarrantyRecordMapper`, `WarrantyRepository` | Mappers per warranty type, created from the resolved product and sale | V-02 | OCP | `refactor: use record mappers in WarrantyRepository (V-02)` / same PR | Developer 2 |
 | `MonthlyBalanceCalculator`, `ReturnService` | The report arithmetic moved to a new class; `ReturnService` delegates and keeps its public methods | V-03 | SRP | `refactor: extract MonthlyBalanceCalculator from ReturnService (V-03)` / same PR | Developer 2 |
+| `SaleService` | Resolves and updates items through the list of inventories; `instanceof Accessory` removed | V-01 | DIP, OCP | `refactor: resolve and update sale items through InventoryService (V-01)` / PR "resolve sale items through InventoryService" | Leader |
+
+Every violation V-01 to V-03 of the consolidated audit appears in this log;
+none was moved to the out of scope findings. No GRASP violation of R7 was
+reintroduced: the menu, the repositories and `CsvFile` were not modified, and
+`Sale` keeps the methods added in R7.
+
+Trade-off: each mapper uses `instanceof` once, in its own `supports` method.
+The type check is now confined to the class of that type, which is what OCP
+asks for; it is not the Polymorphism problem fixed in R7.
+
+## Verification per Pull Request
+
+| Pull Request | Affected operations | Result |
+|--------------|---------------------|--------|
+| prepare the SOLID corrections | none (new interface) | identical output and data |
+| apply developer 1 SOLID corrections | products (load and save), sales | identical output and data |
+| apply developer 2 SOLID corrections | accessories, promotions, warranties, returns, monthly balance | identical output and data |
+| resolve sale items through InventoryService | sales | identical output and data |
+
+## Final verification
+
+The complete script was executed after the last correction and compared with
+the reference run: the 1376 lines of output and every file of `data/` are
+identical. The project compiles without errors after every commit of the phase.

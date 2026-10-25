@@ -1,6 +1,6 @@
 package com.gamezone.service;
 
-import com.gamezone.model.Accessory;
+import com.gamezone.exceptions.ResourceNotFoundException;
 import com.gamezone.model.Console;
 import com.gamezone.model.Customer;
 import com.gamezone.model.Product;
@@ -33,6 +33,7 @@ public class SaleService {
     private final AccessoryService accessoryService;
     private final PromotionService promotionService;
     private final WarrantyService warrantyService;
+    private final List<InventoryService> inventories;
     private final List<Sale> sales;
 
     /**
@@ -53,6 +54,7 @@ public class SaleService {
         this.productService = productService;
         this.personService = personService;
         this.accessoryService = accessoryService;
+        this.inventories = List.of(productService, accessoryService);
         this.promotionService = promotionService;
         this.warrantyService = warrantyService;
         this.sales = saleRepository.loadAll(personService.listCustomers(), personService.listSellers(), allItems());
@@ -185,9 +187,11 @@ public class SaleService {
     private List<Product> resolveItems(List<String> itemIds) {
         List<Product> items = new ArrayList<>();
         for (String itemId : itemIds) {
-            Product item = productService.findById(itemId);
-            if (item == null) {
-                item = accessoryService.findById(itemId);
+            Product item = null;
+            for (InventoryService inventory : inventories) {
+                if (item == null) {
+                    item = inventory.findById(itemId);
+                }
             }
             ProductValidator.validateProductExists(item, itemId);
             items.add(item);
@@ -212,12 +216,17 @@ public class SaleService {
 
     private void updateInventory(List<Product> items, Map<String, Integer> quantities) {
         for (Map.Entry<String, Integer> entry : quantities.entrySet()) {
-            if (findItem(items, entry.getKey()) instanceof Accessory) {
-                accessoryService.updateStock(entry.getKey(), entry.getValue());
-            } else {
-                productService.updateStock(entry.getKey(), entry.getValue());
+            inventoryOf(entry.getKey()).updateStock(entry.getKey(), entry.getValue());
+        }
+    }
+
+    private InventoryService inventoryOf(String itemId) {
+        for (InventoryService inventory : inventories) {
+            if (inventory.findById(itemId) != null) {
+                return inventory;
             }
         }
+        throw new ResourceNotFoundException("producto", itemId);
     }
 
     private Product findItem(List<Product> items, String itemId) {
