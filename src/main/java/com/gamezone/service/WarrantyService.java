@@ -1,5 +1,6 @@
 package com.gamezone.service;
 
+import com.gamezone.exceptions.InvalidDataException;
 import com.gamezone.model.BasicWarranty;
 import com.gamezone.model.ExtendedWarranty;
 import com.gamezone.model.Product;
@@ -131,7 +132,7 @@ public class WarrantyService {
      */
     public List<Warranty> listWarrantiesExpiringSoon(int daysAhead) {
         if (daysAhead < 0) {
-            throw new IllegalArgumentException("Los dias de anticipacion no pueden ser negativos.");
+            throw new InvalidDataException("dias de anticipacion", "no pueden ser negativos.");
         }
         LocalDate today = LocalDate.now();
         LocalDate limit = today.plusDays(daysAhead);

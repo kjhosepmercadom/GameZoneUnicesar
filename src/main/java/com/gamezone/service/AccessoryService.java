@@ -1,5 +1,8 @@
 package com.gamezone.service;
 
+import com.gamezone.exceptions.BusinessRuleException;
+import com.gamezone.exceptions.InvalidDataException;
+import com.gamezone.exceptions.ResourceNotFoundException;
 import com.gamezone.model.Accessory;
 import com.gamezone.model.Cable;
 import com.gamezone.model.Controller;
@@ -68,7 +71,7 @@ public class AccessoryService {
         validateCommonData(id, title, price, stock);
         requireText(connectorType, "tipo de conector");
         if (lengthInMeters <= 0) {
-            throw new IllegalArgumentException("La longitud debe ser mayor que cero.");
+            throw new InvalidDataException("longitud", "debe ser mayor que cero.");
         }
         Cable cable = new Cable(id.trim(), title.trim(), price, stock,
                 cleanIds(compatibleConsoleIds), lengthInMeters, connectorType.trim());
@@ -93,7 +96,7 @@ public class AccessoryService {
         validateCommonData(id, title, price, stock);
         requireText(memoryType, "tipo de memoria");
         if (capacityInGb <= 0) {
-            throw new IllegalArgumentException("La capacidad debe ser mayor que cero.");
+            throw new InvalidDataException("capacidad", "debe ser mayor que cero.");
         }
         Memory memory = new Memory(id.trim(), title.trim(), price, stock,
                 cleanIds(compatibleConsoleIds), capacityInGb, memoryType.trim());
@@ -169,7 +172,7 @@ public class AccessoryService {
     public void updateStock(String accessoryId, int quantity) {
         Accessory accessory = findById(accessoryId);
         if (accessory == null) {
-            throw new IllegalArgumentException("No existe un accesorio con codigo " + accessoryId + ".");
+            throw new ResourceNotFoundException("accesorio", accessoryId);
         }
         accessory.decreaseStock(quantity);
         accessoryRepository.saveAll(accessories);
@@ -185,10 +188,10 @@ public class AccessoryService {
     public void restoreStock(String accessoryId, int quantity) {
         Accessory accessory = findById(accessoryId);
         if (accessory == null) {
-            throw new IllegalArgumentException("No existe un accesorio con codigo " + accessoryId + ".");
+            throw new ResourceNotFoundException("accesorio", accessoryId);
         }
         if (quantity <= 0) {
-            throw new IllegalArgumentException("La cantidad a restaurar debe ser mayor que cero.");
+            throw new InvalidDataException("cantidad a restaurar", "debe ser mayor que cero.");
         }
         accessory.setStock(accessory.getStock() + quantity);
         accessoryRepository.saveAll(accessories);
@@ -216,19 +219,19 @@ public class AccessoryService {
         requireText(id, "codigo");
         requireText(title, "titulo");
         if (findById(id) != null) {
-            throw new IllegalArgumentException("Ya existe un accesorio con codigo " + id.trim() + ".");
+            throw new BusinessRuleException("Ya existe un accesorio con codigo " + id.trim() + ".");
         }
         if (price <= 0) {
-            throw new IllegalArgumentException("El precio debe ser mayor que cero.");
+            throw new InvalidDataException("precio", "debe ser mayor que cero.");
         }
         if (stock < 0) {
-            throw new IllegalArgumentException("La cantidad en inventario no puede ser negativa.");
+            throw new InvalidDataException("cantidad en inventario", "no puede ser negativo.");
         }
     }
 
     private void requireText(String value, String fieldName) {
         if (value == null || value.trim().isEmpty()) {
-            throw new IllegalArgumentException("El campo " + fieldName + " es obligatorio.");
+            throw new InvalidDataException(fieldName, "es obligatorio.");
         }
     }
 }

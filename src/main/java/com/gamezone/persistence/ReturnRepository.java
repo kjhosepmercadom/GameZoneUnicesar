@@ -1,5 +1,6 @@
 package com.gamezone.persistence;
 
+import com.gamezone.exceptions.PersistenceException;
 import com.gamezone.model.Product;
 import com.gamezone.model.Return;
 import com.gamezone.model.Sale;
@@ -59,7 +60,7 @@ public class ReturnRepository {
             }
             Files.write(filePath, lines, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new IllegalStateException("No se pudo guardar el archivo de devoluciones: " + filePath, e);
+            throw new PersistenceException("No se pudo guardar el archivo de devoluciones: " + filePath, e);
         }
     }
 
@@ -103,7 +104,7 @@ public class ReturnRepository {
         try {
             lines = Files.readAllLines(filePath, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new IllegalStateException("No se pudo leer el archivo de devoluciones: " + filePath, e);
+            throw new PersistenceException("No se pudo leer el archivo de devoluciones: " + filePath, e);
         }
         for (int i = 0; i < lines.size(); i++) {
             String line = lines.get(i).trim();
@@ -120,7 +121,7 @@ public class ReturnRepository {
                 return sale;
             }
         }
-        throw new IllegalStateException("Devolucion con venta desconocida " + saleId + " en " + filePath);
+        throw new PersistenceException("Devolucion con venta desconocida " + saleId + " en " + filePath, null);
     }
 
     private Product findProduct(List<Product> products, String productId) {
@@ -129,7 +130,7 @@ public class ReturnRepository {
                 return product;
             }
         }
-        throw new IllegalStateException("Devolucion con producto desconocido " + productId + " en " + filePath);
+        throw new PersistenceException("Devolucion con producto desconocido " + productId + " en " + filePath, null);
     }
 
     private String clean(String value) {
