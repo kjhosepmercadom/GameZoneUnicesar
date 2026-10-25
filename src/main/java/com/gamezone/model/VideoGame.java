@@ -95,4 +95,14 @@ public class VideoGame extends Product {
                         + " | Precio: $%,.0f | Stock: %d",
                 getId(), getTitle(), platform, genre, ageRating, getPrice(), getStock());
     }
+
+    /**
+     * Returns the category of this product type.
+     *
+     * @return {@code "VIDEOGAME"}
+     */
+    @Override
+    public String getCategory() {
+        return "VIDEOGAME";
+    }
 }

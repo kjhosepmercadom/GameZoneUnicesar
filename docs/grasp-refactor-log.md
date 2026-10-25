@@ -43,3 +43,7 @@ Executed on `develop` before the first commit of `feature/grasp-refactor`:
 |-------|--------|-----------|-----------------|-------------|-------------|
 | `Sale` | New `calculateDiscountRate()` | V-03 | Information Expert | `refactor: add calculateDiscountRate to Sale (V-03)` / PR "prepare the GRASP corrections" | Leader |
 | `Sale` | New `findProduct(String)` and `countUnitsOf(String)` | V-04 | Information Expert | `refactor: add findProduct and countUnitsOf to Sale (V-04)` / PR "prepare the GRASP corrections" | Leader |
+| `Product` | New `increaseStock(int)` | V-02 | Information Expert | `refactor: add increaseStock to Product (V-02)` / PR "apply developer 1 GRASP corrections" | Developer 1 |
+| `Product`, `VideoGame`, `Console`, `Accessory` | New abstract `getCategory()` and its implementations | V-05 | Polymorphism | `refactor: declare the product category polymorphically (V-05)` / same PR | Developer 1 |
+| `CategoryDiscount` | `belongsToTargetCategory` compares `product.getCategory()`; the `instanceof` chain was removed | V-05 | Polymorphism, Protected Variations | `refactor: use the product category in CategoryDiscount (V-05)` / same PR | Developer 1 |
+| `Return` | `refundOf` uses `sale.calculateDiscountRate()`; `discountRate()` was removed | V-03 | Information Expert | `refactor: ask the sale for its discount rate in Return (V-03)` / same PR | Developer 1 |

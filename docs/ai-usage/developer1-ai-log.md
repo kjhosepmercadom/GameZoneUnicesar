@@ -113,3 +113,18 @@ member's account.
 | Response        | Pointed out three findings: the stock is increased outside `Product`, `CategoryDiscount` decides the category with `instanceof`, and `Return` calculates the discount rate of the sale. It also noted that the file handling of `ProductRepository` is repeated in the other repositories. |
 | Decision        | Accepted the three findings after checking each fragment in the code. The duplicated file handling was reported to the Leader as a boundary finding instead of being audited here, because most repositories belong to Developer 2. |
 | Related commit  | `docs: add promotion hierarchy findings to developer1 audit` |
+
+### Phase 2 - Correction
+
+#### Entry 9 - GRASP corrections V-02, V-03 and V-05
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Requirement 7, Phase 2 - `feature/grasp-refactor` |
+| Objective       | Correct the violations assigned to Developer 1 without changing the behaviour. |
+| Query           | "Implement Product.increaseStock, the polymorphic getCategory and the use of Sale.calculateDiscountRate in Return, keeping every message and file identical." |
+| Response        | Added `increaseStock` with the same message used by the services, `getCategory()` abstract in `Product` with one implementation per type (`Accessory` answers for all accessories), and replaced `discountRate()` in `Return`. |
+| Decision        | Accepted. Checked with the regression script that the output and the data files are identical to the reference run. |
+| Related commit  | `refactor: declare the product category polymorphically (V-05)` |

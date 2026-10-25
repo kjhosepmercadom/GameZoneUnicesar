@@ -103,4 +103,14 @@ public abstract class Accessory extends Product {
         return String.format("%s - %s | Precio: $%,.0f | Stock: %d | Compatible con: %s",
                 getId(), getTitle(), getPrice(), getStock(), compatibility);
     }
+
+    /**
+     * Returns the category of this product type.
+     *
+     * @return {@code "ACCESSORY"}
+     */
+    @Override
+    public String getCategory() {
+        return "ACCESSORY";
+    }
 }

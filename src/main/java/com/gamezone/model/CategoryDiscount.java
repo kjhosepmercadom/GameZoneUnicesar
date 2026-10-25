@@ -93,15 +93,6 @@ public class CategoryDiscount extends Promotion {
     }
 
     private boolean belongsToTargetCategory(Product product) {
-        if ("VIDEOGAME".equalsIgnoreCase(targetCategory)) {
-            return product instanceof VideoGame;
-        }
-        if ("CONSOLE".equalsIgnoreCase(targetCategory)) {
-            return product instanceof Console;
-        }
-        if ("ACCESSORY".equalsIgnoreCase(targetCategory)) {
-            return product instanceof Accessory;
-        }
-        return false;
+        return product.getCategory().equalsIgnoreCase(targetCategory);
     }
 }
