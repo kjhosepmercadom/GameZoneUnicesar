@@ -49,7 +49,7 @@ public class Main {
             SaleService saleService = new SaleService(saleRepository, productService, personService,
                     accessoryService, promotionService, warrantyService);
             ReturnService returnService = new ReturnService(returnRepository, saleService, productService,
-                    accessoryService);
+                    accessoryService, warrantyService);
 
             ConsoleMenu consoleMenu = new ConsoleMenu(productService, personService, saleService, accessoryService,
                     promotionService, warrantyService, returnService);

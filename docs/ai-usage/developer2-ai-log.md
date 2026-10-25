@@ -96,3 +96,16 @@ member's account.
 | Response        | Added `calculateMonthlySales` (with `calculateFinalTotal()`) and `calculateMonthlyReturns`; `generateMonthlyBalance` returns their difference and the menu prints the three values. |
 | Decision        | Accepted. Verified: sales $3.264.735, returns $3.052.320, net balance $212.415 in the demonstration scenario. |
 | Related commit  | `fix: calculate monthly sales with the final total of each sale` |
+
+## Entry 8 - Warranty cancellation (A7)
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Phase 4 - `feature/return-warranty-cancellation` |
+| Objective       | Cancel the warranties of returned consoles and refund the extended warranty. |
+| Query           | "Apply adjustment A7 after A5." |
+| Response        | Added `WarrantyService.cancelWarranties(productId, saleId)`, the warranty refund in `Return` (calculation, receipt and file) and the call from `ReturnService` for every returned console. |
+| Decision        | Accepted as specified: all the warranties of the product in the sale are cancelled. A partial return of only one of several identical consoles also cancels the warranties of the others; this limitation is noted for a future requirement. |
+| Related commit  | `feat: cancel the warranties of returned consoles in ReturnService` |
