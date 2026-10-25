@@ -19,7 +19,7 @@ public class CategoryDiscount extends Promotion {
      * @param startDate      first valid day
      * @param endDate        last valid day
      * @param percentage     discount percentage between 0 and 100
-     * @param targetCategory category that receives the discount: VIDEOGAME or CONSOLE
+     * @param targetCategory category that receives the discount: VIDEOGAME, CONSOLE or ACCESSORY
      */
     public CategoryDiscount(String id, String name, LocalDate startDate, LocalDate endDate,
                             double percentage, String targetCategory) {
@@ -98,6 +98,9 @@ public class CategoryDiscount extends Promotion {
         }
         if ("CONSOLE".equalsIgnoreCase(targetCategory)) {
             return product instanceof Console;
+        }
+        if ("ACCESSORY".equalsIgnoreCase(targetCategory)) {
+            return product instanceof Accessory;
         }
         return false;
     }
