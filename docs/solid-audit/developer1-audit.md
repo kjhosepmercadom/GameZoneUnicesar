@@ -48,3 +48,13 @@ Verdict legend: **violation**, **correct**, **not applicable**.
 | LSP | correct | Every `Accessory` can be used as a `Product` (stock, price, description). Every `Promotion` subclass returns a non negative discount and never throws for a sale without its category (it returns 0), as the base contract says. |
 | ISP | correct | `Promotion` declares only `calculateDiscount` and `getDescription`, both used by every client. |
 | DIP | correct | The promotions depend on the abstraction `Product`, not on concrete products. |
+
+## Return model and warranty hierarchy
+
+| Principle | Verdict | Evidence |
+|-----------|---------|----------|
+| SRP | correct | `Return` keeps the return data, its refund and its receipt; the discount rate is asked to `Sale` since R7. The warranties keep their coverage and certificate. |
+| OCP | correct | A new warranty type is a new subclass that defines its duration and cost; `Warranty` does not change. |
+| LSP | correct | `BasicWarranty` and `ExtendedWarranty` satisfy the contract of `Warranty`: positive duration, non negative cost. The constructor of `Warranty` calls `getDurationInMonths()`; this is safe because both subclasses return constants and do not depend on their own fields. |
+| ISP | not applicable | No interfaces. |
+| DIP | correct | `Return` and `Warranty` depend on the abstraction `Product`. |
