@@ -18,3 +18,16 @@ member's account.
 | Response        | Proposed a CSV line `TYPE;id;title;price;stock;compatibleIds;field1;field2`, with the compatible console identifiers separated by commas, and a service that keeps the accessories in memory and saves after every change. |
 | Decision        | Accepted. The filter by type uses `getAccessoryType()` instead of `instanceof`. Registration validates required fields, positive price, non negative stock and unique identifier, like the product module. |
 | Related commit  | `feat: add AccessoryRepository with CSV save support` |
+
+## Entry 2 - Promotion persistence and service
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Phase 2 - `feature/promotion-module` |
+| Objective       | Implement `PromotionRepository` and `PromotionService`, including the selection of the best promotion. |
+| Query           | "Implement PromotionRepository with data/promotions.csv and PromotionService with findBestPromotionFor(Sale) returning null when the best discount is zero." |
+| Response        | Proposed evaluating only the promotions active on the date of the sale and keeping the one with the biggest discount, starting from zero so a zero discount returns `null`. |
+| Decision        | Accepted. The preloaded promotions are valid from 2026-09-01 to 2026-12-31 so they apply while the requirements are being tested. |
+| Related commit  | `feat: select the best active promotion for a sale` |
