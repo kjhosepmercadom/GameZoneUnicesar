@@ -84,6 +84,31 @@ public class WarrantyService {
         return found;
     }
 
+    /**
+     * Returns every registered warranty.
+     *
+     * @return a copy of the warranty list
+     */
+    public List<Warranty> listAllWarranties() {
+        return new ArrayList<>(warranties);
+    }
+
+    /**
+     * Returns the warranties that are valid on the current date.
+     *
+     * @return the active warranties, possibly empty
+     */
+    public List<Warranty> listActiveWarranties() {
+        LocalDate today = LocalDate.now();
+        List<Warranty> active = new ArrayList<>();
+        for (Warranty warranty : warranties) {
+            if (warranty.isActive(today)) {
+                active.add(warranty);
+            }
+        }
+        return active;
+    }
+
     private String nextWarrantyId() {
         int max = 0;
         for (Warranty warranty : warranties) {
