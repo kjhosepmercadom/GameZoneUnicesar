@@ -57,3 +57,16 @@ member's account.
 | Response        | Proposed persisting only identifiers, resolving them from the sales passed to `loadAll(List<Sale>)`, adding `WarrantyService.loadWarranties(sales)` called by `SaleService` after loading its sales, and removing the setter used in `Main`. |
 | Decision        | Accepted. The requirement suggests injecting `SaleRepository` into `WarrantyService`; it was discarded because reading the sales file again would create a second copy of every `Sale` (and would need customers, sellers and products). Using the sales already loaded keeps a single object per sale. Documented in the integration analysis. |
 | Related commit  | `fix: load warranties from identifiers without depending on SaleService` |
+
+## Entry 5 - Return persistence and service
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Phase 4 - `feature/return-module` |
+| Objective       | Implement `ReturnRepository` and `ReturnService` with the thirty day and ownership rules and the monthly balance. |
+| Query           | "Implement ReturnRepository and ReturnService as specified in Requirement 3." |
+| Response        | Proposed `ReturnRepository.loadAll(sales, products)` receiving the lists instead of the services, so the persistence layer does not depend on the service layer, and a validation of the quantities returned per product. |
+| Decision        | Accepted. Added the rule that a product cannot be returned more times than it was sold, counting previous returns of the same sale; without it a customer could return the same unit twice. |
+| Related commit  | `feat: implement return registration with deadline and ownership rules` |
