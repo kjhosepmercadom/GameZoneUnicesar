@@ -7,11 +7,13 @@ import com.gamezone.model.Product;
 import com.gamezone.model.Promotion;
 import com.gamezone.model.Sale;
 import com.gamezone.model.Seller;
+import com.gamezone.model.Warranty;
 import com.gamezone.service.AccessoryService;
 import com.gamezone.service.PersonService;
 import com.gamezone.service.ProductService;
 import com.gamezone.service.PromotionService;
 import com.gamezone.service.SaleService;
+import com.gamezone.service.WarrantyService;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -31,6 +33,7 @@ public class ConsoleMenu {
     private final SaleService saleService;
     private final AccessoryService accessoryService;
     private final PromotionService promotionService;
+    private final WarrantyService warrantyService;
     private final Scanner scanner;
 
     /**
@@ -41,14 +44,17 @@ public class ConsoleMenu {
      * @param saleService      service of the sales module
      * @param accessoryService service of the accessory module
      * @param promotionService service of the promotion module
+     * @param warrantyService  service of the warranty module
      */
     public ConsoleMenu(ProductService productService, PersonService personService, SaleService saleService,
-                       AccessoryService accessoryService, PromotionService promotionService) {
+                       AccessoryService accessoryService, PromotionService promotionService,
+                       WarrantyService warrantyService) {
         this.productService = productService;
         this.personService = personService;
         this.saleService = saleService;
         this.accessoryService = accessoryService;
         this.promotionService = promotionService;
+        this.warrantyService = warrantyService;
         this.scanner = new Scanner(System.in);
     }
 
@@ -65,6 +71,7 @@ public class ConsoleMenu {
             System.out.println("3. Gestion de ventas");
             System.out.println("4. Gestion de accesorios");
             System.out.println("5. Gestion de promociones");
+            System.out.println("6. Gestion de garantias");
             System.out.println("0. Salir");
             int option = readInt("Seleccione una opcion: ");
             switch (option) {
@@ -82,6 +89,9 @@ public class ConsoleMenu {
                     break;
                 case 5:
                     showPromotionMenu();
+                    break;
+                case 6:
+                    showWarrantyMenu();
                     break;
                 case 0:
                     running = false;
@@ -564,6 +574,59 @@ public class ConsoleMenu {
             } catch (DateTimeParseException e) {
                 System.out.println("Debe ingresar una fecha valida con el formato AAAA-MM-DD.");
             }
+        }
+    }
+
+    private void showWarrantyMenu() {
+        System.out.println();
+        System.out.println("--- Gestion de garantias ---");
+        System.out.println("1. Consultar la garantia de un producto en una venta");
+        System.out.println("2. Listar todas las garantias");
+        System.out.println("3. Listar garantias vigentes");
+        System.out.println("4. Listar garantias proximas a vencer");
+        System.out.println("0. Volver");
+        int option = readInt("Seleccione una opcion: ");
+        try {
+            switch (option) {
+                case 1:
+                    String saleId = readText("Codigo de la venta: ");
+                    String productId = readText("Codigo del producto: ");
+                    Warranty warranty = warrantyService.findWarrantyByProduct(productId, saleId);
+                    if (warranty == null) {
+                        System.out.println("No existe una garantia para el producto " + productId
+                                + " en la venta " + saleId + ".");
+                    } else {
+                        System.out.println(warranty.generateWarrantyCertificate());
+                    }
+                    break;
+                case 2:
+                    printWarranties(warrantyService.listAllWarranties(), "No hay garantias registradas.");
+                    break;
+                case 3:
+                    printWarranties(warrantyService.listActiveWarranties(), "No hay garantias vigentes.");
+                    break;
+                case 4:
+                    int days = readInt("Dias de anticipacion: ");
+                    printWarranties(warrantyService.listWarrantiesExpiringSoon(days),
+                            "No hay garantias que venzan en los proximos " + days + " dias.");
+                    break;
+                case 0:
+                    break;
+                default:
+                    System.out.println("Opcion no valida.");
+            }
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    private void printWarranties(List<Warranty> warranties, String emptyMessage) {
+        if (warranties.isEmpty()) {
+            System.out.println(emptyMessage);
+            return;
+        }
+        for (Warranty warranty : warranties) {
+            System.out.println(warranty.generateWarrantyCertificate());
         }
     }
 

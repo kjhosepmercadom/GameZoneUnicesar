@@ -51,7 +51,7 @@ public class Main {
             saleService.setWarrantyService(warrantyService);
 
             ConsoleMenu consoleMenu = new ConsoleMenu(productService, personService, saleService, accessoryService,
-                    promotionService);
+                    promotionService, warrantyService);
             consoleMenu.start();
         } catch (IllegalStateException e) {
             System.out.println("Error: " + e.getMessage());
