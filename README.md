@@ -58,6 +58,22 @@ Allowed dependencies: `ui -> service -> persistence -> model`. Design documents:
 - Integration: [analysis](docs/integration-analysis.md), [integrated class diagram](docs/integrated-class-diagram.md)
 - AI usage logs: [docs/ai-usage](docs/ai-usage)
 
+### Exceptions and validation (Requirement 6)
+
+Two cross-cutting packages separate validation and error handling from the
+business logic:
+
+- `com.gamezone.exceptions`: `GameZoneException` (abstract, unchecked) and its
+  subclasses `ResourceNotFoundException`, `BusinessRuleException`,
+  `InvalidDataException` and `PersistenceException`.
+- `com.gamezone.validation`: `ProductValidator`, `PersonValidator` and
+  `SaleValidator`, invoked by the services before every operation.
+
+Repositories wrap file errors in `PersistenceException` with the file and the
+operation, and `ConsoleMenu` shows a different message for each exception
+type; the user never sees a technical trace. Design:
+[analysis](docs/exception-analysis.md) and [class diagram](docs/exception-class-diagram.md).
+
 ## Requirements
 
 - JDK 17 or newer
