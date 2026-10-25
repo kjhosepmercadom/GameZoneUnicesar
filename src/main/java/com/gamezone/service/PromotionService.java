@@ -57,7 +57,7 @@ public class PromotionService {
      * @param startDate      first valid day
      * @param endDate        last valid day
      * @param percentage     discount percentage, greater than 0 and up to 100
-     * @param targetCategory VIDEOGAME or CONSOLE
+     * @param targetCategory VIDEOGAME, CONSOLE or ACCESSORY
      * @return the registered promotion
      * @throws IllegalArgumentException if any data is invalid or the identifier already exists
      */
@@ -65,8 +65,8 @@ public class PromotionService {
                                                      LocalDate endDate, double percentage, String targetCategory) {
         validateCommonData(id, name, startDate, endDate, percentage);
         String category = targetCategory == null ? "" : targetCategory.trim().toUpperCase();
-        if (!category.equals("VIDEOGAME") && !category.equals("CONSOLE")) {
-            throw new IllegalArgumentException("La categoria debe ser VIDEOGAME o CONSOLE.");
+        if (!category.equals("VIDEOGAME") && !category.equals("CONSOLE") && !category.equals("ACCESSORY")) {
+            throw new IllegalArgumentException("La categoria debe ser VIDEOGAME, CONSOLE o ACCESSORY.");
         }
         return save(new CategoryDiscount(id.trim(), name.trim(), startDate, endDate, percentage, category));
     }
