@@ -3,7 +3,6 @@ package com.gamezone.service;
 import com.gamezone.exceptions.BusinessRuleException;
 import com.gamezone.exceptions.InvalidDataException;
 import com.gamezone.exceptions.ResourceNotFoundException;
-import com.gamezone.model.Accessory;
 import com.gamezone.model.Console;
 import com.gamezone.model.Product;
 import com.gamezone.model.Return;
@@ -26,9 +25,9 @@ public class ReturnService {
 
     private final ReturnRepository returnRepository;
     private final SaleService saleService;
-    private final ProductService productService;
-    private final AccessoryService accessoryService;
+    private final List<InventoryService> inventories;
     private final WarrantyService warrantyService;
+    private final MonthlyBalanceCalculator balanceCalculator;
     private final List<Return> returns;
 
     /**
@@ -45,9 +44,9 @@ public class ReturnService {
                          WarrantyService warrantyService) {
         this.returnRepository = returnRepository;
         this.saleService = saleService;
-        this.productService = productService;
-        this.accessoryService = accessoryService;
+        this.inventories = List.of(productService, accessoryService);
         this.warrantyService = warrantyService;
+        this.balanceCalculator = new MonthlyBalanceCalculator();
         this.returns = returnRepository.loadAll(saleService.listAllSales());
     }
 
@@ -106,11 +105,7 @@ public class ReturnService {
         productReturn.setWarrantyRefundAmount(warrantyRefund);
         productReturn.calculateRefundAmount();
         for (Map.Entry<String, Integer> entry : quantities.entrySet()) {
-            if (sale.findProduct(entry.getKey()) instanceof Accessory) {
-                accessoryService.restoreStock(entry.getKey(), entry.getValue());
-            } else {
-                productService.restoreStock(entry.getKey(), entry.getValue());
-            }
+            inventoryOf(entry.getKey()).restoreStock(entry.getKey(), entry.getValue());
         }
         returns.add(productReturn);
         returnRepository.saveAll(returns);
@@ -167,13 +162,7 @@ public class ReturnService {
      * @return the sales total in Colombian pesos
      */
     public double calculateMonthlySales(int month, int year) {
-        double salesTotal = 0;
-        for (Sale sale : saleService.listAllSales()) {
-            if (isInMonth(sale.getDate(), month, year)) {
-                salesTotal += sale.calculateFinalTotal();
-            }
-        }
-        return salesTotal;
+        return balanceCalculator.calculateSales(saleService.listAllSales(), month, year);
     }
 
     /**
@@ -184,13 +173,7 @@ public class ReturnService {
      * @return the returns total in Colombian pesos
      */
     public double calculateMonthlyReturns(int month, int year) {
-        double returnsTotal = 0;
-        for (Return productReturn : returns) {
-            if (isInMonth(productReturn.getDate(), month, year)) {
-                returnsTotal += productReturn.getRefundAmount();
-            }
-        }
-        return returnsTotal;
+        return balanceCalculator.calculateReturns(returns, month, year);
     }
 
     /**
@@ -204,8 +187,13 @@ public class ReturnService {
         return calculateMonthlySales(month, year) - calculateMonthlyReturns(month, year);
     }
 
-    private boolean isInMonth(LocalDate date, int month, int year) {
-        return date.getMonthValue() == month && date.getYear() == year;
+    private InventoryService inventoryOf(String itemId) {
+        for (InventoryService inventory : inventories) {
+            if (inventory.findById(itemId) != null) {
+                return inventory;
+            }
+        }
+        throw new ResourceNotFoundException("producto", itemId);
     }
 
     private int countReturned(Sale sale, String productId) {

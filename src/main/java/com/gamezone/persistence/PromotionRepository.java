@@ -1,12 +1,8 @@
 package com.gamezone.persistence;
 
 import com.gamezone.exceptions.PersistenceException;
-import com.gamezone.model.BulkPurchaseDiscount;
-import com.gamezone.model.CategoryDiscount;
-import com.gamezone.model.PercentageDiscount;
 import com.gamezone.model.Promotion;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +16,7 @@ public class PromotionRepository {
     private static final String SEPARATOR = ";";
 
     private final CsvFile file;
+    private final List<RecordMapper<Promotion>> mappers;
 
     /**
      * Creates a repository that works over the given file.
@@ -28,6 +25,7 @@ public class PromotionRepository {
      */
     public PromotionRepository(String filePath) {
         this.file = new CsvFile(filePath);
+        this.mappers = List.of(new PercentageDiscountRecordMapper(), new CategoryDiscountRecordMapper(), new BulkPurchaseDiscountRecordMapper());
     }
 
     /**
@@ -71,43 +69,20 @@ public class PromotionRepository {
     private Promotion fromLine(String line) {
         String[] fields = line.split(SEPARATOR, -1);
         String type = fields[0];
-        String id = fields[1];
-        String name = fields[2];
-        LocalDate start = LocalDate.parse(fields[3]);
-        LocalDate end = LocalDate.parse(fields[4]);
-        switch (type) {
-            case "PERCENTAGE":
-                return new PercentageDiscount(id, name, start, end, Double.parseDouble(fields[5]));
-            case "CATEGORY":
-                return new CategoryDiscount(id, name, start, end, Double.parseDouble(fields[5]), fields[6]);
-            case "BULK":
-                return new BulkPurchaseDiscount(id, name, start, end, Integer.parseInt(fields[5]),
-                        Double.parseDouble(fields[6]));
-            default:
-                throw new IllegalArgumentException("Tipo de promocion desconocido: " + type);
+        for (RecordMapper<Promotion> mapper : mappers) {
+            if (mapper.getTypeCode().equals(type)) {
+                return mapper.fromFields(fields);
+            }
         }
+        throw new IllegalArgumentException("Tipo de promocion desconocido: " + type);
     }
 
     private String toLine(Promotion promotion) {
-        String common = clean(promotion.getId()) + SEPARATOR + clean(promotion.getName()) + SEPARATOR
-                + promotion.getStartDate() + SEPARATOR + promotion.getEndDate();
-        if (promotion instanceof PercentageDiscount) {
-            return "PERCENTAGE" + SEPARATOR + common + SEPARATOR + ((PercentageDiscount) promotion).getPercentage();
-        }
-        if (promotion instanceof CategoryDiscount) {
-            CategoryDiscount category = (CategoryDiscount) promotion;
-            return "CATEGORY" + SEPARATOR + common + SEPARATOR + category.getPercentage()
-                    + SEPARATOR + category.getTargetCategory();
-        }
-        if (promotion instanceof BulkPurchaseDiscount) {
-            BulkPurchaseDiscount bulk = (BulkPurchaseDiscount) promotion;
-            return "BULK" + SEPARATOR + common + SEPARATOR + bulk.getMinimumQuantity()
-                    + SEPARATOR + bulk.getPercentage();
+        for (RecordMapper<Promotion> mapper : mappers) {
+            if (mapper.supports(promotion)) {
+                return mapper.getTypeCode() + SEPARATOR + mapper.toColumns(promotion);
+            }
         }
         throw new IllegalArgumentException("Tipo de promocion no soportado: " + promotion.getClass().getSimpleName());
-    }
-
-    private String clean(String value) {
-        return CsvFile.clean(value);
     }
 }

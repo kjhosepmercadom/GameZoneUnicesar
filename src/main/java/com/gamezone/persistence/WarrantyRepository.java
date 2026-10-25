@@ -1,8 +1,6 @@
 package com.gamezone.persistence;
 
 import com.gamezone.exceptions.PersistenceException;
-import com.gamezone.model.BasicWarranty;
-import com.gamezone.model.ExtendedWarranty;
 import com.gamezone.model.Product;
 import com.gamezone.model.Sale;
 import com.gamezone.model.Warranty;
@@ -21,6 +19,7 @@ public class WarrantyRepository {
     private static final String SEPARATOR = ";";
 
     private final CsvFile file;
+    private final List<WarrantyRecordMapper> mappers;
 
     /**
      * Creates a repository that works over the given file.
@@ -29,6 +28,7 @@ public class WarrantyRepository {
      */
     public WarrantyRepository(String filePath) {
         this.file = new CsvFile(filePath);
+        this.mappers = List.of(new BasicWarrantyRecordMapper(), new ExtendedWarrantyRecordMapper());
     }
 
     /**
@@ -40,7 +40,7 @@ public class WarrantyRepository {
     public void saveAll(List<Warranty> warranties) {
         List<String> lines = new ArrayList<>();
         for (Warranty warranty : warranties) {
-            String type = warranty instanceof ExtendedWarranty ? "EXTENDED" : "BASIC";
+            String type = mapperOf(warranty).getTypeCode();
             lines.add(type + SEPARATOR + warranty.getId() + SEPARATOR + warranty.getProduct().getId()
                     + SEPARATOR + warranty.getSale().getId() + SEPARATOR + warranty.getStartDate());
         }
@@ -89,10 +89,21 @@ public class WarrantyRepository {
 
     private Warranty create(String[] fields, Product product, Sale sale) {
         LocalDate start = LocalDate.parse(fields[4]);
-        if ("EXTENDED".equals(fields[0])) {
-            return new ExtendedWarranty(fields[1], product, sale, start);
+        for (WarrantyRecordMapper mapper : mappers) {
+            if (mapper.getTypeCode().equals(fields[0])) {
+                return mapper.create(fields[1], product, sale, start);
+            }
         }
-        return new BasicWarranty(fields[1], product, sale, start);
+        throw new IllegalArgumentException("Tipo de garantia desconocido: " + fields[0]);
+    }
+
+    private WarrantyRecordMapper mapperOf(Warranty warranty) {
+        for (WarrantyRecordMapper mapper : mappers) {
+            if (mapper.supports(warranty)) {
+                return mapper;
+            }
+        }
+        throw new IllegalArgumentException("Tipo de garantia no soportado: " + warranty.getClass().getSimpleName());
     }
 
     private List<String[]> readRecords() {

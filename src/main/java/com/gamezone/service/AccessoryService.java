@@ -17,7 +17,7 @@ import java.util.List;
  * controllers, cables and memories, inventory queries, compatibility queries
  * and stock updates. Every change is persisted through the {@link AccessoryRepository}.
  */
-public class AccessoryService {
+public class AccessoryService implements InventoryService {
 
     private final AccessoryRepository accessoryRepository;
     private final List<Accessory> accessories;
@@ -150,6 +150,7 @@ public class AccessoryService {
      * @param id the accessory identifier
      * @return the accessory found, or {@code null} if it does not exist
      */
+    @Override
     public Accessory findById(String id) {
         if (id == null) {
             return null;
@@ -169,6 +170,7 @@ public class AccessoryService {
      * @param quantity    the quantity sold
      * @throws IllegalArgumentException if the accessory does not exist or the stock is insufficient
      */
+    @Override
     public void updateStock(String accessoryId, int quantity) {
         Accessory accessory = findById(accessoryId);
         if (accessory == null) {
@@ -185,6 +187,7 @@ public class AccessoryService {
      * @param quantity    the quantity returned, must be positive
      * @throws IllegalArgumentException if the accessory does not exist or the quantity is not positive
      */
+    @Override
     public void restoreStock(String accessoryId, int quantity) {
         Accessory accessory = findById(accessoryId);
         if (accessory == null) {
