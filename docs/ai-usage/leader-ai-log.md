@@ -18,3 +18,16 @@ member's account.
 | Response        | Proposed resolving every item identifier first in `ProductService` and then in `AccessoryService`, validating stock with `Product.hasEnoughStock` (common to both), and delegating `updateStock` by type. The sales loading passes products and accessories to the repository. |
 | Decision        | Accepted. The repeated parts of `registerSale` were extracted to private methods (`resolveItems`, `validateStock`, `updateInventory`) to keep the method readable. |
 | Related commit  | `feat: accept products and accessories in SaleService.registerSale` |
+
+## Entry 2 - Promotion integration
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Phase 2 - `feature/promotion-module` |
+| Objective       | Apply the best promotion when registering a sale and show the breakdown in the receipt. |
+| Query           | "Add appliedPromotionName and discountAmount to Sale, update generateReceipt and apply findBestPromotionFor in registerSale." |
+| Response        | Added the two attributes, `calculateFinalTotal()`, the receipt breakdown, the new columns in `data/sales.csv` (read only when present, so old sales still load) and the promotion submenu. |
+| Decision        | Accepted. `calculateTotal()` keeps meaning "subtotal" so the promotions and the old code keep working; the final total is a separate method. Added `findSaleById` to show the detail of a sale. |
+| Related commit  | `feat: apply the best active promotion in SaleService.registerSale` |
