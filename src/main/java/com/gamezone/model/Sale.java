@@ -168,6 +168,16 @@ public class Sale {
     }
 
     /**
+     * Checks whether the sale can still receive returns: a return is accepted
+     * up to thirty calendar days after the sale date.
+     *
+     * @return {@code true} if today is within the return period
+     */
+    public boolean canBeReturned() {
+        return !LocalDate.now().isAfter(date.plusDays(30));
+    }
+
+    /**
      * Builds a receipt in Spanish with the sale details: identifier, date,
      * customer, seller, products bought and total.
      *
