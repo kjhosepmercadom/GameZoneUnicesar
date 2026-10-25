@@ -5,6 +5,7 @@ import com.gamezone.model.Console;
 import com.gamezone.model.Customer;
 import com.gamezone.model.Product;
 import com.gamezone.model.Promotion;
+import com.gamezone.model.Return;
 import com.gamezone.model.Sale;
 import com.gamezone.model.Seller;
 import com.gamezone.model.Warranty;
@@ -12,6 +13,7 @@ import com.gamezone.service.AccessoryService;
 import com.gamezone.service.PersonService;
 import com.gamezone.service.ProductService;
 import com.gamezone.service.PromotionService;
+import com.gamezone.service.ReturnService;
 import com.gamezone.service.SaleService;
 import com.gamezone.service.WarrantyService;
 
@@ -35,6 +37,7 @@ public class ConsoleMenu {
     private final AccessoryService accessoryService;
     private final PromotionService promotionService;
     private final WarrantyService warrantyService;
+    private final ReturnService returnService;
     private final Scanner scanner;
 
     /**
@@ -46,16 +49,18 @@ public class ConsoleMenu {
      * @param accessoryService service of the accessory module
      * @param promotionService service of the promotion module
      * @param warrantyService  service of the warranty module
+     * @param returnService    service of the return module
      */
     public ConsoleMenu(ProductService productService, PersonService personService, SaleService saleService,
                        AccessoryService accessoryService, PromotionService promotionService,
-                       WarrantyService warrantyService) {
+                       WarrantyService warrantyService, ReturnService returnService) {
         this.productService = productService;
         this.personService = personService;
         this.saleService = saleService;
         this.accessoryService = accessoryService;
         this.promotionService = promotionService;
         this.warrantyService = warrantyService;
+        this.returnService = returnService;
         this.scanner = new Scanner(System.in);
     }
 
@@ -73,6 +78,7 @@ public class ConsoleMenu {
             System.out.println("4. Gestion de accesorios");
             System.out.println("5. Gestion de promociones");
             System.out.println("6. Gestion de garantias");
+            System.out.println("7. Gestion de devoluciones");
             System.out.println("0. Salir");
             int option = readInt("Seleccione una opcion: ");
             switch (option) {
@@ -93,6 +99,9 @@ public class ConsoleMenu {
                     break;
                 case 6:
                     showWarrantyMenu();
+                    break;
+                case 7:
+                    showReturnMenu();
                     break;
                 case 0:
                     running = false;
@@ -637,6 +646,71 @@ public class ConsoleMenu {
         }
         for (Warranty warranty : warranties) {
             System.out.println(warranty.generateWarrantyCertificate());
+        }
+    }
+
+    private void showReturnMenu() {
+        System.out.println();
+        System.out.println("--- Gestion de devoluciones ---");
+        System.out.println("1. Registrar devolucion");
+        System.out.println("2. Consultar todas las devoluciones");
+        System.out.println("0. Volver");
+        int option = readInt("Seleccione una opcion: ");
+        try {
+            switch (option) {
+                case 1:
+                    registerReturn();
+                    break;
+                case 2:
+                    printReturns(returnService.viewAllReturns(), "No hay devoluciones registradas.");
+                    break;
+                case 0:
+                    break;
+                default:
+                    System.out.println("Opcion no valida.");
+            }
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    private void registerReturn() {
+        System.out.println("-- Registrar devolucion --");
+        String saleId = readText("Codigo de la venta original: ");
+        Sale sale = saleService.findSaleById(saleId);
+        if (sale == null) {
+            System.out.println("No existe una venta con codigo " + saleId + ".");
+            return;
+        }
+        System.out.println(sale.generateReceipt());
+        List<String> productIds = new ArrayList<>();
+        while (true) {
+            String productId = readLine("Codigo del producto a devolver (Enter para terminar): ");
+            if (productId.isEmpty()) {
+                break;
+            }
+            int quantity = readInt("Cantidad: ");
+            if (quantity <= 0) {
+                System.out.println("La cantidad debe ser mayor que cero.");
+                continue;
+            }
+            for (int i = 0; i < quantity; i++) {
+                productIds.add(productId);
+            }
+        }
+        String reason = readText("Motivo de la devolucion: ");
+        Return productReturn = returnService.registerReturn(sale.getId(), productIds, reason);
+        System.out.println("Devolucion registrada correctamente.");
+        System.out.println(productReturn.generateReturnReceipt());
+    }
+
+    private void printReturns(List<Return> returns, String emptyMessage) {
+        if (returns.isEmpty()) {
+            System.out.println(emptyMessage);
+            return;
+        }
+        for (Return productReturn : returns) {
+            System.out.println(productReturn.generateReturnReceipt());
         }
     }
 
