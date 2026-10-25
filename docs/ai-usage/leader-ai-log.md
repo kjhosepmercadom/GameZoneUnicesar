@@ -128,3 +128,16 @@ member's account.
 | Response        | Wrote `docs/regression/menu-operations-input.txt` and the three methods of `Sale`. |
 | Decision        | Accepted. The reference run was recorded before any correction (1376 lines of output). |
 | Related commit  | `docs: define the GRASP non-regression strategy and baseline` |
+
+#### Entry 10 - Split of the console menu
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Requirement 7, Phase 2 - `feature/grasp-refactor` |
+| Objective       | Correct V-01 moving one submenu per commit, so the project compiles after every commit. |
+| Query           | "Split ConsoleMenu into ConsoleInput, ErrorPrinter and one submenu class per module without changing any text shown to the user." |
+| Response        | Proposed temporary private methods in `ConsoleMenu` that delegate to the new classes while the remaining submenus are moved, and removing them at the end. |
+| Decision        | Accepted. After the last commit `ConsoleMenu` only has the main menu. The final regression run is identical to the reference. |
+| Related commit  | `refactor: move the sales submenu to SaleMenu (V-01)` |
