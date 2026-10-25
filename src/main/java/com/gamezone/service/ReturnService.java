@@ -162,21 +162,31 @@ public class ReturnService {
     }
 
     /**
-     * Calculates the net balance of a month: the total of the sales minus the
-     * total refunded in the returns of the same month.
+     * Calculates the total refunded in the returns of a month.
      *
      * @param month month number, from 1 to 12
      * @param year  four digit year
-     * @return the net balance in Colombian pesos
+     * @return the returns total in Colombian pesos
      */
-    public double generateMonthlyBalance(int month, int year) {
+    public double calculateMonthlyReturns(int month, int year) {
         double returnsTotal = 0;
         for (Return productReturn : returns) {
             if (isInMonth(productReturn.getDate(), month, year)) {
                 returnsTotal += productReturn.getRefundAmount();
             }
         }
-        return calculateMonthlySales(month, year) - returnsTotal;
+        return returnsTotal;
+    }
+
+    /**
+     * Calculates the net balance of a month: sales minus returns.
+     *
+     * @param month month number, from 1 to 12
+     * @param year  four digit year
+     * @return the net balance in Colombian pesos
+     */
+    public double generateMonthlyBalance(int month, int year) {
+        return calculateMonthlySales(month, year) - calculateMonthlyReturns(month, year);
     }
 
     private boolean isInMonth(LocalDate date, int month, int year) {
