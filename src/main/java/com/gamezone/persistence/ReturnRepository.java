@@ -5,11 +5,6 @@ import com.gamezone.model.Product;
 import com.gamezone.model.Return;
 import com.gamezone.model.Sale;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +19,7 @@ public class ReturnRepository {
     private static final String SEPARATOR = ";";
     private static final String LIST_SEPARATOR = ",";
 
-    private final Path filePath;
+    private final CsvFile file;
 
     /**
      * Creates a repository that works over the given file.
@@ -32,7 +27,7 @@ public class ReturnRepository {
      * @param filePath path of the CSV file that stores the returns
      */
     public ReturnRepository(String filePath) {
-        this.filePath = Paths.get(filePath);
+        this.file = new CsvFile(filePath);
     }
 
     /**
@@ -54,14 +49,7 @@ public class ReturnRepository {
                     + SEPARATOR + productReturn.getWarrantyRefundAmount()
             );
         }
-        try {
-            if (filePath.getParent() != null) {
-                Files.createDirectories(filePath.getParent());
-            }
-            Files.write(filePath, lines, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new PersistenceException("No se pudo guardar el archivo de devoluciones: " + filePath, e);
-        }
+        file.writeLines(lines, "No se pudo guardar el archivo de devoluciones: ");
     }
 
     /**
@@ -97,15 +85,7 @@ public class ReturnRepository {
 
     private List<String[]> readRecords() {
         List<String[]> records = new ArrayList<>();
-        if (!Files.exists(filePath)) {
-            return records;
-        }
-        List<String> lines;
-        try {
-            lines = Files.readAllLines(filePath, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new PersistenceException("No se pudo leer el archivo de devoluciones: " + filePath, e);
-        }
+        List<String> lines = file.readLines("No se pudo leer el archivo de devoluciones: ");
         for (int i = 0; i < lines.size(); i++) {
             String line = lines.get(i).trim();
             if (!line.isEmpty()) {
@@ -121,7 +101,7 @@ public class ReturnRepository {
                 return sale;
             }
         }
-        throw new PersistenceException("Devolucion con venta desconocida " + saleId + " en " + filePath, null);
+        throw new PersistenceException("Devolucion con venta desconocida " + saleId + " en " + file.getPath(), null);
     }
 
     private Product findProduct(List<Product> products, String productId) {
@@ -130,10 +110,10 @@ public class ReturnRepository {
                 return product;
             }
         }
-        throw new PersistenceException("Devolucion con producto desconocido " + productId + " en " + filePath, null);
+        throw new PersistenceException("Devolucion con producto desconocido " + productId + " en " + file.getPath(), null);
     }
 
     private String clean(String value) {
-        return value == null ? "" : value.replace(SEPARATOR, ",").replace("\n", " ").replace("\r", " ");
+        return CsvFile.clean(value);
     }
 }
