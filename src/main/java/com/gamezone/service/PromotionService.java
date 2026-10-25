@@ -4,6 +4,7 @@ import com.gamezone.model.BulkPurchaseDiscount;
 import com.gamezone.model.CategoryDiscount;
 import com.gamezone.model.PercentageDiscount;
 import com.gamezone.model.Promotion;
+import com.gamezone.model.Sale;
 import com.gamezone.persistence.PromotionRepository;
 
 import java.time.LocalDate;
@@ -118,6 +119,26 @@ public class PromotionService {
             }
         }
         return null;
+    }
+
+    /**
+     * Among the promotions valid on the date of the sale, returns the one that
+     * grants the biggest discount. Promotions are not cumulative.
+     *
+     * @param sale the sale to evaluate
+     * @return the best promotion, or {@code null} if none applies or the best discount is zero
+     */
+    public Promotion findBestPromotionFor(Sale sale) {
+        Promotion best = null;
+        double bestDiscount = 0;
+        for (Promotion promotion : listActivePromotions(sale.getDate())) {
+            double discount = promotion.calculateDiscount(sale);
+            if (discount > bestDiscount) {
+                best = promotion;
+                bestDiscount = discount;
+            }
+        }
+        return best;
     }
 
     private List<Promotion> listActivePromotions(LocalDate date) {
