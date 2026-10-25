@@ -57,3 +57,16 @@ member's account.
 | Response        | Reordered the method into the eight numbered steps with the private methods `applyBestPromotion` and `assignWarranties`, added the extended warranty line to the receipt and split the sales menu into `readSaleItems` and `askExtendedWarranties`. |
 | Decision        | Accepted. Before and after the refactor the same sale (console + controller with extended warranty) gives the same total, $1.996.810. |
 | Related commit  | `refactor: reorganize registerSale into the eight integration steps` |
+
+## Entry 5 - Return integration
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Phase 4 - `feature/return-module` |
+| Objective       | Add `ProductService.restoreStock` and the returns submenu with the monthly balance. |
+| Query           | "Add restoreStock to ProductService and the return management submenu of Requirement 3." |
+| Response        | `restoreStock` increases the stock and saves through the repository; the submenu shows the original sale before asking which items are returned. |
+| Decision        | Accepted. `restoreStock` was delivered in its own Pull Request before the return service, because `ReturnService` depends on it. |
+| Related commit  | `feat: add restoreStock to ProductService` |
