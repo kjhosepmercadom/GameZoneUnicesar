@@ -1,5 +1,8 @@
 package com.gamezone.service;
 
+import com.gamezone.exceptions.BusinessRuleException;
+import com.gamezone.exceptions.InvalidDataException;
+import com.gamezone.exceptions.ResourceNotFoundException;
 import com.gamezone.model.Accessory;
 import com.gamezone.model.Console;
 import com.gamezone.model.Product;
@@ -62,24 +65,24 @@ public class ReturnService {
     public Return registerReturn(String saleId, List<String> productIds, String reason) {
         Sale sale = saleService.findSaleById(saleId);
         if (sale == null) {
-            throw new IllegalArgumentException("No existe una venta con codigo " + saleId + ".");
+            throw new ResourceNotFoundException("venta", saleId);
         }
         if (!sale.canBeReturned()) {
-            throw new IllegalArgumentException("La venta " + sale.getId()
+            throw new BusinessRuleException("La venta " + sale.getId()
                     + " supero el plazo de 30 dias para devoluciones.");
         }
         if (productIds == null || productIds.isEmpty()) {
-            throw new IllegalArgumentException("La devolucion debe incluir al menos un producto.");
+            throw new BusinessRuleException("La devolucion debe incluir al menos un producto.");
         }
         if (reason == null || reason.trim().isEmpty()) {
-            throw new IllegalArgumentException("El campo motivo es obligatorio.");
+            throw new InvalidDataException("motivo", "es obligatorio.");
         }
         List<Product> returned = new ArrayList<>();
         Map<String, Integer> quantities = new LinkedHashMap<>();
         for (String productId : productIds) {
             Product product = findInSale(sale, productId);
             if (product == null) {
-                throw new IllegalArgumentException("El producto " + productId + " no pertenece a la venta "
+                throw new BusinessRuleException("El producto " + productId + " no pertenece a la venta "
                         + sale.getId() + ".");
             }
             returned.add(product);
@@ -88,7 +91,7 @@ public class ReturnService {
         for (Map.Entry<String, Integer> entry : quantities.entrySet()) {
             int available = countInSale(sale, entry.getKey()) - countReturned(sale, entry.getKey());
             if (entry.getValue() > available) {
-                throw new IllegalArgumentException("Solo se pueden devolver " + available + " unidades de "
+                throw new BusinessRuleException("Solo se pueden devolver " + available + " unidades de "
                         + entry.getKey() + " en la venta " + sale.getId() + ".");
             }
         }
