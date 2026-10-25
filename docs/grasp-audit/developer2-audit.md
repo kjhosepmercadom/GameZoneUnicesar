@@ -81,3 +81,17 @@ Verdict legend: **violation**, **correct**, **not applicable**.
 | Consequence | Any other client that needs the same information (warranties, reports) has to copy the loop; the service depends on the internal representation of the sale (one entry per unit). |
 | Proposed solution | `Sale.findProduct(productId)` and `Sale.countUnitsOf(productId)` (Leader); `ReturnService` uses them and drops its helpers (Developer 2). |
 | Code of another member | Yes: new methods in `Sale` (Leader). Reported to the Leader. |
+
+## Repositories
+
+### V-03 - File handling duplicated in every repository (boundary)
+
+| Field | Content |
+|-------|---------|
+| Pattern | Pure Fabrication (also High Cohesion) |
+| Module | Persistence of every module (Taller 1, R1 to R4) |
+| Evidence | The same blocks appear in `PersonRepository`, `AccessoryRepository`, `PromotionRepository`, `WarrantyRepository` and `ReturnRepository` (and in `ProductRepository` and `SaleRepository`): `if (!Files.exists(filePath)) { return ...; }`, `Files.readAllLines(filePath, StandardCharsets.UTF_8)`, `Files.createDirectories(filePath.getParent())`, `Files.write(filePath, lines, StandardCharsets.UTF_8)`, the `catch (IOException e)` that throws `PersistenceException`, and the private method `clean(String)`. |
+| Explanation | Reading and writing a CSV file is a technical responsibility that does not belong to any domain repository; it was copied seven times instead of being assigned to one artificial class. |
+| Consequence | A change in the file handling (encoding, backup before writing, a different error message) must be repeated in seven classes and the copies can diverge. |
+| Proposed solution | A pure fabrication `CsvFile` in the persistence package with `readLines`, `writeLines` and `clean`; every repository uses it. Developer 2 creates it and migrates five repositories; `ProductRepository` (Developer 1) and `SaleRepository` (Leader) are migrated by their owners. |
+| Code of another member | Yes: `ProductRepository` (Developer 1) and `SaleRepository` (Leader). Reported to the Leader. |
