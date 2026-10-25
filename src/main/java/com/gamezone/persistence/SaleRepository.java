@@ -6,11 +6,6 @@ import com.gamezone.model.Product;
 import com.gamezone.model.Sale;
 import com.gamezone.model.Seller;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +21,7 @@ public class SaleRepository {
     private static final String SEPARATOR = ";";
     private static final String PRODUCT_SEPARATOR = ",";
 
-    private final Path filePath;
+    private final CsvFile file;
 
     /**
      * Creates a repository that works over the given file.
@@ -34,7 +29,7 @@ public class SaleRepository {
      * @param filePath path of the CSV file that stores the sales
      */
     public SaleRepository(String filePath) {
-        this.filePath = Paths.get(filePath);
+        this.file = new CsvFile(filePath);
     }
 
     /**
@@ -58,14 +53,7 @@ public class SaleRepository {
                     + SEPARATOR + sale.getExtendedWarrantyCost()
             );
         }
-        try {
-            if (filePath.getParent() != null) {
-                Files.createDirectories(filePath.getParent());
-            }
-            Files.write(filePath, lines, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new PersistenceException("No se pudo guardar el archivo de ventas: " + filePath, e);
-        }
+        file.writeLines(lines, "No se pudo guardar el archivo de ventas: ");
     }
 
     /**
@@ -81,15 +69,7 @@ public class SaleRepository {
      */
     public List<Sale> loadAll(List<Customer> customers, List<Seller> sellers, List<Product> products) {
         List<Sale> sales = new ArrayList<>();
-        if (!Files.exists(filePath)) {
-            return sales;
-        }
-        List<String> lines;
-        try {
-            lines = Files.readAllLines(filePath, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new PersistenceException("No se pudo leer el archivo de ventas: " + filePath, e);
-        }
+        List<String> lines = file.readLines("No se pudo leer el archivo de ventas: ");
         for (int i = 0; i < lines.size(); i++) {
             String line = lines.get(i).trim();
             if (line.isEmpty()) {
@@ -98,7 +78,7 @@ public class SaleRepository {
             try {
                 sales.add(fromLine(line, customers, sellers, products));
             } catch (RuntimeException e) {
-                throw new PersistenceException("Linea " + (i + 1) + " invalida en " + filePath + ": "
+                throw new PersistenceException("Linea " + (i + 1) + " invalida en " + file.getPath() + ": "
                         + e.getMessage(), e);
             }
         }
@@ -125,7 +105,7 @@ public class SaleRepository {
     }
 
     private String clean(String value) {
-        return value == null ? "" : value.replace(SEPARATOR, ",").replace("\n", " ").replace("\r", " ");
+        return CsvFile.clean(value);
     }
 
     private Customer findCustomer(List<Customer> customers, String identification) {
