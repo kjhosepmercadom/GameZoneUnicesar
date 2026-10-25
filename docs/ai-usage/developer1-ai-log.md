@@ -83,3 +83,16 @@ member's account.
 | Response        | Added the private helpers `discountRate()` and `refundOf(product)` and a receipt table with list price, proportional discount and refund. |
 | Decision        | Accepted. Checked with a sale of $3.499.700 with a $524.955 discount: the console is refunded $2.464.915 instead of $2.899.900. |
 | Related commit  | `fix: refund returned items proportionally to the sale discount` |
+
+## Entry 7 - Exception and validation layers (Requirement 6)
+
+| Field           | Content |
+|-----------------|---------|
+| Date            | 2026-10-24 |
+| Tool            | Claude (Anthropic) - Claude Code |
+| Phase and branch| Requirement 6 - `feature/exception-handling` |
+| Objective       | Create the custom exception hierarchy and the three validators. |
+| Query           | "Implement GameZoneException and its four subclasses, and ProductValidator, PersonValidator and SaleValidator as specified in Requirement 6." |
+| Response        | Proposed an abstract unchecked root with an error code, one subclass per error category with Spanish messages, and final validator classes with static methods and a private constructor. |
+| Decision        | Accepted. `validateUniquePerson` receives `List<? extends Person>` so it accepts the list of customers (generics are invariant). A third, protected constructor with the cause was added to the root so `PersistenceException` keeps the original `IOException`. |
+| Related commit  | `feat: add GameZoneException as root of the exception hierarchy` |
